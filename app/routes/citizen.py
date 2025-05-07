@@ -130,6 +130,33 @@ def new_complaint():
     """Create a new complaint"""
     form = ComplaintForm()
     
+    # Check if categories exist, if not create them
+    categories_count = Category.query.count()
+    if categories_count == 0:
+        # Create default categories if none exist
+        default_categories = [
+            {'name': 'Roads', 'description': 'Issues related to roads, potholes, and traffic signals', 'department': 'Public Works', 'icon': 'fa-road'},
+            {'name': 'Water Supply', 'description': 'Issues related to water supply, leakages, and quality', 'department': 'Water Department', 'icon': 'fa-tint'},
+            {'name': 'Electricity', 'description': 'Issues related to power outages, streetlights, and electrical hazards', 'department': 'Electricity Board', 'icon': 'fa-bolt'},
+            {'name': 'Garbage', 'description': 'Issues related to waste collection, dumps, and cleanups', 'department': 'Sanitation', 'icon': 'fa-trash'},
+            {'name': 'Parks & Playgrounds', 'description': 'Issues related to parks, playgrounds, and public spaces', 'department': 'Parks & Recreation', 'icon': 'fa-tree'},
+            {'name': 'Public Transport', 'description': 'Issues related to buses, bus stops, and public transport', 'department': 'Transport', 'icon': 'fa-bus'},
+            {'name': 'Stray Animals', 'description': 'Issues related to stray animals and animal control', 'department': 'Animal Control', 'icon': 'fa-paw'},
+            {'name': 'Others', 'description': 'Other civic issues not covered in other categories', 'department': 'General Administration', 'icon': 'fa-exclamation-circle'}
+        ]
+        
+        for cat_data in default_categories:
+            category = Category(
+                name=cat_data['name'],
+                description=cat_data['description'],
+                department=cat_data['department'],
+                icon=cat_data['icon']
+            )
+            db.session.add(category)
+        
+        db.session.commit()
+        flash('Default categories have been created.', 'info')
+    
     # Populate category choices
     form.category_id.choices = [(c.id, c.name) for c in Category.query.order_by('name')]
     

@@ -11,6 +11,8 @@ instance/
 .env
 .env.*
 !.env.example
+cityseva.env
+
 
 # Database
 *.db
@@ -25,6 +27,7 @@ logs/
 venv/
 env/
 ENV/
+.venv/
 
 # IDE files
 .idea/
