@@ -4,6 +4,7 @@ from flask_login import LoginManager
 from flask_mailman import Mail
 from config import config
 from app.utils.context_processors import inject_now
+import re
 
 # Initialize extensions
 db = SQLAlchemy()
@@ -14,6 +15,12 @@ mail = Mail()
 login_manager.login_view = 'auth.login'
 login_manager.login_message = 'Please log in to access this page.'
 login_manager.login_message_category = 'info'
+
+def nl2br(value):
+    """Convert newlines to <br> tags"""
+    if not value:
+        return ''
+    return re.sub(r'\n', '<br>', value)
 
 def create_app(config_name):
     app = Flask(__name__)
@@ -26,6 +33,9 @@ def create_app(config_name):
     
     # Register context processors
     app.context_processor(inject_now)
+    
+    # Register Jinja2 filters
+    app.jinja_env.filters['nl2br'] = nl2br
     
     # Ensure upload directory exists
     import os

@@ -1,0 +1,357 @@
+{% extends 'base.html' %}
+
+{% block title %}Reports & Analytics | CitySeva{% endblock %}
+
+{% block styles %}
+<style>
+    .stats-card {
+        transition: transform 0.3s;
+    }
+    .stats-card:hover {
+        transform: translateY(-5px);
+    }
+    .chart-container {
+        position: relative;
+        height: 300px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1><i class="fas fa-chart-bar me-2"></i>Reports & Analytics</h1>
+        <div>
+            <a href="{{ url_for('government_officials.dashboard') }}" class="btn btn-outline-primary">
+                <i class="fas fa-tachometer-alt me-2"></i>Dashboard
+            </a>
+        </div>
+    </div>
+
+    <!-- Date Range Filter -->
+    <div class="card shadow mb-4">
+        <div class="card-header bg-white">
+            <h5 class="mb-0"><i class="fas fa-calendar-alt me-2"></i>Date Range</h5>
+        </div>
+        <div class="card-body">
+            <form method="GET" action="{{ url_for('government_officials.reports') }}" class="row g-3">
+                <div class="col-md-4">
+                    <label class="form-label">Start Date</label>
+                    <input type="date" name="start_date" class="form-control" value="{{ request.args.get('start_date', '') }}">
+                </div>
+                
+                <div class="col-md-4">
+                    <label class="form-label">End Date</label>
+                    <input type="date" name="end_date" class="form-control" value="{{ request.args.get('end_date', '') }}">
+                </div>
+                
+                <div class="col-md-4 d-flex align-items-end">
+                    <div class="d-grid w-100">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-filter me-2"></i>Apply Filter
+                        </button>
+                    </div>
+                </div>
+            </form>
+            
+            {% if request.args.get('start_date') or request.args.get('end_date') %}
+            <div class="mt-3">
+                <span class="badge bg-info">
+                    <i class="fas fa-calendar-alt me-1"></i>
+                    Showing data from {{ request.args.get('start_date') }} to {{ request.args.get('end_date') }}
+                </span>
+                <a href="{{ url_for('government_officials.reports') }}" class="btn btn-sm btn-outline-secondary ms-2">
+                    <i class="fas fa-times me-1"></i>Clear Filter
+                </a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Performance Metrics -->
+    <div class="row mb-4">
+        <div class="col-md-3 mb-3">
+            <div class="card bg-primary text-white stats-card h-100">
+                <div class="card-body">
+                    <h6 class="card-title">Complaints Resolved</h6>
+                    <h2 class="display-4 fw-bold mb-0">{{ resolved_count }}</h2>
+                    <p class="mb-0 mt-2">
+                        <i class="fas fa-arrow-up me-1"></i>
+                        {{ resolution_rate }}% Resolution Rate
+                    </p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3 mb-3">
+            <div class="card bg-success text-white stats-card h-100">
+                <div class="card-body">
+                    <h6 class="card-title">Avg. Resolution Time</h6>
+                    <h2 class="display-4 fw-bold mb-0">{{ avg_resolution_time }}</h2>
+                    <p class="mb-0 mt-2">Days to resolve complaints</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3 mb-3">
+            <div class="card bg-warning text-dark stats-card h-100">
+                <div class="card-body">
+                    <h6 class="card-title">Citizen Satisfaction</h6>
+                    <h2 class="display-4 fw-bold mb-0">{{ avg_rating }}</h2>
+                    <p class="mb-0 mt-2">Average rating (out of 5)</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3 mb-3">
+            <div class="card bg-info text-white stats-card h-100">
+                <div class="card-body">
+                    <h6 class="card-title">Response Time</h6>
+                    <h2 class="display-4 fw-bold mb-0">{{ avg_first_response }}</h2>
+                    <p class="mb-0 mt-2">Hours to first response</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Charts Row -->
+    <div class="row mb-4">
+        <!-- Complaint Status Trend -->
+        <div class="col-md-6 mb-4">
+            <div class="card shadow h-100">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0"><i class="fas fa-chart-line me-2"></i>Complaint Trend</h5>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container">
+                        <canvas id="complaintTrendChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Resolution Time by Category -->
+        <div class="col-md-6 mb-4">
+            <div class="card shadow h-100">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0"><i class="fas fa-chart-bar me-2"></i>Resolution Time by Subcategory</h5>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container">
+                        <canvas id="resolutionTimeChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- More Charts Row -->
+    <div class="row mb-4">
+        <!-- Complaint Distribution by Location -->
+        <div class="col-md-6 mb-4">
+            <div class="card shadow h-100">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0"><i class="fas fa-map-marker-alt me-2"></i>Complaints by Location</h5>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container">
+                        <canvas id="locationChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Feedback Rating Distribution -->
+        <div class="col-md-6 mb-4">
+            <div class="card shadow h-100">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0"><i class="fas fa-star me-2"></i>Feedback Ratings</h5>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container">
+                        <canvas id="feedbackChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Export Options -->
+    <div class="card shadow mb-4">
+        <div class="card-header bg-white">
+            <h5 class="mb-0"><i class="fas fa-file-export me-2"></i>Export Reports</h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-4 mb-3">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">Complaint Status Report</h5>
+                            <p class="card-text">Export a detailed report of all complaints and their current status.</p>
+                            <a href="{{ url_for('government_officials.export_report', report_type='status') }}" class="btn btn-outline-primary">
+                                <i class="fas fa-download me-2"></i>Download CSV
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-4 mb-3">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">Resolution Time Report</h5>
+                            <p class="card-text">Export data on resolution times by complaint type and priority.</p>
+                            <a href="{{ url_for('government_officials.export_report', report_type='resolution') }}" class="btn btn-outline-primary">
+                                <i class="fas fa-download me-2"></i>Download CSV
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-4 mb-3">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">Feedback Summary</h5>
+                            <p class="card-text">Export citizen feedback and satisfaction ratings data.</p>
+                            <a href="{{ url_for('government_officials.export_report', report_type='feedback') }}" class="btn btn-outline-primary">
+                                <i class="fas fa-download me-2"></i>Download CSV
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Complaint Trend Chart
+        const trendCtx = document.getElementById('complaintTrendChart').getContext('2d');
+        const trendChart = new Chart(trendCtx, {
+            type: 'line',
+            data: {
+                labels: {{ trend_dates|tojson }},
+                datasets: [
+                    {
+                        label: 'Received',
+                        data: {{ trend_received|tojson }},
+                        borderColor: '#4e73df',
+                        backgroundColor: 'rgba(78, 115, 223, 0.1)',
+                        tension: 0.3,
+                        fill: true
+                    },
+                    {
+                        label: 'Resolved',
+                        data: {{ trend_resolved|tojson }},
+                        borderColor: '#1cc88a',
+                        backgroundColor: 'rgba(28, 200, 138, 0.1)',
+                        tension: 0.3,
+                        fill: true
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            precision: 0
+                        }
+                    }
+                }
+            }
+        });
+        
+        // Resolution Time by Subcategory Chart
+        const resTimeCtx = document.getElementById('resolutionTimeChart').getContext('2d');
+        const resTimeChart = new Chart(resTimeCtx, {
+            type: 'bar',
+            data: {
+                labels: {{ resolution_categories|tojson }},
+                datasets: [{
+                    label: 'Avg. Days to Resolve',
+                    data: {{ resolution_times|tojson }},
+                    backgroundColor: 'rgba(54, 185, 204, 0.7)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'Days'
+                        }
+                    }
+                }
+            }
+        });
+        
+        // Location Chart
+        const locationCtx = document.getElementById('locationChart').getContext('2d');
+        const locationChart = new Chart(locationCtx, {
+            type: 'pie',
+            data: {
+                labels: {{ location_labels|tojson }},
+                datasets: [{
+                    data: {{ location_counts|tojson }},
+                    backgroundColor: [
+                        '#4e73df', '#1cc88a', '#36b9cc', '#f6c23e',
+                        '#e74a3b', '#5a5c69', '#6f42c1', '#fd7e14'
+                    ]
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'right'
+                    }
+                }
+            }
+        });
+        
+        // Feedback Chart
+        const feedbackCtx = document.getElementById('feedbackChart').getContext('2d');
+        const feedbackChart = new Chart(feedbackCtx, {
+            type: 'bar',
+            data: {
+                labels: ['1 Star', '2 Stars', '3 Stars', '4 Stars', '5 Stars'],
+                datasets: [{
+                    label: 'Number of Ratings',
+                    data: {{ rating_distribution|tojson }},
+                    backgroundColor: [
+                        '#e74a3b', '#f6c23e', '#f6c23e', '#1cc88a', '#1cc88a'
+                    ]
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            precision: 0
+                        }
+                    }
+                }
+            }
+        });
+    });
+</script>
+{% endblock %} 

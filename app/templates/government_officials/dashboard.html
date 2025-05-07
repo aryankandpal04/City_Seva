@@ -1,0 +1,248 @@
+{% extends 'base.html' %}
+
+{% block title %}Official Dashboard | CitySeva{% endblock %}
+
+{% block styles %}
+<style>
+    .stats-card {
+        transition: transform 0.3s;
+    }
+    .stats-card:hover {
+        transform: translateY(-5px);
+    }
+    .stats-icon {
+        font-size: 2.5rem;
+        opacity: 0.8;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1><i class="fas fa-tachometer-alt me-2"></i>Department Dashboard</h1>
+        <div>
+            <span class="badge bg-info me-2">{{ current_user.role|title }}</span>
+            {% if current_user.department %}
+                <span class="badge bg-primary">{{ current_user.department }}</span>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3 mb-3">
+            <div class="card bg-primary text-white stats-card h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-title">Total Assigned</h6>
+                            <h2 class="display-4 fw-bold mb-0">{{ total_complaints }}</h2>
+                        </div>
+                        <div class="stats-icon">
+                            <i class="fas fa-clipboard-list"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3 mb-3">
+            <div class="card bg-warning text-dark stats-card h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-title">Pending</h6>
+                            <h2 class="display-4 fw-bold mb-0">{{ pending_count }}</h2>
+                        </div>
+                        <div class="stats-icon">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3 mb-3">
+            <div class="card bg-info text-dark stats-card h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-title">In Progress</h6>
+                            <h2 class="display-4 fw-bold mb-0">{{ in_progress_count }}</h2>
+                        </div>
+                        <div class="stats-icon">
+                            <i class="fas fa-tools"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3 mb-3">
+            <div class="card bg-success text-white stats-card h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-title">Resolved</h6>
+                            <h2 class="display-4 fw-bold mb-0">{{ resolved_count }}</h2>
+                        </div>
+                        <div class="stats-icon">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row">
+        <!-- Assigned Complaints -->
+        <div class="col-lg-8 mb-4">
+            <div class="card shadow">
+                <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="fas fa-clipboard-list me-2"></i>Assigned Complaints</h5>
+                    <a href="{{ url_for('government_officials.assigned_complaints') }}" class="btn btn-sm btn-outline-primary">View All</a>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>#</th>
+                                    <th>Title</th>
+                                    <th>Location</th>
+                                    <th>Status</th>
+                                    <th>Date</th>
+                                    <th>Priority</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for complaint in assigned_complaints %}
+                                <tr>
+                                    <td>{{ complaint.id }}</td>
+                                    <td>{{ complaint.title }}</td>
+                                    <td>{{ complaint.location }}</td>
+                                    <td>
+                                        <span class="badge bg-{{ complaint.status|replace('pending', 'warning')|replace('in_progress', 'info')|replace('resolved', 'success')|replace('rejected', 'danger') }}">
+                                            {{ complaint.status|replace('_', ' ')|title }}
+                                        </span>
+                                    </td>
+                                    <td>{{ complaint.created_at.strftime('%Y-%m-%d') }}</td>
+                                    <td>
+                                        <span class="badge bg-{{ complaint.priority|replace('low', 'secondary')|replace('medium', 'primary')|replace('high', 'warning')|replace('urgent', 'danger') }}">
+                                            {{ complaint.priority|title }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <a href="{{ url_for('government_officials.complaint_detail', complaint_id=complaint.id) }}" class="btn btn-sm btn-primary">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                                
+                                {% if not assigned_complaints %}
+                                <tr>
+                                    <td colspan="7" class="text-center py-3">No complaints assigned to your department.</td>
+                                </tr>
+                                {% endif %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Quick Links -->
+        <div class="col-lg-4 mb-4">
+            <div class="card shadow mb-4">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0"><i class="fas fa-link me-2"></i>Quick Links</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <a href="{{ url_for('government_officials.assigned_complaints') }}" class="btn btn-primary">
+                            <i class="fas fa-clipboard-list me-2"></i>Manage Assigned Complaints
+                        </a>
+                        <a href="{{ url_for('government_officials.profile') }}" class="btn btn-info">
+                            <i class="fas fa-user-circle me-2"></i>My Profile
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Priority Cases -->
+            <div class="card shadow">
+                <div class="card-header bg-warning text-dark">
+                    <h5 class="mb-0"><i class="fas fa-exclamation-triangle me-2"></i>Priority Cases</h5>
+                </div>
+                <div class="card-body p-0">
+                    <div class="list-group list-group-flush">
+                        {% for complaint in priority_complaints %}
+                        <a href="{{ url_for('government_officials.complaint_detail', complaint_id=complaint.id) }}" class="list-group-item list-group-item-action">
+                            <div class="d-flex w-100 justify-content-between">
+                                <h6 class="mb-1">{{ complaint.title }}</h6>
+                                <small class="text-muted">{{ complaint.created_at.strftime('%Y-%m-%d') }}</small>
+                            </div>
+                            <p class="mb-1">{{ complaint.location }}</p>
+                            <div>
+                                <span class="badge bg-{{ complaint.status|replace('pending', 'warning')|replace('in_progress', 'info')|replace('resolved', 'success')|replace('rejected', 'danger') }}">
+                                    {{ complaint.status|replace('_', ' ')|title }}
+                                </span>
+                                <span class="badge bg-{{ complaint.priority|replace('low', 'secondary')|replace('medium', 'primary')|replace('high', 'warning')|replace('urgent', 'danger') }}">
+                                    {{ complaint.priority|title }}
+                                </span>
+                            </div>
+                        </a>
+                        {% endfor %}
+                        
+                        {% if not priority_complaints %}
+                        <div class="text-center text-muted py-4">
+                            <i class="fas fa-check-circle fa-2x mb-2"></i>
+                            <p>No priority cases at the moment.</p>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Recent Activity -->
+    <div class="card shadow mb-4">
+        <div class="card-header bg-white">
+            <h5 class="mb-0"><i class="fas fa-history me-2"></i>Recent Activity</h5>
+        </div>
+        <div class="card-body p-0">
+            <div class="list-group list-group-flush">
+                {% for update in recent_updates %}
+                <div class="list-group-item">
+                    <div class="d-flex w-100 justify-content-between">
+                        <h6 class="mb-1">
+                            {{ update.complaint.title }}
+                            <span class="badge bg-{{ update.status|replace('pending', 'warning')|replace('in_progress', 'info')|replace('resolved', 'success')|replace('rejected', 'danger') }}">
+                                {{ update.status|replace('_', ' ')|title }}
+                            </span>
+                        </h6>
+                        <small class="text-muted">{{ update.created_at.strftime('%d %b, %Y') }}</small>
+                    </div>
+                    <p class="mb-1">{{ update.comment }}</p>
+                    <small class="text-muted">
+                        By: {{ update.user.full_name() }}
+                    </small>
+                </div>
+                {% endfor %}
+                
+                {% if not recent_updates %}
+                <div class="text-center text-muted py-4">
+                    <i class="fas fa-info-circle fa-2x mb-2"></i>
+                    <p>No recent activities.</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

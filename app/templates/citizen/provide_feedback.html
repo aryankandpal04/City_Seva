@@ -1,0 +1,78 @@
+{% extends 'base.html' %}
+
+{% block title %}Provide Feedback | CitySeva{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <nav aria-label="Breadcrumb" class="mb-4">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{{ url_for('citizen.dashboard') }}">Dashboard</a></li>
+                    <li class="breadcrumb-item"><a href="{{ url_for('citizen.complaints') }}">My Complaints</a></li>
+                    <li class="breadcrumb-item"><a href="{{ url_for('citizen.complaint_detail', complaint_id=complaint.id) }}">Complaint #{{ complaint.id }}</a></li>
+                    <li class="breadcrumb-item active">Provide Feedback</li>
+                </ol>
+            </nav>
+            
+            <div class="card shadow mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0"><i class="fas fa-star me-2"></i>Provide Feedback</h4>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info mb-4">
+                        <i class="fas fa-info-circle me-2"></i>
+                        Your feedback is valuable and helps us improve our services. Please rate your experience with the resolution of your complaint.
+                    </div>
+                    
+                    <div class="mb-4">
+                        <h5>Complaint: {{ complaint.title }}</h5>
+                        <p class="text-muted">
+                            <i class="fas fa-check-circle me-1 text-success"></i>
+                            Resolved on {{ complaint.resolved_at.strftime('%d %B, %Y') }}
+                        </p>
+                    </div>
+                    
+                    <form method="POST" action="{{ url_for('citizen.provide_feedback', complaint_id=complaint.id) }}">
+                        {{ form.hidden_tag() }}
+                        
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">{{ form.rating.label }}</label>
+                            <div class="mb-2">
+                                {% for option in form.rating %}
+                                <div class="form-check">
+                                    {{ option(class="form-check-input") }}
+                                    {{ option.label(class="form-check-label") }}
+                                </div>
+                                {% endfor %}
+                            </div>
+                            {% for error in form.rating.errors %}
+                                <div class="text-danger">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                        
+                        <div class="mb-4">
+                            {{ form.comment.label(class="form-label fw-bold") }}
+                            {{ form.comment(class="form-control", rows=5, placeholder="Please share your experience with the resolution of your complaint...") }}
+                            {% for error in form.comment.errors %}
+                                <div class="text-danger">{{ error }}</div>
+                            {% endfor %}
+                            <div class="form-text">Optional: Let us know what we did well or how we could improve.</div>
+                        </div>
+                        
+                        <div class="d-grid gap-2">
+                            {{ form.submit(class="btn btn-primary btn-lg") }}
+                        </div>
+                    </form>
+                </div>
+            </div>
+            
+            <div class="text-center">
+                <a href="{{ url_for('citizen.complaint_detail', complaint_id=complaint.id) }}" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left me-2"></i>Back to Complaint
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

@@ -1,0 +1,280 @@
+{% extends 'base.html' %}
+
+{% block title %}Complaint #{{ complaint.id }} | CitySeva Admin{% endblock %}
+
+{% block styles %}
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+    <style>
+        .status-badge {
+            font-size: 1rem;
+            padding: 0.5rem 1rem;
+        }
+        .timeline {
+            position: relative;
+            padding-left: 30px;
+        }
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 9px;
+            top: 15px;
+            bottom: 10px;
+            width: 2px;
+            background-color: #dee2e6;
+        }
+        .timeline-item {
+            position: relative;
+            margin-bottom: 20px;
+        }
+        .timeline-marker {
+            position: absolute;
+            left: -30px;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background-color: #ffffff;
+            border: 2px solid #6c757d;
+        }
+        .timeline-marker.pending { border-color: #ffc107; background-color: #fff3cd; }
+        .timeline-marker.in_progress { border-color: #0dcaf0; background-color: #cff4fc; }
+        .timeline-marker.resolved { border-color: #198754; background-color: #d1e7dd; }
+        .timeline-marker.rejected { border-color: #dc3545; background-color: #f8d7da; }
+        .timeline-content {
+            padding: 15px;
+            border-radius: 5px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            background-color: #f8f9fa;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Breadcrumb navigation -->
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ url_for('admin.dashboard') }}">Dashboard</a></li>
+            <li class="breadcrumb-item"><a href="{{ url_for('admin.complaints') }}">Complaints</a></li>
+            <li class="breadcrumb-item active">Complaint #{{ complaint.id }}</li>
+        </ol>
+    </nav>
+    
+    <div class="row">
+        <!-- Complaint Details -->
+        <div class="col-lg-8">
+            <div class="card shadow mb-4">
+                <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                    <h4 class="mb-0"><i class="fas fa-info-circle me-2"></i>Complaint Details</h4>
+                    <span class="badge status-badge bg-{{ complaint.status|replace('pending', 'warning')|replace('in_progress', 'info')|replace('resolved', 'success')|replace('rejected', 'danger') }}">
+                        {{ complaint.status|replace('_', ' ')|title }}
+                    </span>
+                </div>
+                <div class="card-body">
+                    <h3>{{ complaint.title }}</h3>
+                    
+                    <div class="row mb-3 mt-4">
+                        <div class="col-md-6">
+                            <p class="mb-2">
+                                <strong><i class="fas fa-user me-2"></i>Reported By:</strong>
+                                {{ complaint.author.full_name() }} ({{ complaint.author.email }})
+                            </p>
+                            <p class="mb-2">
+                                <strong><i class="fas fa-calendar me-2"></i>Submitted:</strong>
+                                {{ complaint.created_at.strftime('%d %B, %Y - %H:%M') }}
+                            </p>
+                            <p class="mb-2">
+                                <strong><i class="fas fa-list-alt me-2"></i>Category:</strong>
+                                {{ complaint.category.name }} ({{ complaint.category.department }})
+                            </p>
+                            <p class="mb-2">
+                                <strong><i class="fas fa-exclamation-triangle me-2"></i>Priority:</strong>
+                                <span class="badge bg-{{ complaint.priority|replace('low', 'secondary')|replace('medium', 'primary')|replace('high', 'warning')|replace('urgent', 'danger') }}">
+                                    {{ complaint.priority|title }}
+                                </span>
+                            </p>
+                        </div>
+                        <div class="col-md-6">
+                            <p class="mb-2">
+                                <strong><i class="fas fa-map-marker-alt me-2"></i>Location:</strong>
+                                {{ complaint.location }}
+                            </p>
+                            
+                            {% if complaint.assigned_to %}
+                            <p class="mb-2">
+                                <strong><i class="fas fa-user-tie me-2"></i>Assigned To:</strong>
+                                {{ complaint.assigned_to.full_name() }} ({{ complaint.assigned_to.department }})
+                                <small class="text-muted">on {{ complaint.assigned_at.strftime('%d %B, %Y') }}</small>
+                            </p>
+                            {% else %}
+                            <p class="mb-2">
+                                <strong><i class="fas fa-user-tie me-2"></i>Assigned To:</strong>
+                                <span class="text-muted">Not assigned</span>
+                            </p>
+                            {% endif %}
+                            
+                            {% if complaint.resolved_at %}
+                            <p class="mb-2">
+                                <strong><i class="fas fa-check-circle me-2"></i>Resolved:</strong>
+                                {{ complaint.resolved_at.strftime('%d %B, %Y - %H:%M') }}
+                                ({{ complaint.days_open }} days)
+                            </p>
+                            {% else %}
+                            <p class="mb-2">
+                                <strong><i class="fas fa-clock me-2"></i>Days Open:</strong>
+                                {{ complaint.days_open }} days
+                            </p>
+                            {% endif %}
+                            
+                            {% if complaint.feedback %}
+                            <p class="mb-2">
+                                <strong><i class="fas fa-star me-2"></i>Feedback Rating:</strong>
+                                {% for i in range(5) %}
+                                    {% if i < complaint.feedback.rating %}
+                                        <i class="fas fa-star text-warning"></i>
+                                    {% else %}
+                                        <i class="far fa-star text-secondary"></i>
+                                    {% endif %}
+                                {% endfor %}
+                            </p>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <h5><i class="fas fa-align-left me-2"></i>Description</h5>
+                        <div class="p-3 bg-light rounded">
+                            {{ complaint.description|nl2br }}
+                        </div>
+                    </div>
+                    
+                    {% if complaint.feedback and complaint.feedback.comment %}
+                    <div class="mb-4">
+                        <h5><i class="fas fa-comment me-2"></i>Citizen Feedback</h5>
+                        <div class="p-3 bg-light rounded">
+                            {{ complaint.feedback.comment|nl2br }}
+                        </div>
+                    </div>
+                    {% endif %}
+                    
+                    {% if complaint.image_path %}
+                    <div class="mb-4">
+                        <h5><i class="fas fa-image me-2"></i>Attached Image</h5>
+                        <div class="text-center">
+                            <img src="{{ url_for('citizen.uploaded_file', filename=complaint.image_path.split('/')[-1]) }}" 
+                                 alt="Complaint Image" class="img-fluid rounded" style="max-height: 400px;">
+                        </div>
+                    </div>
+                    {% endif %}
+                    
+                    {% if complaint.latitude and complaint.longitude %}
+                    <div class="mb-4">
+                        <h5><i class="fas fa-map me-2"></i>Location on Map</h5>
+                        <div id="complaint-map" style="height: 300px; border-radius: 5px;"></div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <!-- Update and Timeline -->
+        <div class="col-lg-4">
+            <!-- Update Form -->
+            <div class="card shadow mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="fas fa-edit me-2"></i>Update Complaint</h5>
+                </div>
+                <div class="card-body">
+                    <form method="POST" action="{{ url_for('admin.complaint_detail', complaint_id=complaint.id) }}">
+                        {{ form.hidden_tag() }}
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Status</label>
+                            {{ form.status(class="form-select") }}
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Assign To</label>
+                            {{ form.assigned_to_id(class="form-select") }}
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Comment</label>
+                            {{ form.comment(class="form-control", rows=4, placeholder="Add details about this update...") }}
+                            <div class="form-text">This comment will be visible to the citizen and included in email notifications.</div>
+                        </div>
+                        
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-2"></i>Update Complaint
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            
+            <!-- Updates Timeline -->
+            <div class="card shadow">
+                <div class="card-header bg-secondary text-white">
+                    <h5 class="mb-0"><i class="fas fa-history me-2"></i>Updates Timeline</h5>
+                </div>
+                <div class="card-body">
+                    {% if updates %}
+                    <div class="timeline">
+                        {% for update in updates %}
+                        <div class="timeline-item">
+                            <div class="timeline-marker {{ update.status }}"></div>
+                            <div class="timeline-content">
+                                <div class="d-flex justify-content-between">
+                                    <h6 class="mb-1">
+                                        <span class="badge bg-{{ update.status|replace('pending', 'warning')|replace('in_progress', 'info')|replace('resolved', 'success')|replace('rejected', 'danger') }}">
+                                            {{ update.status|replace('_', ' ')|title }}
+                                        </span>
+                                    </h6>
+                                    <small class="text-muted">{{ update.created_at.strftime('%d %b, %Y') }}</small>
+                                </div>
+                                <p class="mb-1">{{ update.comment }}</p>
+                                <small class="text-muted">
+                                    By: {{ update.user.full_name() }}
+                                    <span class="badge bg-{% if update.user.role == 'admin' %}danger{% elif update.user.role == 'official' %}info{% else %}primary{% endif %}">
+                                        {{ update.user.role|title }}
+                                    </span>
+                                </small>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="text-center text-muted py-4">
+                        <i class="fas fa-info-circle fa-2x mb-2"></i>
+                        <p>No updates yet.</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+{% if complaint.latitude and complaint.longitude %}
+<script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize the map
+        const map = L.map('complaint-map').setView([{{ complaint.latitude }}, {{ complaint.longitude }}], 15);
+        
+        // Add OpenStreetMap tile layer
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors'
+        }).addTo(map);
+        
+        // Add marker for the complaint location
+        L.marker([{{ complaint.latitude }}, {{ complaint.longitude }}])
+            .addTo(map)
+            .bindPopup("{{ complaint.title }}")
+            .openPopup();
+    });
+</script>
+{% endif %}
+{% endblock %} 
