@@ -1,0 +1,169 @@
+{% extends 'base.html' %}
+
+{% block title %}CitySeva - Connect with Municipal Authorities{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero-section">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6">
+                <h1>Report and Track Civic Issues in Your City</h1>
+                <p>CitySeva connects citizens with municipal authorities to efficiently resolve civic issues like potholes, garbage collection, water supply, and more.</p>
+                <div class="d-grid gap-2 d-md-flex">
+                    {% if current_user.is_authenticated %}
+                        <a href="{{ url_for('citizen.new_complaint') }}" class="btn btn-light btn-lg px-4 me-md-2">Report an Issue</a>
+                        <a href="{{ url_for('citizen.complaints') }}" class="btn btn-outline-light btn-lg px-4">Track Your Complaints</a>
+                    {% else %}
+                        <a href="{{ url_for('auth.register') }}" class="btn btn-light btn-lg px-4 me-md-2">Register Now</a>
+                        <a href="{{ url_for('auth.login') }}" class="btn btn-outline-light btn-lg px-4">Login</a>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="col-lg-6 d-none d-lg-block">
+                <img src="{{ url_for('static', filename='img/hero-image.svg') }}" alt="CitySeva" class="img-fluid">
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Stats Section -->
+<section class="container py-5">
+    <div class="row text-center">
+        <div class="col-md-4 mb-4">
+            <div class="card dashboard-card h-100">
+                <div class="card-body">
+                    <i class="fas fa-clipboard-list icon text-primary"></i>
+                    <h5 class="card-title">Total Complaints</h5>
+                    <p class="card-text">{{ total_complaints }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="card dashboard-card h-100">
+                <div class="card-body">
+                    <i class="fas fa-check-circle icon text-success"></i>
+                    <h5 class="card-title">Resolved Issues</h5>
+                    <p class="card-text">{{ resolved_complaints }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="card dashboard-card h-100">
+                <div class="card-body">
+                    <i class="fas fa-chart-line icon text-info"></i>
+                    <h5 class="card-title">Resolution Rate</h5>
+                    <p class="card-text">{{ '%.1f'|format(resolved_complaints / total_complaints * 100) if total_complaints > 0 else '0' }}%</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Features Section -->
+<section class="container py-5" id="about">
+    <div class="text-center mb-5">
+        <h2>How CitySeva Works</h2>
+        <p class="lead">A simple and transparent process to resolve civic issues</p>
+    </div>
+    
+    <div class="row">
+        <div class="col-md-4 mb-4">
+            <div class="feature-card h-100">
+                <i class="fas fa-edit"></i>
+                <h3>Report an Issue</h3>
+                <p>Submit complaints with details, location, and images of civic issues in your area.</p>
+            </div>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="feature-card h-100">
+                <i class="fas fa-tasks"></i>
+                <h3>Track Progress</h3>
+                <p>Get real-time updates and track the status of your complaints until resolution.</p>
+            </div>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="feature-card h-100">
+                <i class="fas fa-star"></i>
+                <h3>Provide Feedback</h3>
+                <p>Rate and review the resolution to help improve municipal services.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Categories Section -->
+<section class="container py-5">
+    <div class="text-center mb-5">
+        <h2>Report Issues in Various Categories</h2>
+        <p class="lead">From potholes to garbage collection, we've got you covered</p>
+    </div>
+    
+    <div class="row row-cols-2 row-cols-md-3 row-cols-lg-4 g-4">
+        {% for category in categories %}
+            <div class="col">
+                <div class="card h-100 text-center">
+                    <div class="card-body">
+                        <i class="fas {{ category.icon }} fa-3x text-primary mb-3"></i>
+                        <h5 class="card-title">{{ category.name }}</h5>
+                        <p class="card-text small">{{ category.description }}</p>
+                    </div>
+                    <div class="card-footer bg-transparent border-0">
+                        {% if current_user.is_authenticated %}
+                            <a href="{{ url_for('citizen.new_complaint') }}" class="btn btn-sm btn-outline-primary">Report</a>
+                        {% else %}
+                            <a href="{{ url_for('auth.login') }}" class="btn btn-sm btn-outline-primary">Login to Report</a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+</section>
+
+<!-- Contact Section -->
+<section class="bg-light py-5" id="contact">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h2>Contact Us</h2>
+            <p class="lead">Have questions or suggestions? We'd love to hear from you!</p>
+        </div>
+        
+        <div class="row">
+            <div class="col-md-6 mb-4">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h5 class="mb-3">Contact Information</h5>
+                        <p><i class="fas fa-map-marker-alt me-2 text-primary"></i> 123 Main Street, City Center</p>
+                        <p><i class="fas fa-phone me-2 text-primary"></i> +1 (555) 123-4567</p>
+                        <p><i class="fas fa-envelope me-2 text-primary"></i> info@cityseva.com</p>
+                        <p><i class="fas fa-clock me-2 text-primary"></i> Monday - Friday, 9:00 AM - 5:00 PM</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 mb-4">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h5 class="mb-3">Send Us a Message</h5>
+                        <form>
+                            <div class="mb-3">
+                                <label for="name" class="form-label">Name</label>
+                                <input type="text" class="form-control" id="name" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="email" class="form-label">Email</label>
+                                <input type="email" class="form-control" id="email" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="message" class="form-label">Message</label>
+                                <textarea class="form-control" id="message" rows="3" required></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Send Message</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %} 

@@ -1,0 +1,81 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard | CitySeva{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <h1>Citizen Dashboard</h1>
+    <p>Welcome, {{ current_user.first_name }}!</p>
+    
+    <div class="row mt-4">
+        <div class="col-md-4 mb-4">
+            <div class="card dashboard-card">
+                <div class="card-body">
+                    <i class="fas fa-clipboard-list icon text-primary"></i>
+                    <h5 class="card-title">Total Complaints</h5>
+                    <p class="card-text">{{ pending_count + in_progress_count + resolved_count + rejected_count }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="card dashboard-card">
+                <div class="card-body">
+                    <i class="fas fa-clock icon text-warning"></i>
+                    <h5 class="card-title">Pending</h5>
+                    <p class="card-text">{{ pending_count }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="card dashboard-card">
+                <div class="card-body">
+                    <i class="fas fa-check-circle icon text-success"></i>
+                    <h5 class="card-title">Resolved</h5>
+                    <p class="card-text">{{ resolved_count }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    {% if recent_complaints %}
+        <h2 class="mt-5 mb-4">Recent Complaints</h2>
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Title</th>
+                        <th>Category</th>
+                        <th>Status</th>
+                        <th>Date</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for complaint in recent_complaints %}
+                        <tr>
+                            <td>{{ complaint.id }}</td>
+                            <td>{{ complaint.title }}</td>
+                            <td>{{ complaint.category.name }}</td>
+                            <td>
+                                <span class="badge bg-{{ complaint.status|replace('pending', 'warning')|replace('in_progress', 'info')|replace('resolved', 'success')|replace('rejected', 'danger') }}">
+                                    {{ complaint.status|replace('_', ' ')|title }}
+                                </span>
+                            </td>
+                            <td>{{ complaint.created_at.strftime('%Y-%m-%d') }}</td>
+                            <td>
+                                <a href="{{ url_for('citizen.complaint_detail', complaint_id=complaint.id) }}" class="btn btn-sm btn-primary">View</a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <div class="alert alert-info mt-5">
+            <i class="fas fa-info-circle me-2"></i> You haven't submitted any complaints yet.
+            <a href="{{ url_for('citizen.new_complaint') }}" class="ms-2">Submit a complaint</a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %} 

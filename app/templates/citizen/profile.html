@@ -1,0 +1,98 @@
+{% extends 'base.html' %}
+
+{% block title %}Profile | CitySeva{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0"><i class="fas fa-user-circle me-2"></i>Profile Information</h4>
+                </div>
+                <div class="card-body">
+                    <form method="POST" action="{{ url_for('citizen.profile') }}">
+                        {{ form.hidden_tag() }}
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                {{ form.first_name.label(class="form-label") }}
+                                {{ form.first_name(class="form-control", placeholder="Enter your first name") }}
+                                {% for error in form.first_name.errors %}
+                                    <div class="text-danger">{{ error }}</div>
+                                {% endfor %}
+                            </div>
+                            
+                            <div class="col-md-6">
+                                {{ form.last_name.label(class="form-label") }}
+                                {{ form.last_name(class="form-control", placeholder="Enter your last name") }}
+                                {% for error in form.last_name.errors %}
+                                    <div class="text-danger">{{ error }}</div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            {{ form.phone.label(class="form-label") }}
+                            {{ form.phone(class="form-control", placeholder="Enter your phone number") }}
+                            {% for error in form.phone.errors %}
+                                <div class="text-danger">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                        
+                        <div class="mb-3">
+                            {{ form.address.label(class="form-label") }}
+                            {{ form.address(class="form-control", rows=3, placeholder="Enter your address") }}
+                            {% for error in form.address.errors %}
+                                <div class="text-danger">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                        
+                        <div class="d-grid gap-2">
+                            {{ form.submit(class="btn btn-primary") }}
+                        </div>
+                    </form>
+                </div>
+            </div>
+            
+            <div class="card shadow mt-4">
+                <div class="card-header bg-secondary text-white">
+                    <h4 class="mb-0"><i class="fas fa-info-circle me-2"></i>Account Information</h4>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-3">
+                        <div class="col-md-4 fw-bold">Username:</div>
+                        <div class="col-md-8">{{ current_user.username }}</div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-4 fw-bold">Email:</div>
+                        <div class="col-md-8">{{ current_user.email }}</div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-4 fw-bold">Account Type:</div>
+                        <div class="col-md-8">
+                            {% if current_user.role == 'citizen' %}
+                                <span class="badge bg-primary">Citizen</span>
+                            {% elif current_user.role == 'official' %}
+                                <span class="badge bg-success">Official</span>
+                            {% elif current_user.role == 'admin' %}
+                                <span class="badge bg-danger">Admin</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-4 fw-bold">Joined:</div>
+                        <div class="col-md-8">{{ current_user.created_at.strftime('%Y-%m-%d') }}</div>
+                    </div>
+                    {% if current_user.department %}
+                    <div class="row mb-3">
+                        <div class="col-md-4 fw-bold">Department:</div>
+                        <div class="col-md-8">{{ current_user.department }}</div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

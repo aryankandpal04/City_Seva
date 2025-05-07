@@ -1,0 +1,124 @@
+{% extends 'base.html' %}
+
+{% block title %}My Complaints | CitySeva{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>My Complaints</h1>
+        <a href="{{ url_for('citizen.new_complaint') }}" class="btn btn-primary">
+            <i class="fas fa-plus me-2"></i>Submit New Complaint
+        </a>
+    </div>
+    
+    <!-- Filter Options -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <form method="GET" action="{{ url_for('citizen.complaints') }}" class="row g-3">
+                <div class="col-md-6">
+                    <label class="form-label">Filter by Status</label>
+                    <div class="d-flex">
+                        <a href="{{ url_for('citizen.complaints') }}" class="btn {% if not request.args.get('status') %}btn-primary{% else %}btn-outline-secondary{% endif %} me-2">All</a>
+                        <a href="{{ url_for('citizen.complaints', status='pending') }}" class="btn {% if request.args.get('status') == 'pending' %}btn-warning{% else %}btn-outline-warning{% endif %} me-2">Pending</a>
+                        <a href="{{ url_for('citizen.complaints', status='in_progress') }}" class="btn {% if request.args.get('status') == 'in_progress' %}btn-info{% else %}btn-outline-info{% endif %} me-2">In Progress</a>
+                        <a href="{{ url_for('citizen.complaints', status='resolved') }}" class="btn {% if request.args.get('status') == 'resolved' %}btn-success{% else %}btn-outline-success{% endif %} me-2">Resolved</a>
+                        <a href="{{ url_for('citizen.complaints', status='rejected') }}" class="btn {% if request.args.get('status') == 'rejected' %}btn-danger{% else %}btn-outline-danger{% endif %}">Rejected</a>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    {% if complaints.items %}
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead class="table-light">
+                    <tr>
+                        <th>#</th>
+                        <th>Title</th>
+                        <th>Category</th>
+                        <th>Location</th>
+                        <th>Status</th>
+                        <th>Date</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for complaint in complaints.items %}
+                        <tr class="priority-{{ complaint.priority }}">
+                            <td>{{ complaint.id }}</td>
+                            <td>{{ complaint.title }}</td>
+                            <td>{{ complaint.category.name }}</td>
+                            <td>{{ complaint.location }}</td>
+                            <td>
+                                <span class="badge bg-{{ complaint.status|replace('pending', 'warning')|replace('in_progress', 'info')|replace('resolved', 'success')|replace('rejected', 'danger') }}">
+                                    {{ complaint.status|replace('_', ' ')|title }}
+                                </span>
+                            </td>
+                            <td>{{ complaint.created_at.strftime('%Y-%m-%d') }}</td>
+                            <td>
+                                <a href="{{ url_for('citizen.complaint_detail', complaint_id=complaint.id) }}" class="btn btn-sm btn-primary">
+                                    <i class="fas fa-eye"></i> View
+                                </a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        
+        <!-- Pagination -->
+        <nav aria-label="Complaints pagination">
+            <ul class="pagination justify-content-center">
+                {% if complaints.has_prev %}
+                    <li class="page-item">
+                        <a class="page-link" href="{{ url_for('citizen.complaints', page=complaints.prev_num, status=request.args.get('status', '')) }}">Previous</a>
+                    </li>
+                {% else %}
+                    <li class="page-item disabled">
+                        <span class="page-link">Previous</span>
+                    </li>
+                {% endif %}
+                
+                {% for page_num in complaints.iter_pages(left_edge=1, right_edge=1, left_current=2, right_current=2) %}
+                    {% if page_num %}
+                        {% if page_num == complaints.page %}
+                            <li class="page-item active">
+                                <span class="page-link">{{ page_num }}</span>
+                            </li>
+                        {% else %}
+                            <li class="page-item">
+                                <a class="page-link" href="{{ url_for('citizen.complaints', page=page_num, status=request.args.get('status', '')) }}">{{ page_num }}</a>
+                            </li>
+                        {% endif %}
+                    {% else %}
+                        <li class="page-item disabled">
+                            <span class="page-link">...</span>
+                        </li>
+                    {% endif %}
+                {% endfor %}
+                
+                {% if complaints.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="{{ url_for('citizen.complaints', page=complaints.next_num, status=request.args.get('status', '')) }}">Next</a>
+                    </li>
+                {% else %}
+                    <li class="page-item disabled">
+                        <span class="page-link">Next</span>
+                    </li>
+                {% endif %}
+            </ul>
+        </nav>
+    {% else %}
+        <div class="alert alert-info text-center">
+            <i class="fas fa-info-circle me-2"></i>
+            {% if request.args.get('status') %}
+                You don't have any {{ request.args.get('status')|replace('_', ' ') }} complaints.
+            {% else %}
+                You haven't submitted any complaints yet.
+            {% endif %}
+            <a href="{{ url_for('citizen.new_complaint') }}" class="ms-2">Submit a complaint</a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %} 
