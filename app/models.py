@@ -193,4 +193,29 @@ class Notification(db.Model):
     user = db.relationship('User', backref=db.backref('notifications', lazy='dynamic'))
     
     def __repr__(self):
-        return f'<Notification {self.id}>' 
+        return f'<Notification {self.id}>'
+
+
+class OfficialRequest(db.Model):
+    """Model for tracking requests to become a government official"""
+    __tablename__ = 'official_requests'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    department = db.Column(db.String(64), nullable=False)
+    position = db.Column(db.String(100), nullable=False)
+    employee_id = db.Column(db.String(50), nullable=False)
+    office_phone = db.Column(db.String(20), nullable=False)
+    justification = db.Column(db.Text, nullable=False)
+    status = db.Column(db.String(20), default='pending')  # pending, approved, rejected
+    reviewed_by = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=True)
+    reviewed_at = db.Column(db.DateTime, nullable=True)
+    review_notes = db.Column(db.Text, nullable=True)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    # Relationships
+    user = db.relationship('User', foreign_keys=[user_id], backref='official_requests')
+    reviewer = db.relationship('User', foreign_keys=[reviewed_by], backref='reviewed_requests')
+    
+    def __repr__(self):
+        return f'<OfficialRequest {self.id}>' 

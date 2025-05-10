@@ -13,6 +13,12 @@ function initializeComplaintMap() {
     const mapElement = document.getElementById('complaint-map');
     if (!mapElement) return;
 
+    // Check if latitude and longitude inputs exist
+    const latInput = document.getElementById('latitude');
+    const lngInput = document.getElementById('longitude');
+    
+    if (!latInput || !lngInput) return; // Exit if these elements don't exist
+
     // Initialize the map
     const map = L.map('complaint-map').setView([20.5937, 78.9629], 5); // Default center on India
 
@@ -22,9 +28,6 @@ function initializeComplaintMap() {
     }).addTo(map);
 
     // Add marker for the complaint location (if editing a complaint)
-    const latInput = document.getElementById('latitude');
-    const lngInput = document.getElementById('longitude');
-    
     let marker;
     if (latInput.value && lngInput.value) {
         const lat = parseFloat(latInput.value);
@@ -47,12 +50,16 @@ function initializeComplaintMap() {
             marker = L.marker(e.latlng).addTo(map);
         }
         
-        // Reverse geocode to get address (simplified - in a real app, use a geocoding service)
+        // Check if location element exists
+        const locationInput = document.getElementById('location');
+        if (!locationInput) return;
+        
+        // Reverse geocode to get address
         fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${e.latlng.lat}&lon=${e.latlng.lng}`)
             .then(response => response.json())
             .then(data => {
                 if (data.display_name) {
-                    document.getElementById('location').value = data.display_name;
+                    locationInput.value = data.display_name;
                 }
             })
             .catch(error => console.error('Error getting location name:', error));
@@ -176,6 +183,12 @@ function initializeComplaintsMap() {
     // Check if the map element exists
     const mapElement = document.getElementById('complaints-map');
     if (!mapElement) return;
+    
+    // Check if map is already initialized
+    if (mapElement._leaflet_id) {
+        console.log('Map already initialized');
+        return;
+    }
 
     // Initialize the map
     const map = L.map('complaints-map').setView([20.5937, 78.9629], 5); // Default center on India
@@ -228,7 +241,7 @@ function initializeComplaintsMap() {
             }).addTo(map);
             
             // If we have complaints, fit the map to their bounds
-            if (data.features.length > 0) {
+            if (data.features && data.features.length > 0) {
                 const bounds = L.geoJSON(data).getBounds();
                 map.fitBounds(bounds);
             }

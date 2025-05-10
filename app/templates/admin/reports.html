@@ -1,0 +1,219 @@
+{% extends "base.html" %}
+
+{% block title %}Reports - CitySeva{% endblock %}
+
+{% block styles %}
+<style>
+    .chart-container {
+        height: 300px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1 class="mb-4">System Reports</h1>
+    
+    <!-- Resolution Time -->
+    <div class="card shadow mb-4">
+        <div class="card-header bg-light">
+            <h5 class="mb-0">Resolution Time Statistics</h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="card text-center bg-primary text-white">
+                        <div class="card-body">
+                            <h5 class="card-title">Average Resolution Time</h5>
+                            {% if resolution_stats.avg_time is not none %}
+                                <h2 class="display-5">{{ "%.1f"|format(resolution_stats.avg_time) }} days</h2>
+                            {% else %}
+                                <h2 class="display-5">N/A</h2>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card text-center bg-success text-white">
+                        <div class="card-body">
+                            <h5 class="card-title">Minimum Resolution Time</h5>
+                            {% if resolution_stats.min_time is not none %}
+                                <h2 class="display-5">{{ "%.1f"|format(resolution_stats.min_time) }} days</h2>
+                            {% else %}
+                                <h2 class="display-5">N/A</h2>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card text-center bg-danger text-white">
+                        <div class="card-body">
+                            <h5 class="card-title">Maximum Resolution Time</h5>
+                            {% if resolution_stats.max_time is not none %}
+                                <h2 class="display-5">{{ "%.1f"|format(resolution_stats.max_time) }} days</h2>
+                            {% else %}
+                                <h2 class="display-5">N/A</h2>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Category Stats -->
+    <div class="card shadow mb-4">
+        <div class="card-header bg-light">
+            <h5 class="mb-0">Complaints by Category</h5>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Category</th>
+                            <th>Total</th>
+                            <th>Pending</th>
+                            <th>In Progress</th>
+                            <th>Resolved</th>
+                            <th>Rejected</th>
+                            <th>Resolution Rate</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if category_stats %}
+                            {% for cat in category_stats %}
+                                <tr>
+                                    <td>{{ cat.name }}</td>
+                                    <td>{{ cat.total }}</td>
+                                    <td>{{ cat.pending }}</td>
+                                    <td>{{ cat.in_progress }}</td>
+                                    <td>{{ cat.resolved }}</td>
+                                    <td>{{ cat.rejected }}</td>
+                                    <td>
+                                        {% if cat.total > 0 %}
+                                            {{ "%.1f"|format((cat.resolved / cat.total) * 100) }}%
+                                        {% else %}
+                                            N/A
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        {% else %}
+                            <tr>
+                                <td colspan="7" class="text-center">No data available</td>
+                            </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Feedback Stats -->
+    <div class="card shadow mb-4">
+        <div class="card-header bg-light">
+            <h5 class="mb-0">Feedback Statistics</h5>
+        </div>
+        <div class="card-body">
+            <div class="row align-items-center">
+                <div class="col-md-4">
+                    <div class="card text-center bg-info text-white">
+                        <div class="card-body">
+                            <h5 class="card-title">Average Rating</h5>
+                            <h2 class="display-5">{{ "%.1f"|format(avg_rating) }}/5</h2>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-8">
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Rating</th>
+                                    <th>Count</th>
+                                    <th>Percentage</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% set total_feedback = namespace(value=0) %}
+                                {% for rating in feedback_stats %}
+                                    {% set total_feedback.value = total_feedback.value + rating.count %}
+                                {% endfor %}
+                                
+                                {% for i in range(5, 0, -1) %}
+                                    {% set found = false %}
+                                    {% for rating in feedback_stats %}
+                                        {% if rating.rating == i %}
+                                            <tr>
+                                                <td>{{ rating.rating }} stars</td>
+                                                <td>{{ rating.count }}</td>
+                                                <td>
+                                                    {% if total_feedback.value > 0 %}
+                                                        {{ "%.1f"|format((rating.count / total_feedback.value) * 100) }}%
+                                                    {% else %}
+                                                        0%
+                                                    {% endif %}
+                                                </td>
+                                            </tr>
+                                            {% set found = true %}
+                                        {% endif %}
+                                    {% endfor %}
+                                    {% if not found %}
+                                        <tr>
+                                            <td>{{ i }} stars</td>
+                                            <td>0</td>
+                                            <td>0%</td>
+                                        </tr>
+                                    {% endif %}
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Top Locations -->
+    <div class="card shadow">
+        <div class="card-header bg-light">
+            <h5 class="mb-0">Top Locations with Most Complaints</h5>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Location</th>
+                            <th>Number of Complaints</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if top_locations %}
+                            {% for location in top_locations %}
+                                <tr>
+                                    <td>{{ location.location }}</td>
+                                    <td>{{ location.count }}</td>
+                                </tr>
+                            {% endfor %}
+                        {% else %}
+                            <tr>
+                                <td colspan="2" class="text-center">No data available</td>
+                            </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    $(document).ready(function() {
+        // Initialize any visualizations here if needed
+    });
+</script>
+{% endblock %} 

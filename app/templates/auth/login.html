@@ -14,6 +14,42 @@
                     <form method="POST" action="{{ url_for('auth.login') }}">
                         {{ form.hidden_tag() }}
                         
+                        <!-- Role Selection Cards -->
+                        <div class="mb-4">
+                            <label class="form-label">I want to login as:</label>
+                            <div class="d-flex justify-content-center gap-3 mt-2">
+                                <div class="form-check form-check-inline flex-grow-1">
+                                    <input class="form-check-input visually-hidden" type="radio" name="role" id="role-citizen" value="citizen" {% if form.role.data == 'citizen' %}checked{% endif %}>
+                                    <label class="form-check-label btn btn-outline-primary w-100 py-3" for="role-citizen">
+                                        <i class="fas fa-user fa-2x mb-2 d-block"></i>
+                                        <div>Citizen</div>
+                                        <div class="small text-muted">Report and track civic issues</div>
+                                    </label>
+                                </div>
+                                <div class="form-check form-check-inline flex-grow-1">
+                                    <input class="form-check-input visually-hidden" type="radio" name="role" id="role-official" value="official" {% if form.role.data == 'official' %}checked{% endif %}>
+                                    <label class="form-check-label btn btn-outline-info w-100 py-3" for="role-official">
+                                        <i class="fas fa-user-tie fa-2x mb-2 d-block"></i>
+                                        <div>Government Official</div>
+                                        <div class="small text-muted">Manage citizen complaints</div>
+                                    </label>
+                                </div>
+                            </div>
+                            {% for error in form.role.errors %}
+                                <div class="text-danger">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                        
+                        <!-- Department Selection (only shown for officials) -->
+                        <div id="department-field" class="mb-3" style="display: none;">
+                            {{ form.department.label(class="form-label") }}
+                            {{ form.department(class="form-select") }}
+                            {% for error in form.department.errors %}
+                                <div class="text-danger">{{ error }}</div>
+                            {% endfor %}
+                            <div class="form-text">Select the department you work in.</div>
+                        </div>
+                        
                         <div class="mb-3">
                             {{ form.email.label(class="form-label") }}
                             {{ form.email(class="form-control", placeholder="Enter your email") }}
@@ -48,7 +84,62 @@
                     </div>
                 </div>
             </div>
+            
+            <!-- Government Official Info -->
+            <div class="card mt-3">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0"><i class="fas fa-info-circle me-2"></i>Government Officials</h5>
+                </div>
+                <div class="card-body">
+                    <p class="mb-2">
+                        <strong>New to CitySeva?</strong> Government official accounts need verification.
+                    </p>
+                    <p class="small mb-3">
+                        During registration, select "Government Official" option and provide your credentials.
+                        Administrators will verify your information before granting official access.
+                    </p>
+                    <div class="d-grid">
+                        <a href="{{ url_for('auth.register') }}" class="btn btn-outline-info">
+                            <i class="fas fa-user-plus me-2"></i>Register as a Government Official
+                        </a>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const citizenRadio = document.getElementById('role-citizen');
+    const officialRadio = document.getElementById('role-official');
+    const departmentField = document.getElementById('department-field');
+    
+    // Set initial state based on the selected role
+    if (officialRadio.checked) {
+        departmentField.style.display = 'block';
+    }
+    
+    // Add event listeners
+    citizenRadio.addEventListener('change', function() {
+        departmentField.style.display = 'none';
+    });
+    
+    officialRadio.addEventListener('change', function() {
+        departmentField.style.display = 'block';
+    });
+    
+    // Make the whole button label clickable
+    document.querySelectorAll('.form-check-label.btn').forEach(function(label) {
+        label.addEventListener('click', function() {
+            const radio = document.getElementById(this.getAttribute('for'));
+            radio.checked = true;
+            
+            // Trigger the change event
+            const event = new Event('change');
+            radio.dispatchEvent(event);
+        });
+    });
+});
+</script>
 {% endblock %} 

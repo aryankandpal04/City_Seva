@@ -1,0 +1,135 @@
+{% extends 'base.html' %}
+
+{% block title %}Request Official Account | CitySeva{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-header bg-info text-white">
+                    <h3><i class="fas fa-user-tie me-2"></i>Request Official Account</h3>
+                </div>
+                <div class="card-body">
+                    {% if current_user.is_authenticated %}
+                        {% if current_user.role != 'citizen' %}
+                            <div class="alert alert-warning">
+                                <i class="fas fa-exclamation-triangle me-2"></i>
+                                <strong>Note:</strong> You already have an {{ current_user.role }} account. If you need further access, please contact the system administrator.
+                            </div>
+                        {% else %}
+                            {% if success %}
+                                <div class="alert alert-success">
+                                    <i class="fas fa-check-circle me-2"></i>
+                                    <strong>Success!</strong> Your request has been submitted successfully. Administrators will review your application and you will be notified by email once a decision has been made.
+                                </div>
+                                <div class="text-center my-4">
+                                    <a href="{{ url_for('citizen.dashboard') }}" class="btn btn-primary">
+                                        <i class="fas fa-home me-2"></i>Return to Dashboard
+                                    </a>
+                                </div>
+                            {% else %}
+                                <p class="lead mb-4">Complete this form to request an official government account. Your request will be reviewed by administrators.</p>
+                                
+                                <form method="POST" action="{{ url_for('auth.request_official_account') }}">
+                                    {{ form.hidden_tag() }}
+                                    
+                                    <div class="mb-3">
+                                        <label class="form-label">Full Name</label>
+                                        <input type="text" class="form-control" value="{{ current_user.full_name() }}" readonly>
+                                        <div class="form-text">Your name as registered with CitySeva.</div>
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <label class="form-label">Email</label>
+                                        <input type="email" class="form-control" value="{{ current_user.email }}" readonly>
+                                        <div class="form-text">Your email as registered with CitySeva.</div>
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        {{ form.department.label(class="form-label") }}
+                                        {{ form.department(class="form-select") }}
+                                        {% for error in form.department.errors %}
+                                            <div class="text-danger">{{ error }}</div>
+                                        {% endfor %}
+                                        <div class="form-text">Select the government department you work in.</div>
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        {{ form.position.label(class="form-label") }}
+                                        {{ form.position(class="form-control") }}
+                                        {% for error in form.position.errors %}
+                                            <div class="text-danger">{{ error }}</div>
+                                        {% endfor %}
+                                        <div class="form-text">Your official position or title.</div>
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        {{ form.employee_id.label(class="form-label") }}
+                                        {{ form.employee_id(class="form-control") }}
+                                        {% for error in form.employee_id.errors %}
+                                            <div class="text-danger">{{ error }}</div>
+                                        {% endfor %}
+                                        <div class="form-text">Your government employee ID number for verification.</div>
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        {{ form.office_phone.label(class="form-label") }}
+                                        {{ form.office_phone(class="form-control") }}
+                                        {% for error in form.office_phone.errors %}
+                                            <div class="text-danger">{{ error }}</div>
+                                        {% endfor %}
+                                        <div class="form-text">Your official office contact number.</div>
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        {{ form.justification.label(class="form-label") }}
+                                        {{ form.justification(class="form-control", rows=4) }}
+                                        {% for error in form.justification.errors %}
+                                            <div class="text-danger">{{ error }}</div>
+                                        {% endfor %}
+                                        <div class="form-text">Explain why you need an official account and how you will use it.</div>
+                                    </div>
+                                    
+                                    <div class="form-check mb-4">
+                                        {{ form.terms(class="form-check-input") }}
+                                        {{ form.terms.label(class="form-check-label") }}
+                                        {% for error in form.terms.errors %}
+                                            <div class="text-danger">{{ error }}</div>
+                                        {% endfor %}
+                                    </div>
+                                    
+                                    <div class="alert alert-warning">
+                                        <i class="fas fa-info-circle me-2"></i>
+                                        <strong>Note:</strong> All information provided will be verified. Submitting false information may result in your account being suspended.
+                                    </div>
+                                    
+                                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                                        <a href="{{ url_for('citizen.dashboard') }}" class="btn btn-secondary me-md-2">
+                                            <i class="fas fa-times me-2"></i>Cancel
+                                        </a>
+                                        {{ form.submit(class="btn btn-primary") }}
+                                    </div>
+                                </form>
+                            {% endif %}
+                        {% endif %}
+                    {% else %}
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle me-2"></i>
+                            <strong>Please login first:</strong> You need to be logged in as a citizen to request an official account.
+                        </div>
+                        <div class="text-center my-4">
+                            <a href="{{ url_for('auth.login') }}" class="btn btn-primary">
+                                <i class="fas fa-sign-in-alt me-2"></i>Login
+                            </a>
+                            <a href="{{ url_for('auth.register') }}" class="btn btn-outline-primary ms-2">
+                                <i class="fas fa-user-plus me-2"></i>Register
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

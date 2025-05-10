@@ -66,8 +66,8 @@ users = [
     {
         'first_name': 'Admin',
         'last_name': 'User',
-        'username': 'admin',
-        'email': 'admin@cityseva.com',
+        'username': 'admin123',
+        'email': 'admin123@gmail.com',
         'password': 'Admin@123',
         'role': 'admin',
         'phone': '1234567890',

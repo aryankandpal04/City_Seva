@@ -14,6 +14,30 @@
                     <form method="POST" action="{{ url_for('auth.register') }}">
                         {{ form.hidden_tag() }}
                         
+                        <!-- Role Selection -->
+                        <div class="mb-4">
+                            <label class="form-label">I want to register as:</label>
+                            <div class="d-flex justify-content-center gap-3 mt-2">
+                                <div class="form-check form-check-inline flex-grow-1">
+                                    <input class="form-check-input visually-hidden" type="radio" name="role" id="role-citizen" value="citizen" {% if form.role.data == 'citizen' %}checked{% endif %}>
+                                    <label class="form-check-label btn btn-outline-primary w-100 py-3" for="role-citizen">
+                                        <i class="fas fa-user me-2"></i>Citizen
+                                        <div class="small text-muted mt-1">Report issues in your area</div>
+                                    </label>
+                                </div>
+                                <div class="form-check form-check-inline flex-grow-1">
+                                    <input class="form-check-input visually-hidden" type="radio" name="role" id="role-official" value="official" {% if form.role.data == 'official' %}checked{% endif %}>
+                                    <label class="form-check-label btn btn-outline-info w-100 py-3" for="role-official">
+                                        <i class="fas fa-user-tie me-2"></i>Government Official
+                                        <div class="small text-muted mt-1">Manage citizen complaints</div>
+                                    </label>
+                                </div>
+                            </div>
+                            {% for error in form.role.errors %}
+                                <div class="text-danger">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                        
                         <div class="row">
                             <div class="col-md-6 mb-3">
                                 {{ form.first_name.label(class="form-label") }}
@@ -82,6 +106,69 @@
                             </div>
                         </div>
                         
+                        <!-- Government Official Fields (conditionally shown) -->
+                        <div id="official-fields" class="official-fields mt-4" style="display: none;">
+                            <div class="card border-info mb-4">
+                                <div class="card-header bg-info text-white">
+                                    <h5 class="mb-0"><i class="fas fa-id-badge me-2"></i>Government Official Information</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="alert alert-warning mb-3">
+                                        <i class="fas fa-exclamation-triangle me-2"></i>
+                                        <strong>Note:</strong> Official accounts require verification by administrators. You will still be registered as a citizen while your request is being verified.
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        {{ form.department.label(class="form-label") }}
+                                        {{ form.department(class="form-select") }}
+                                        {% for error in form.department.errors %}
+                                            <div class="text-danger">{{ error }}</div>
+                                        {% endfor %}
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        {{ form.position.label(class="form-label") }}
+                                        {{ form.position(class="form-control", placeholder="Your job title or position") }}
+                                        {% for error in form.position.errors %}
+                                            <div class="text-danger">{{ error }}</div>
+                                        {% endfor %}
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        {{ form.employee_id.label(class="form-label") }}
+                                        {{ form.employee_id(class="form-control", placeholder="Your government employee ID") }}
+                                        {% for error in form.employee_id.errors %}
+                                            <div class="text-danger">{{ error }}</div>
+                                        {% endfor %}
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        {{ form.office_phone.label(class="form-label") }}
+                                        {{ form.office_phone(class="form-control", placeholder="Your official contact number") }}
+                                        {% for error in form.office_phone.errors %}
+                                            <div class="text-danger">{{ error }}</div>
+                                        {% endfor %}
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        {{ form.justification.label(class="form-label") }}
+                                        {{ form.justification(class="form-control", rows=3, placeholder="Explain how you will use an official account") }}
+                                        {% for error in form.justification.errors %}
+                                            <div class="text-danger">{{ error }}</div>
+                                        {% endfor %}
+                                    </div>
+                                    
+                                    <div class="form-check mb-3">
+                                        {{ form.terms(class="form-check-input") }}
+                                        {{ form.terms.label(class="form-check-label") }}
+                                        {% for error in form.terms.errors %}
+                                            <div class="text-danger">{{ error }}</div>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
                         <div class="d-grid gap-2 mt-3">
                             {{ form.submit(class="btn btn-primary") }}
                         </div>
@@ -97,4 +184,39 @@
         </div>
     </div>
 </div>
+
+<!-- JavaScript to toggle official fields -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const citizenRadio = document.getElementById('role-citizen');
+    const officialRadio = document.getElementById('role-official');
+    const officialFields = document.getElementById('official-fields');
+    
+    // Set initial state
+    if (officialRadio.checked) {
+        officialFields.style.display = 'block';
+    }
+    
+    // Add event listeners
+    citizenRadio.addEventListener('change', function() {
+        officialFields.style.display = 'none';
+    });
+    
+    officialRadio.addEventListener('change', function() {
+        officialFields.style.display = 'block';
+    });
+    
+    // Make the whole button label clickable
+    document.querySelectorAll('.form-check-label.btn').forEach(function(label) {
+        label.addEventListener('click', function() {
+            const radio = document.getElementById(this.getAttribute('for'));
+            radio.checked = true;
+            
+            // Trigger the change event
+            const event = new Event('change');
+            radio.dispatchEvent(event);
+        });
+    });
+});
+</script>
 {% endblock %} 

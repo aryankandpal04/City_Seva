@@ -54,13 +54,17 @@ def dashboard():
                               .order_by(Notification.created_at.desc())\
                               .limit(5).all()
     
+    # Count unread notifications
+    unread_notifications = Notification.query.filter_by(user_id=current_user.id, is_read=False).count()
+    
     return render_template('citizen/dashboard.html',
                           recent_complaints=recent_complaints,
                           pending_count=pending_count,
                           in_progress_count=in_progress_count,
                           resolved_count=resolved_count,
                           rejected_count=rejected_count,
-                          notifications=notifications)
+                          notifications=notifications,
+                          unread_notifications=unread_notifications)
 
 @citizen.route('/profile', methods=['GET', 'POST'])
 @login_required
@@ -167,8 +171,11 @@ def new_complaint():
             # Generate unique filename
             filename = secure_filename(f"{uuid.uuid4()}_{form.image.data.filename}")
             # Save file
-            image_path = os.path.join('uploads', filename)
-            form.image.data.save(os.path.join(current_app.config['UPLOAD_FOLDER'], filename))
+            image_path = f"uploads/{filename}"  # Use forward slash for consistent paths in DB
+            upload_path = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
+            # Ensure upload directory exists
+            os.makedirs(os.path.dirname(upload_path), exist_ok=True)
+            form.image.data.save(upload_path)
         
         # Create complaint
         complaint = Complaint(
@@ -314,4 +321,9 @@ def notifications():
 @login_required
 def uploaded_file(filename):
     """Serve uploaded files"""
-    return send_from_directory(current_app.config['UPLOAD_FOLDER'], filename) 
+    # Clean the filename to handle potential backslashes
+    clean_filename = filename.replace('\\', '/')
+    # Extract just the final filename if it contains a path
+    if '/' in clean_filename:
+        clean_filename = clean_filename.split('/')[-1]
+    return send_from_directory(current_app.config['UPLOAD_FOLDER'], clean_filename) 

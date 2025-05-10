@@ -1,56 +1,68 @@
-{% extends 'base.html' %}
+{% extends "base.html" %}
 
-{% block title %}Complaint #{{ complaint.id }} | CitySeva Admin{% endblock %}
+{% block title %}Complaint #{{ complaint.id }} - CitySeva{% endblock %}
 
 {% block styles %}
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
-    <style>
-        .status-badge {
-            font-size: 1rem;
-            padding: 0.5rem 1rem;
-        }
-        .timeline {
-            position: relative;
-            padding-left: 30px;
-        }
-        .timeline::before {
-            content: '';
-            position: absolute;
-            left: 9px;
-            top: 15px;
-            bottom: 10px;
-            width: 2px;
-            background-color: #dee2e6;
-        }
-        .timeline-item {
-            position: relative;
-            margin-bottom: 20px;
-        }
-        .timeline-marker {
-            position: absolute;
-            left: -30px;
-            width: 20px;
-            height: 20px;
-            border-radius: 50%;
-            background-color: #ffffff;
-            border: 2px solid #6c757d;
-        }
-        .timeline-marker.pending { border-color: #ffc107; background-color: #fff3cd; }
-        .timeline-marker.in_progress { border-color: #0dcaf0; background-color: #cff4fc; }
-        .timeline-marker.resolved { border-color: #198754; background-color: #d1e7dd; }
-        .timeline-marker.rejected { border-color: #dc3545; background-color: #f8d7da; }
-        .timeline-content {
-            padding: 15px;
-            border-radius: 5px;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-            background-color: #f8f9fa;
-        }
-    </style>
+<style>
+    .timeline {
+        position: relative;
+        padding-left: 30px;
+    }
+    .timeline::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        width: 2px;
+        background-color: #dee2e6;
+    }
+    .timeline-item {
+        position: relative;
+        padding-bottom: 1.5rem;
+    }
+    .timeline-item::before {
+        content: '';
+        position: absolute;
+        left: -9px;
+        top: 0;
+        width: 16px;
+        height: 16px;
+        border-radius: 50%;
+        background-color: #fff;
+        border: 2px solid #dee2e6;
+    }
+    .timeline-item.pending::before {
+        background-color: #ffc107;
+        border-color: #ffc107;
+    }
+    .timeline-item.in_progress::before {
+        background-color: #17a2b8;
+        border-color: #17a2b8;
+    }
+    .timeline-item.resolved::before {
+        background-color: #28a745;
+        border-color: #28a745;
+    }
+    .timeline-item.rejected::before {
+        background-color: #dc3545;
+        border-color: #dc3545;
+    }
+    .timeline-content {
+        padding: 15px;
+        background-color: #f8f9fa;
+        border-radius: 5px;
+        box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    }
+    #map {
+        height: 300px;
+        width: 100%;
+    }
+</style>
 {% endblock %}
 
 {% block content %}
-<div class="container-fluid py-4">
-    <!-- Breadcrumb navigation -->
+<div class="container">
     <nav aria-label="breadcrumb" class="mb-4">
         <ol class="breadcrumb">
             <li class="breadcrumb-item"><a href="{{ url_for('admin.dashboard') }}">Dashboard</a></li>
@@ -58,197 +70,215 @@
             <li class="breadcrumb-item active">Complaint #{{ complaint.id }}</li>
         </ol>
     </nav>
-    
+
     <div class="row">
-        <!-- Complaint Details -->
-        <div class="col-lg-8">
+        <div class="col-md-8">
+            <!-- Complaint Details -->
             <div class="card shadow mb-4">
-                <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
-                    <h4 class="mb-0"><i class="fas fa-info-circle me-2"></i>Complaint Details</h4>
-                    <span class="badge status-badge bg-{{ complaint.status|replace('pending', 'warning')|replace('in_progress', 'info')|replace('resolved', 'success')|replace('rejected', 'danger') }}">
-                        {{ complaint.status|replace('_', ' ')|title }}
-                    </span>
+                <div class="card-header bg-light">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">Complaint #{{ complaint.id }}</h5>
+                        <div>
+                            {% if complaint.status == 'pending' %}
+                                <span class="badge bg-warning">Pending</span>
+                            {% elif complaint.status == 'in_progress' %}
+                                <span class="badge bg-info">In Progress</span>
+                            {% elif complaint.status == 'resolved' %}
+                                <span class="badge bg-success">Resolved</span>
+                            {% else %}
+                                <span class="badge bg-danger">Rejected</span>
+                            {% endif %}
+                            
+                            {% if complaint.priority == 'low' %}
+                                <span class="badge bg-secondary">Low Priority</span>
+                            {% elif complaint.priority == 'medium' %}
+                                <span class="badge bg-primary">Medium Priority</span>
+                            {% elif complaint.priority == 'high' %}
+                                <span class="badge bg-warning">High Priority</span>
+                            {% else %}
+                                <span class="badge bg-danger">Urgent Priority</span>
+                            {% endif %}
+                        </div>
+                    </div>
                 </div>
                 <div class="card-body">
-                    <h3>{{ complaint.title }}</h3>
+                    <h4>{{ complaint.title }}</h4>
                     
-                    <div class="row mb-3 mt-4">
+                    <div class="row mb-3">
                         <div class="col-md-6">
-                            <p class="mb-2">
-                                <strong><i class="fas fa-user me-2"></i>Reported By:</strong>
-                                {{ complaint.author.full_name() }} ({{ complaint.author.email }})
-                            </p>
-                            <p class="mb-2">
-                                <strong><i class="fas fa-calendar me-2"></i>Submitted:</strong>
-                                {{ complaint.created_at.strftime('%d %B, %Y - %H:%M') }}
-                            </p>
-                            <p class="mb-2">
-                                <strong><i class="fas fa-list-alt me-2"></i>Category:</strong>
-                                {{ complaint.category.name }} ({{ complaint.category.department }})
-                            </p>
-                            <p class="mb-2">
-                                <strong><i class="fas fa-exclamation-triangle me-2"></i>Priority:</strong>
-                                <span class="badge bg-{{ complaint.priority|replace('low', 'secondary')|replace('medium', 'primary')|replace('high', 'warning')|replace('urgent', 'danger') }}">
-                                    {{ complaint.priority|title }}
-                                </span>
-                            </p>
+                            <strong>Category:</strong> <span class="badge bg-light text-dark">{{ complaint.category.name }}</span>
                         </div>
                         <div class="col-md-6">
-                            <p class="mb-2">
-                                <strong><i class="fas fa-map-marker-alt me-2"></i>Location:</strong>
-                                {{ complaint.location }}
-                            </p>
-                            
+                            <strong>Department:</strong> <span class="badge bg-light text-dark">{{ complaint.category.department }}</span>
+                        </div>
+                    </div>
+                    
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <strong>Submitted By:</strong> {{ complaint.author.full_name() }}
+                        </div>
+                        <div class="col-md-6">
+                            <strong>Submitted On:</strong> {{ complaint.created_at.strftime('%Y-%m-%d %H:%M') }}
+                        </div>
+                    </div>
+                    
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <strong>Location:</strong> {{ complaint.location }}
+                        </div>
+                        <div class="col-md-6">
+                            <strong>Days Open:</strong> {{ complaint.days_open }}
+                        </div>
+                    </div>
+                    
+                    <div class="row mb-3">
+                        <div class="col-md-12">
+                            <strong>Assigned To:</strong> 
                             {% if complaint.assigned_to %}
-                            <p class="mb-2">
-                                <strong><i class="fas fa-user-tie me-2"></i>Assigned To:</strong>
                                 {{ complaint.assigned_to.full_name() }} ({{ complaint.assigned_to.department }})
-                                <small class="text-muted">on {{ complaint.assigned_at.strftime('%d %B, %Y') }}</small>
-                            </p>
+                                <small class="text-muted">
+                                    Assigned on {{ complaint.assigned_at.strftime('%Y-%m-%d') if complaint.assigned_at }}
+                                </small>
                             {% else %}
-                            <p class="mb-2">
-                                <strong><i class="fas fa-user-tie me-2"></i>Assigned To:</strong>
                                 <span class="text-muted">Not assigned</span>
-                            </p>
-                            {% endif %}
-                            
-                            {% if complaint.resolved_at %}
-                            <p class="mb-2">
-                                <strong><i class="fas fa-check-circle me-2"></i>Resolved:</strong>
-                                {{ complaint.resolved_at.strftime('%d %B, %Y - %H:%M') }}
-                                ({{ complaint.days_open }} days)
-                            </p>
-                            {% else %}
-                            <p class="mb-2">
-                                <strong><i class="fas fa-clock me-2"></i>Days Open:</strong>
-                                {{ complaint.days_open }} days
-                            </p>
-                            {% endif %}
-                            
-                            {% if complaint.feedback %}
-                            <p class="mb-2">
-                                <strong><i class="fas fa-star me-2"></i>Feedback Rating:</strong>
-                                {% for i in range(5) %}
-                                    {% if i < complaint.feedback.rating %}
-                                        <i class="fas fa-star text-warning"></i>
-                                    {% else %}
-                                        <i class="far fa-star text-secondary"></i>
-                                    {% endif %}
-                                {% endfor %}
-                            </p>
                             {% endif %}
                         </div>
                     </div>
                     
-                    <div class="mb-4">
-                        <h5><i class="fas fa-align-left me-2"></i>Description</h5>
-                        <div class="p-3 bg-light rounded">
-                            {{ complaint.description|nl2br }}
+                    <div class="row mb-3">
+                        <div class="col-md-12">
+                            <strong>Description:</strong>
+                            <p class="mt-2">{{ complaint.description }}</p>
                         </div>
                     </div>
-                    
-                    {% if complaint.feedback and complaint.feedback.comment %}
-                    <div class="mb-4">
-                        <h5><i class="fas fa-comment me-2"></i>Citizen Feedback</h5>
-                        <div class="p-3 bg-light rounded">
-                            {{ complaint.feedback.comment|nl2br }}
-                        </div>
-                    </div>
-                    {% endif %}
                     
                     {% if complaint.image_path %}
-                    <div class="mb-4">
-                        <h5><i class="fas fa-image me-2"></i>Attached Image</h5>
-                        <div class="text-center">
-                            <img src="{{ url_for('citizen.uploaded_file', filename=complaint.image_path.split('/')[-1]) }}" 
-                                 alt="Complaint Image" class="img-fluid rounded" style="max-height: 400px;">
+                        <div class="row mb-3">
+                            <div class="col-md-12">
+                                <strong>Attached Image:</strong><br>
+                                <img src="{{ url_for('citizen.uploaded_file', filename=complaint.image_path.split('/')[-1]) }}" 
+                                     class="img-fluid mt-2 img-thumbnail" alt="Complaint Image">
+                            </div>
                         </div>
-                    </div>
                     {% endif %}
                     
                     {% if complaint.latitude and complaint.longitude %}
-                    <div class="mb-4">
-                        <h5><i class="fas fa-map me-2"></i>Location on Map</h5>
-                        <div id="complaint-map" style="height: 300px; border-radius: 5px;"></div>
-                    </div>
+                        <div class="row mb-3">
+                            <div class="col-md-12">
+                                <strong>Location on Map:</strong>
+                                <div id="complaint-map" class="mt-2" style="height: 300px;"></div>
+                            </div>
+                        </div>
                     {% endif %}
                 </div>
             </div>
-        </div>
-        
-        <!-- Update and Timeline -->
-        <div class="col-lg-4">
+            
             <!-- Update Form -->
             <div class="card shadow mb-4">
-                <div class="card-header bg-primary text-white">
-                    <h5 class="mb-0"><i class="fas fa-edit me-2"></i>Update Complaint</h5>
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">Update Complaint Status</h5>
                 </div>
                 <div class="card-body">
-                    <form method="POST" action="{{ url_for('admin.complaint_detail', complaint_id=complaint.id) }}">
+                    <form method="post" action="{{ url_for('admin.complaint_detail', complaint_id=complaint.id) }}">
                         {{ form.hidden_tag() }}
                         
-                        <div class="mb-3">
-                            <label class="form-label">Status</label>
-                            {{ form.status(class="form-select") }}
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="status" class="form-label">Status</label>
+                                <select class="form-select" id="status" name="status">
+                                    <option value="pending" {% if form.status.data == 'pending' %}selected{% endif %}>Pending</option>
+                                    <option value="in_progress" {% if form.status.data == 'in_progress' %}selected{% endif %}>In Progress</option>
+                                    <option value="resolved" {% if form.status.data == 'resolved' %}selected{% endif %}>Resolved</option>
+                                    <option value="rejected" {% if form.status.data == 'rejected' %}selected{% endif %}>Rejected</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="assigned_to_id" class="form-label">Assign To</label>
+                                <select class="form-select" id="assigned_to_id" name="assigned_to_id">
+                                    {% for id, name in form.assigned_to_id.choices %}
+                                        <option value="{{ id }}" {% if form.assigned_to_id.data == id %}selected{% endif %}>{{ name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
                         </div>
                         
                         <div class="mb-3">
-                            <label class="form-label">Assign To</label>
-                            {{ form.assigned_to_id(class="form-select") }}
-                        </div>
-                        
-                        <div class="mb-3">
-                            <label class="form-label">Comment</label>
-                            {{ form.comment(class="form-control", rows=4, placeholder="Add details about this update...") }}
-                            <div class="form-text">This comment will be visible to the citizen and included in email notifications.</div>
+                            <label for="comment" class="form-label">Comment</label>
+                            <textarea class="form-control" id="comment" name="comment" rows="3" required></textarea>
+                            <div class="form-text">Provide details about the status update. This will be visible to the citizen.</div>
                         </div>
                         
                         <div class="d-grid">
-                            <button type="submit" class="btn btn-primary">
-                                <i class="fas fa-save me-2"></i>Update Complaint
-                            </button>
+                            <button type="submit" class="btn btn-primary">Update Complaint</button>
                         </div>
                     </form>
                 </div>
             </div>
-            
-            <!-- Updates Timeline -->
-            <div class="card shadow">
-                <div class="card-header bg-secondary text-white">
-                    <h5 class="mb-0"><i class="fas fa-history me-2"></i>Updates Timeline</h5>
+        </div>
+        
+        <div class="col-md-4">
+            <!-- Citizen Info -->
+            <div class="card shadow mb-4">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">Citizen Information</h5>
                 </div>
                 <div class="card-body">
-                    {% if updates %}
-                    <div class="timeline">
-                        {% for update in updates %}
-                        <div class="timeline-item">
-                            <div class="timeline-marker {{ update.status }}"></div>
-                            <div class="timeline-content">
-                                <div class="d-flex justify-content-between">
-                                    <h6 class="mb-1">
-                                        <span class="badge bg-{{ update.status|replace('pending', 'warning')|replace('in_progress', 'info')|replace('resolved', 'success')|replace('rejected', 'danger') }}">
-                                            {{ update.status|replace('_', ' ')|title }}
-                                        </span>
-                                    </h6>
-                                    <small class="text-muted">{{ update.created_at.strftime('%d %b, %Y') }}</small>
-                                </div>
-                                <p class="mb-1">{{ update.comment }}</p>
-                                <small class="text-muted">
-                                    By: {{ update.user.full_name() }}
-                                    <span class="badge bg-{% if update.user.role == 'admin' %}danger{% elif update.user.role == 'official' %}info{% else %}primary{% endif %}">
-                                        {{ update.user.role|title }}
-                                    </span>
-                                </small>
-                            </div>
+                    <div class="d-flex align-items-center mb-3">
+                        <i class="fas fa-user-circle fa-2x me-3 text-primary"></i>
+                        <div>
+                            <h6 class="mb-0">{{ complaint.author.full_name() }}</h6>
+                            <small class="text-muted">{{ complaint.author.email }}</small>
                         </div>
-                        {% endfor %}
                     </div>
-                    {% else %}
-                    <div class="text-center text-muted py-4">
-                        <i class="fas fa-info-circle fa-2x mb-2"></i>
-                        <p>No updates yet.</p>
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <span>Phone:</span>
+                            <span>{{ complaint.author.phone or 'Not provided' }}</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <span>Address:</span>
+                            <span>{{ complaint.author.address or 'Not provided' }}</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <span>Member Since:</span>
+                            <span>{{ complaint.author.created_at.strftime('%Y-%m-%d') }}</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            
+            <!-- Status Updates -->
+            <div class="card shadow">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">Status Timeline</h5>
+                </div>
+                <div class="card-body">
+                    <div class="timeline">
+                        {% if updates %}
+                            {% for update in updates %}
+                                <div class="timeline-item {{ update.status }}">
+                                    <div class="timeline-content">
+                                        <div class="d-flex justify-content-between">
+                                            <small class="text-muted">{{ update.created_at.strftime('%Y-%m-%d %H:%M') }}</small>
+                                            {% if update.status == 'pending' %}
+                                                <span class="badge bg-warning">Pending</span>
+                                            {% elif update.status == 'in_progress' %}
+                                                <span class="badge bg-info">In Progress</span>
+                                            {% elif update.status == 'resolved' %}
+                                                <span class="badge bg-success">Resolved</span>
+                                            {% else %}
+                                                <span class="badge bg-danger">Rejected</span>
+                                            {% endif %}
+                                        </div>
+                                        <p class="mb-0">{{ update.comment }}</p>
+                                        <small class="text-muted">By {{ update.user.full_name() }}</small>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        {% else %}
+                            <p class="text-center">No updates yet.</p>
+                        {% endif %}
                     </div>
-                    {% endif %}
                 </div>
             </div>
         </div>
@@ -258,7 +288,6 @@
 
 {% block scripts %}
 {% if complaint.latitude and complaint.longitude %}
-<script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         // Initialize the map
@@ -269,11 +298,8 @@
             attribution: '© OpenStreetMap contributors'
         }).addTo(map);
         
-        // Add marker for the complaint location
-        L.marker([{{ complaint.latitude }}, {{ complaint.longitude }}])
-            .addTo(map)
-            .bindPopup("{{ complaint.title }}")
-            .openPopup();
+        // Add marker
+        L.marker([{{ complaint.latitude }}, {{ complaint.longitude }}]).addTo(map);
     });
 </script>
 {% endif %}

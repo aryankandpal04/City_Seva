@@ -453,11 +453,31 @@ def reports():
     # For simplicity, we'll show overall stats
     
     # Resolution time statistics (avg, min, max)
-    resolution_stats = db.session.query(
-        func.avg(Complaint.resolved_at - Complaint.created_at).label('avg_time'),
-        func.min(Complaint.resolved_at - Complaint.created_at).label('min_time'),
-        func.max(Complaint.resolved_at - Complaint.created_at).label('max_time')
-    ).filter(Complaint.status == 'resolved').first()
+    # Get resolved complaints and calculate statistics in Python instead of at SQL level
+    resolved_complaints = Complaint.query.filter_by(status='resolved').all()
+    
+    avg_time = None
+    min_time = None
+    max_time = None
+    
+    if resolved_complaints:
+        # Calculate time differences in days
+        time_diffs = []
+        for complaint in resolved_complaints:
+            if complaint.resolved_at and complaint.created_at:
+                time_diff = (complaint.resolved_at - complaint.created_at).total_seconds() / 86400  # Convert to days
+                time_diffs.append(time_diff)
+        
+        if time_diffs:
+            avg_time = sum(time_diffs) / len(time_diffs)
+            min_time = min(time_diffs)
+            max_time = max(time_diffs)
+    
+    resolution_stats = {
+        'avg_time': avg_time,
+        'min_time': min_time,
+        'max_time': max_time
+    }
     
     # Category statistics
     category_stats = db.session.query(

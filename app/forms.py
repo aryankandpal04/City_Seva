@@ -127,4 +127,109 @@ class SearchForm(FlaskForm):
         ('high', 'High'),
         ('urgent', 'Urgent')
     ], validators=[Optional()])
-    submit = SubmitField('Search') 
+    submit = SubmitField('Search')
+
+class OfficialRequestForm(FlaskForm):
+    """Form for requesting a government official account"""
+    department = SelectField('Department', choices=[
+        ('Public Works', 'Public Works'),
+        ('Sanitation', 'Sanitation'),
+        ('Water Department', 'Water Department'),
+        ('Electricity Board', 'Electricity Board'),
+        ('Transport', 'Transport'),
+        ('Parks & Recreation', 'Parks & Recreation'),
+        ('Animal Control', 'Animal Control'),
+        ('General Administration', 'General Administration'),
+        ('Other', 'Other')
+    ], validators=[DataRequired()])
+    position = StringField('Official Position', validators=[DataRequired(), Length(3, 100)])
+    employee_id = StringField('Employee ID', validators=[DataRequired(), Length(3, 50)])
+    office_phone = StringField('Office Phone', validators=[DataRequired(), Length(10, 20)])
+    justification = TextAreaField('Justification', validators=[DataRequired(), Length(20, 500)])
+    terms = BooleanField('I confirm that all information provided is accurate and I am authorized to request an official account.', validators=[DataRequired()])
+    submit = SubmitField('Submit Request')
+
+class EnhancedRegistrationForm(RegistrationForm):
+    """Enhanced registration form with role selection and official details"""
+    role = SelectField('Register as', choices=[
+        ('citizen', 'Citizen'), 
+        ('official', 'Government Official')
+    ], default='citizen', validators=[DataRequired()])
+    
+    # Official account fields (only required if role is 'official')
+    department = SelectField('Department', choices=[
+        ('Public Works', 'Public Works'),
+        ('Sanitation', 'Sanitation'),
+        ('Water Department', 'Water Department'),
+        ('Electricity Board', 'Electricity Board'),
+        ('Transport', 'Transport'),
+        ('Parks & Recreation', 'Parks & Recreation'),
+        ('Animal Control', 'Animal Control'),
+        ('General Administration', 'General Administration'),
+        ('Other', 'Other')
+    ], validators=[Optional()])
+    position = StringField('Official Position', validators=[Optional(), Length(3, 100)])
+    employee_id = StringField('Employee ID', validators=[Optional(), Length(3, 50)])
+    office_phone = StringField('Office Phone', validators=[Optional(), Length(10, 20)])
+    justification = TextAreaField('Why do you need an official account?', validators=[Optional(), Length(20, 500)])
+    terms = BooleanField('I confirm that all information provided is accurate and I am authorized to request an official account.', validators=[Optional()])
+    
+    def validate(self, extra_validators=None):
+        """Custom validation for official account fields"""
+        initial_validation = super().validate(extra_validators=extra_validators)
+        if not initial_validation:
+            return False
+            
+        if self.role.data == 'official':
+            if not self.department.data:
+                self.department.errors = ['Department is required for officials']
+                return False
+            if not self.position.data:
+                self.position.errors = ['Position is required for officials']
+                return False
+            if not self.employee_id.data:
+                self.employee_id.errors = ['Employee ID is required for officials']
+                return False
+            if not self.office_phone.data:
+                self.office_phone.errors = ['Office phone is required for officials']
+                return False
+            if not self.justification.data:
+                self.justification.errors = ['Justification is required for officials']
+                return False
+            if not self.terms.data:
+                self.terms.errors = ['You must confirm this statement']
+                return False
+                
+        return True 
+
+class EnhancedLoginForm(LoginForm):
+    """Enhanced login form with department selection for officials"""
+    role = SelectField('Login as', choices=[
+        ('citizen', 'Citizen'),
+        ('official', 'Government Official')
+    ], default='citizen', validators=[DataRequired()])
+    
+    department = SelectField('Department', choices=[
+        ('', 'Select Department'),
+        ('Public Works', 'Public Works'),
+        ('Sanitation', 'Sanitation'),
+        ('Water Department', 'Water Department'),
+        ('Electricity Board', 'Electricity Board'),
+        ('Transport', 'Transport'),
+        ('Parks & Recreation', 'Parks & Recreation'),
+        ('Animal Control', 'Animal Control'),
+        ('General Administration', 'General Administration'),
+        ('Other', 'Other')
+    ], validators=[Optional()])
+    
+    def validate(self, extra_validators=None):
+        """Custom validation to require department for officials"""
+        initial_validation = super().validate(extra_validators=extra_validators)
+        if not initial_validation:
+            return False
+            
+        if self.role.data == 'official' and not self.department.data:
+            self.department.errors = ['Department is required for Government Officials']
+            return False
+                
+        return True 
