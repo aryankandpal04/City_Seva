@@ -107,12 +107,44 @@
                                             <span class="badge bg-danger">Urgent</span>
                                         {% endif %}
                                     </td>
-                                    <td>{{ complaint.author.full_name() }}</td>
+                                    <td>{{ complaint.author.full_name() if complaint.author else 'Unknown' }}</td>
                                     <td>{{ complaint.created_at.strftime('%Y-%m-%d') }}</td>
                                     <td>
                                         <a href="{{ url_for('admin.complaint_detail', complaint_id=complaint.id) }}" class="btn btn-sm btn-primary">
                                             <i class="fas fa-eye"></i> View
                                         </a>
+                                        {% if current_user.role == 'admin' %}
+                                        <button type="button" class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal{{ complaint.id }}">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                        
+                                        <!-- Delete Modal -->
+                                        <div class="modal fade" id="deleteModal{{ complaint.id }}" tabindex="-1" aria-hidden="true">
+                                            <div class="modal-dialog">
+                                                <div class="modal-content">
+                                                    <div class="modal-header bg-danger text-white">
+                                                        <h5 class="modal-title">Confirm Deletion</h5>
+                                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                    </div>
+                                                    <div class="modal-body">
+                                                        <p>Are you sure you want to delete complaint #{{ complaint.id }}?</p>
+                                                        <p><strong>{{ complaint.title }}</strong></p>
+                                                        <div class="alert alert-warning">
+                                                            <i class="fas fa-exclamation-triangle me-2"></i>
+                                                            This action cannot be undone.
+                                                        </div>
+                                                    </div>
+                                                    <div class="modal-footer">
+                                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                                        <form method="POST" action="{{ url_for('admin.delete_complaint', complaint_id=complaint.id) }}">
+                                                            <input type="hidden" name="confirm" value="true">
+                                                            <button type="submit" class="btn btn-danger">Delete</button>
+                                                        </form>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        {% endif %}
                                     </td>
                                 </tr>
                             {% endfor %}

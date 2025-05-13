@@ -3,6 +3,7 @@ from flask_login import login_required, current_user
 from app import db
 from app.models import Complaint, Category, ComplaintUpdate, Feedback, AuditLog
 from app.utils.decorators import admin_required, official_required
+from app.utils.constants import COMPLAINT_PRIORITIES
 
 api = Blueprint('api', __name__)
 
@@ -90,12 +91,7 @@ def stats_by_priority():
     results = query.all()
     
     # Format priorities for display
-    priorities = {
-        'low': 'Low',
-        'medium': 'Medium',
-        'high': 'High',
-        'urgent': 'Urgent'
-    }
+    priorities = dict(COMPLAINT_PRIORITIES)
     
     return jsonify({
         'status': 'success',

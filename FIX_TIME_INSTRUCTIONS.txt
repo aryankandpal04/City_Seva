@@ -1,0 +1,49 @@
+======================================
+      SYSTEM TIME CORRECTION
+======================================
+
+Your server time is approximately 5.5 hours (19,800 seconds) out of sync with the actual time.
+This is causing Firebase JWT token validation errors.
+
+The best solution is to fix your system time. Here's how:
+
+OPTION 1: FIX DIRECTLY FROM WINDOWS SETTINGS
+============================================
+1. Right-click on the time in the Windows taskbar
+2. Select "Adjust date/time"
+3. Turn ON "Set time automatically"
+4. If that doesn't work, click "Sync now"
+5. Restart your Flask application
+
+OPTION 2: USE COMMAND PROMPT (ADMINISTRATOR)
+============================================
+1. Press Windows key
+2. Type "cmd"
+3. Right-click on "Command Prompt" and select "Run as administrator"
+4. In the admin command prompt, run:
+
+   w32tm /resync
+
+5. If that doesn't work, try these commands:
+
+   net stop w32time
+   net start w32time
+   w32tm /resync
+
+6. Restart your Flask application
+
+OPTION 3: MANUAL TIME SETTING
+============================
+If the automatic options don't work, set the time manually:
+1. Run this command in Command Prompt (as admin):
+
+   time 17:02:00
+
+2. Replace 17:02:00 with the current UTC time (visible from any online world clock)
+
+CHECKING IF TIME IS FIXED
+========================
+After correcting your system time, run your Flask application again.
+If the Firebase authentication starts working, the time correction was successful.
+
+====================================== 

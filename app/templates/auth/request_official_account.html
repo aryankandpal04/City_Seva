@@ -55,6 +55,12 @@
                                         <div class="form-text">Select the government department you work in.</div>
                                     </div>
                                     
+                                    <div class="mb-3" id="otherDepartmentContainer" style="display: none;">
+                                        <label for="otherDepartment" class="form-label">Custom Department Name <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" id="otherDepartment" name="other_department">
+                                        <div class="form-text">Please specify the custom department name.</div>
+                                    </div>
+                                    
                                     <div class="mb-3">
                                         {{ form.position.label(class="form-label") }}
                                         {{ form.position(class="form-control") }}
@@ -132,4 +138,27 @@
         </div>
     </div>
 </div>
+
+{% block scripts %}
+<script>
+    $(document).ready(function() {
+        // Show/hide other department field based on selection
+        $('#department').on('change', function() {
+            if ($(this).val() === 'Other') {
+                $('#otherDepartmentContainer').show();
+                $('#otherDepartment').prop('required', true);
+            } else {
+                $('#otherDepartmentContainer').hide();
+                $('#otherDepartment').prop('required', false);
+            }
+        });
+        
+        // Initialize on page load
+        if ($('#department').val() === 'Other') {
+            $('#otherDepartmentContainer').show();
+            $('#otherDepartment').prop('required', true);
+        }
+    });
+</script>
+{% endblock %}
 {% endblock %} 

@@ -1,0 +1,80 @@
+{% extends 'base.html' %}
+
+{% block title %}Email Verification | CitySeva{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow my-5">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">Email Verification</h4>
+                </div>
+                <div class="card-body">
+                    {% if verification_sent %}
+                    <div class="alert alert-info">
+                        <p><strong>Verification Code Sent!</strong></p>
+                        <p>We've sent a verification code to your email address: <strong>{{ email }}</strong></p>
+                        <p>Please check your inbox (and spam folder) for the verification code.</p>
+                    </div>
+                    {% endif %}
+                    
+                    {% if verification_error %}
+                    <div class="alert alert-danger">
+                        <p><strong>Verification Failed</strong></p>
+                        <p>{{ verification_error }}</p>
+                    </div>
+                    {% endif %}
+                    
+                    {% if debug_otp %}
+                    <div class="alert alert-warning">
+                        <p><strong>Development Mode: Verification Code</strong></p>
+                        <p>Email sending may have failed, but you can use this code for testing:</p>
+                        <h3 class="text-center">{{ debug_otp }}</h3>
+                        <p class="text-center text-muted small">This is only shown in development mode</p>
+                    </div>
+                    {% endif %}
+                    
+                    <form method="POST" action="{{ url_for('auth.verify_otp') }}">
+                        <input type="hidden" name="email" value="{{ email }}">
+                        
+                        <div class="form-group">
+                            <label for="otp_code">Verification Code</label>
+                            <input type="text" class="form-control form-control-lg text-center" 
+                                   id="otp_code" name="otp_code" placeholder="Enter 6-digit code"
+                                   pattern="[0-9]{6}" maxlength="6" required>
+                            <small class="form-text text-muted">
+                                Enter the 6-digit code sent to your email address.
+                            </small>
+                        </div>
+                        
+                        <div class="form-group mt-4">
+                            <button type="submit" class="btn btn-primary btn-block">
+                                Verify Email
+                            </button>
+                        </div>
+                    </form>
+                    
+                    <hr>
+                    
+                    <div class="text-center">
+                        <p>Didn't receive the code?</p>
+                        <form action="{{ url_for('auth.resend_otp') }}" method="POST">
+                            <input type="hidden" name="email" value="{{ email }}">
+                            <button type="submit" class="btn btn-outline-secondary">
+                                Resend Verification Code
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="text-center mt-3">
+                <a href="{{ url_for('auth.login') }}" class="btn btn-link">
+                    Back to Login
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

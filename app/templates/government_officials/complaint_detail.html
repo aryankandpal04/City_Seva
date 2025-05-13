@@ -3,7 +3,6 @@
 {% block title %}Complaint #{{ complaint.id }} | CitySeva{% endblock %}
 
 {% block styles %}
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
     <style>
         .status-badge {
             font-size: 1rem;
@@ -118,12 +117,57 @@
                         </div>
                     </div>
                     
-                    {% if complaint.image_path %}
+                    {% if complaint.media_attachments.count() > 0 %}
+                    <div class="mb-4">
+                        <h5><i class="fas fa-paperclip me-2"></i>Attached Media ({{ complaint.media_attachments.count() }})</h5>
+                        <div class="row">
+                            {% for media in complaint.media_attachments %}
+                                <div class="col-md-6 mb-3">
+                                    {% if media.media_type == 'image' %}
+                                    <div class="card">
+                                        <img src="{{ url_for('citizen.uploaded_file', filename=media.file_path.split('/')[-1]) }}" 
+                                             alt="Complaint Image" class="card-img-top" style="max-height: 300px; object-fit: cover;">
+                                        <div class="card-footer text-center">
+                                            <a href="{{ url_for('citizen.uploaded_file', filename=media.file_path.split('/')[-1]) }}" 
+                                               target="_blank" class="btn btn-sm btn-primary">
+                                                <i class="fas fa-expand me-1"></i>View Full Size
+                                            </a>
+                                        </div>
+                                    </div>
+                                    {% elif media.media_type == 'video' %}
+                                    <div class="card">
+                                        <video controls class="card-img-top" style="max-height: 300px;">
+                                            <source src="{{ url_for('citizen.uploaded_file', filename=media.file_path.split('/')[-1]) }}" type="video/mp4">
+                                            Your browser does not support the video tag.
+                                        </video>
+                                        <div class="card-footer text-center">
+                                            <a href="{{ url_for('citizen.uploaded_file', filename=media.file_path.split('/')[-1]) }}" 
+                                               target="_blank" class="btn btn-sm btn-primary">
+                                                <i class="fas fa-download me-1"></i>Download
+                                            </a>
+                                        </div>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% elif complaint.media_path and complaint.media_type == 'image' %}
                     <div class="mb-4">
                         <h5><i class="fas fa-image me-2"></i>Attached Image</h5>
                         <div class="text-center">
-                            <img src="{{ url_for('citizen.uploaded_file', filename=complaint.image_path.split('/')[-1]) }}" 
+                            <img src="{{ url_for('citizen.uploaded_file', filename=complaint.media_path.split('/')[-1]) }}" 
                                  alt="Complaint Image" class="img-fluid rounded" style="max-height: 400px;">
+                        </div>
+                    </div>
+                    {% elif complaint.media_path and complaint.media_type == 'video' %}
+                    <div class="mb-4">
+                        <h5><i class="fas fa-video me-2"></i>Attached Video</h5>
+                        <div class="text-center">
+                            <video controls class="img-fluid rounded" style="max-height: 400px;">
+                                <source src="{{ url_for('citizen.uploaded_file', filename=complaint.media_path.split('/')[-1]) }}" type="video/mp4">
+                                Your browser does not support the video tag.
+                            </video>
                         </div>
                     </div>
                     {% endif %}
@@ -192,10 +236,14 @@
                                 </div>
                                 <p class="mb-1">{{ update.comment }}</p>
                                 <small class="text-muted">
-                                    By: {{ update.user.full_name() }}
+                                    By: {% if update.user %}
+                                    {{ update.user.full_name() }}
                                     <span class="badge bg-{% if update.user.role == 'admin' %}danger{% elif update.user.role == 'official' %}info{% else %}primary{% endif %}">
                                         {{ update.user.role|title }}
                                     </span>
+                                    {% else %}
+                                    System
+                                    {% endif %}
                                 </small>
                             </div>
                         </div>
@@ -216,22 +264,30 @@
 
 {% block scripts %}
 {% if complaint.latitude and complaint.longitude %}
-<script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD8atpL2upxvA99KrVaZFlv8XxgrqbGZGE&libraries=places"></script>
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         // Initialize the map
-        const map = L.map('complaint-map').setView([{{ complaint.latitude }}, {{ complaint.longitude }}], 15);
-        
-        // Add OpenStreetMap tile layer
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '© OpenStreetMap contributors'
-        }).addTo(map);
+        const map = new google.maps.Map(document.getElementById('complaint-map'), {
+            center: { lat: {{ complaint.latitude }}, lng: {{ complaint.longitude }} },
+            zoom: 15
+        });
         
         // Add marker for the complaint location
-        L.marker([{{ complaint.latitude }}, {{ complaint.longitude }}])
-            .addTo(map)
-            .bindPopup("{{ complaint.title }}")
-            .openPopup();
+        const marker = new google.maps.Marker({
+            position: { lat: {{ complaint.latitude }}, lng: {{ complaint.longitude }} },
+            map: map,
+            title: "{{ complaint.title }}"
+        });
+        
+        // Add info window
+        const infoWindow = new google.maps.InfoWindow({
+            content: "{{ complaint.title }}"
+        });
+        
+        marker.addListener('click', function() {
+            infoWindow.open(map, marker);
+        });
     });
 </script>
 {% endif %}

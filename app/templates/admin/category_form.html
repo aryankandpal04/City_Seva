@@ -41,17 +41,18 @@
                             <label for="department" class="form-label">Department <span class="text-danger">*</span></label>
                             <select class="form-select" id="department" name="department" required>
                                 <option value="">Select Department</option>
-                                <option value="Public Works" {% if category and category.department == 'Public Works' %}selected{% endif %}>Public Works</option>
-                                <option value="Sanitation" {% if category and category.department == 'Sanitation' %}selected{% endif %}>Sanitation</option>
-                                <option value="Water Department" {% if category and category.department == 'Water Department' %}selected{% endif %}>Water Department</option>
-                                <option value="Electricity Board" {% if category and category.department == 'Electricity Board' %}selected{% endif %}>Electricity Board</option>
-                                <option value="Transport" {% if category and category.department == 'Transport' %}selected{% endif %}>Transport</option>
-                                <option value="Parks & Recreation" {% if category and category.department == 'Parks & Recreation' %}selected{% endif %}>Parks & Recreation</option>
-                                <option value="Animal Control" {% if category and category.department == 'Animal Control' %}selected{% endif %}>Animal Control</option>
-                                <option value="General Administration" {% if category and category.department == 'General Administration' %}selected{% endif %}>General Administration</option>
-                                <option value="Other" {% if category and category.department == 'Other' %}selected{% endif %}>Other</option>
+                                {% for dept_value, dept_label in department_choices %}
+                                    <option value="{{ dept_value }}" {% if category and category.department == dept_value %}selected{% endif %}>{{ dept_label }}</option>
+                                {% endfor %}
                             </select>
                             <div class="form-text">The government department responsible for this category.</div>
+                        </div>
+                        
+                        <div class="mb-3" id="otherDepartmentContainer" style="display: none;">
+                            <label for="otherDepartment" class="form-label">Custom Department Name <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="otherDepartment" name="other_department" 
+                                   value="{{ category.department if category and category.department != 'Other' and category.department not in departments else '' }}">
+                            <div class="form-text">Please specify the custom department name.</div>
                         </div>
                         
                         <div class="mb-3">
@@ -101,6 +102,23 @@
         // Set initial preview
         var initialIcon = '{{ category.icon if category else "fa-exclamation-circle" }}';
         $('#iconPreview').attr('class', 'fas ' + initialIcon + ' fa-3x');
+        
+        // Show/hide other department field based on selection
+        $('#department').on('change', function() {
+            if ($(this).val() === 'Other') {
+                $('#otherDepartmentContainer').show();
+                $('#otherDepartment').prop('required', true);
+            } else {
+                $('#otherDepartmentContainer').hide();
+                $('#otherDepartment').prop('required', false);
+            }
+        });
+        
+        // Initialize on page load
+        if ($('#department').val() === 'Other') {
+            $('#otherDepartmentContainer').show();
+            $('#otherDepartment').prop('required', true);
+        }
     });
 </script>
 {% endblock %} 

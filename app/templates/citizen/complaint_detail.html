@@ -3,7 +3,6 @@
 {% block title %}Complaint #{{ complaint.id }} | CitySeva{% endblock %}
 
 {% block styles %}
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
     <style>
         .status-badge {
             font-size: 1rem;
@@ -134,14 +133,124 @@
                         </div>
                     </div>
                     
-                    {% if complaint.image_path %}
-                    <div class="mb-4">
-                        <h5><i class="fas fa-image me-2"></i>Attached Image</h5>
-                        <div class="text-center">
-                            <img src="{{ url_for('citizen.uploaded_file', filename=complaint.image_path.split('/')[-1]) }}" 
-                                 alt="Complaint Image" class="img-fluid rounded" style="max-height: 400px;">
+                    {% if complaint is mapping %}
+                        {% if 'media_attachments' in complaint and complaint.media_attachments %}
+                        <div class="mb-4">
+                            <h5><i class="fas fa-paperclip me-2"></i>Attached Media ({{ complaint.media_attachments|length }})</h5>
+                            <div class="row">
+                                {% for media in complaint.media_attachments %}
+                                    <div class="col-md-6 mb-3">
+                                        {% if media.media_type == 'image' %}
+                                        <div class="card">
+                                            <img src="{{ media.file_url }}" 
+                                                 alt="Complaint Image" class="card-img-top" style="max-height: 300px; object-fit: cover;">
+                                            <div class="card-footer text-center">
+                                                <a href="{{ media.file_url }}" 
+                                                   target="_blank" class="btn btn-sm btn-primary">
+                                                    <i class="fas fa-expand me-1"></i>View Full Size
+                                                </a>
+                                            </div>
+                                        </div>
+                                        {% elif media.media_type == 'video' %}
+                                        <div class="card">
+                                            <video controls class="card-img-top" style="max-height: 300px;">
+                                                <source src="{{ media.file_url }}" type="video/mp4">
+                                                Your browser does not support the video tag.
+                                            </video>
+                                            <div class="card-footer text-center">
+                                                <a href="{{ media.file_url }}" 
+                                                   target="_blank" class="btn btn-sm btn-primary">
+                                                    <i class="fas fa-download me-1"></i>Download
+                                                </a>
+                                            </div>
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                {% endfor %}
+                            </div>
                         </div>
-                    </div>
+                        {% endif %}
+                    {% else %}
+                        {% if complaint.media_attachments %}
+                        <div class="mb-4">
+                            <h5><i class="fas fa-paperclip me-2"></i>Attached Media ({{ complaint.media_attachments.count() }})</h5>
+                            <div class="row">
+                                {% for media in complaint.media_attachments %}
+                                    <div class="col-md-6 mb-3">
+                                        {% if media.media_type == 'image' %}
+                                        <div class="card">
+                                            {% if media.file_url %}
+                                            <img src="{{ media.file_url }}" 
+                                                 alt="Complaint Image" class="card-img-top" style="max-height: 300px; object-fit: cover;">
+                                            {% elif media.file_path %}
+                                            <img src="{{ url_for('citizen.uploaded_file', filename=media.file_path.split('/')[-1]) }}" 
+                                                 alt="Complaint Image" class="card-img-top" style="max-height: 300px; object-fit: cover;">
+                                            {% endif %}
+                                            <div class="card-footer text-center">
+                                                {% if media.file_url %}
+                                                <a href="{{ media.file_url }}" 
+                                                   target="_blank" class="btn btn-sm btn-primary">
+                                                    <i class="fas fa-expand me-1"></i>View Full Size
+                                                </a>
+                                                {% elif media.file_path %}
+                                                <a href="{{ url_for('citizen.uploaded_file', filename=media.file_path.split('/')[-1]) }}" 
+                                                   target="_blank" class="btn btn-sm btn-primary">
+                                                    <i class="fas fa-expand me-1"></i>View Full Size
+                                                </a>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                        {% elif media.media_type == 'video' %}
+                                        <div class="card">
+                                            {% if media.file_url %}
+                                            <video controls class="card-img-top" style="max-height: 300px;">
+                                                <source src="{{ media.file_url }}" type="video/mp4">
+                                                Your browser does not support the video tag.
+                                            </video>
+                                            {% elif media.file_path %}
+                                            <video controls class="card-img-top" style="max-height: 300px;">
+                                                <source src="{{ url_for('citizen.uploaded_file', filename=media.file_path.split('/')[-1]) }}" type="video/mp4">
+                                                Your browser does not support the video tag.
+                                            </video>
+                                            {% endif %}
+                                            <div class="card-footer text-center">
+                                                {% if media.file_url %}
+                                                <a href="{{ media.file_url }}" 
+                                                   target="_blank" class="btn btn-sm btn-primary">
+                                                    <i class="fas fa-download me-1"></i>Download
+                                                </a>
+                                                {% elif media.file_path %}
+                                                <a href="{{ url_for('citizen.uploaded_file', filename=media.file_path.split('/')[-1]) }}" 
+                                                   target="_blank" class="btn btn-sm btn-primary">
+                                                    <i class="fas fa-download me-1"></i>Download
+                                                </a>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        {% elif complaint.media_path and complaint.media_type == 'image' %}
+                        <div class="mb-4">
+                            <h5><i class="fas fa-image me-2"></i>Attached Image</h5>
+                            <div class="text-center">
+                                <img src="{{ url_for('citizen.uploaded_file', filename=complaint.media_path.split('/')[-1]) }}" 
+                                     alt="Complaint Image" class="img-fluid rounded" style="max-height: 400px;">
+                            </div>
+                        </div>
+                        {% elif complaint.media_path and complaint.media_type == 'video' %}
+                        <div class="mb-4">
+                            <h5><i class="fas fa-video me-2"></i>Attached Video</h5>
+                            <div class="text-center">
+                                <video controls class="img-fluid rounded" style="max-height: 400px;">
+                                    <source src="{{ url_for('citizen.uploaded_file', filename=complaint.media_path.split('/')[-1]) }}" type="video/mp4">
+                                    Your browser does not support the video tag.
+                                </video>
+                            </div>
+                        </div>
+                        {% endif %}
                     {% endif %}
                     
                     {% if complaint.latitude and complaint.longitude %}
@@ -153,7 +262,37 @@
                 </div>
             </div>
             
-            {% if complaint.feedback %}
+            {% if complaint is mapping and 'feedback' in complaint and complaint.feedback %}
+            <div class="card shadow mb-4">
+                <div class="card-header bg-success text-white">
+                    <h4 class="mb-0"><i class="fas fa-star me-2"></i>Your Feedback</h4>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="me-3">
+                            <h5 class="mb-0">Rating: 
+                                {% for i in range(5) %}
+                                    {% if i < complaint.feedback.rating %}
+                                        <i class="fas fa-star text-warning"></i>
+                                    {% else %}
+                                        <i class="far fa-star text-secondary"></i>
+                                    {% endif %}
+                                {% endfor %}
+                            </h5>
+                        </div>
+                        <div class="text-muted">
+                            Submitted on {{ complaint.feedback.created_at|format_timestamp('%d %B, %Y') }}
+                        </div>
+                    </div>
+                    
+                    {% if 'comment' in complaint.feedback and complaint.feedback.comment %}
+                    <div class="p-3 bg-light rounded">
+                        {{ complaint.feedback.comment|nl2br }}
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            {% elif complaint.feedback %}
             <div class="card shadow mb-4">
                 <div class="card-header bg-success text-white">
                     <h4 class="mb-0"><i class="fas fa-star me-2"></i>Your Feedback</h4>
@@ -194,25 +333,60 @@
                 </div>
                 <div class="card-body">
                     <div class="timeline">
-                        {% for update in updates %}
-                        <div class="timeline-item">
-                            <div class="timeline-marker {{ update.status }}"></div>
-                            <div class="timeline-content">
-                                <div class="d-flex justify-content-between">
-                                    <h5 class="mb-1">
-                                        <span class="badge bg-{{ update.status|replace('pending', 'warning')|replace('in_progress', 'info')|replace('resolved', 'success')|replace('rejected', 'danger') }}">
-                                            {{ update.status|replace('_', ' ')|title }}
-                                        </span>
-                                    </h5>
-                                    <small class="text-muted">{{ update.created_at.strftime('%d %b, %Y') }}</small>
+                        {% if complaint is mapping and 'updates' in complaint %}
+                            {% for update in complaint.updates %}
+                            <div class="timeline-item">
+                                <div class="timeline-marker {{ update.status }}"></div>
+                                <div class="timeline-content">
+                                    <div class="d-flex justify-content-between">
+                                        <h5 class="mb-1">
+                                            <span class="badge bg-{{ update.status|replace('pending', 'warning')|replace('in_progress', 'info')|replace('resolved', 'success')|replace('rejected', 'danger') }}">
+                                                {{ update.status|replace('_', ' ')|title }}
+                                            </span>
+                                        </h5>
+                                        <small class="text-muted">{{ update.created_at|format_timestamp }}</small>
+                                    </div>
+                                    <p class="mb-0">{{ update.comment }}</p>
+                                    <small class="text-muted">
+                                        By: {% if 'user_name' in update %}
+                                            {{ update.user_name }}
+                                        {% else %}
+                                            System
+                                        {% endif %}
+                                    </small>
                                 </div>
-                                <p class="mb-0">{{ update.comment }}</p>
-                                <small class="text-muted">
-                                    By: {% if update.user.role == 'citizen' %}You{% else %}{{ update.user.full_name() }}{% endif %}
-                                </small>
                             </div>
-                        </div>
-                        {% endfor %}
+                            {% endfor %}
+                        {% elif updates %}
+                            {% for update in updates %}
+                            <div class="timeline-item">
+                                <div class="timeline-marker {{ update.status }}"></div>
+                                <div class="timeline-content">
+                                    <div class="d-flex justify-content-between">
+                                        <h5 class="mb-1">
+                                            <span class="badge bg-{{ update.status|replace('pending', 'warning')|replace('in_progress', 'info')|replace('resolved', 'success')|replace('rejected', 'danger') }}">
+                                                {{ update.status|replace('_', ' ')|title }}
+                                            </span>
+                                        </h5>
+                                        <small class="text-muted">{{ update.created_at.strftime('%d %b, %Y') }}</small>
+                                    </div>
+                                    <p class="mb-0">{{ update.comment }}</p>
+                                    <small class="text-muted">
+                                        By: {% if update.user %}
+                                            {% if update.user.role == 'citizen' %}You{% else %}{{ update.user.full_name() }}{% endif %}
+                                        {% else %}
+                                            System
+                                        {% endif %}
+                                    </small>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        {% else %}
+                            <div class="text-center py-3">
+                                <i class="fas fa-info-circle fa-2x mb-2"></i>
+                                <p>No updates yet.</p>
+                            </div>
+                        {% endif %}
                     </div>
                 </div>
             </div>
@@ -223,22 +397,30 @@
 
 {% block scripts %}
 {% if complaint.latitude and complaint.longitude %}
-<script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD8atpL2upxvA99KrVaZFlv8XxgrqbGZGE&libraries=places"></script>
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         // Initialize the map
-        const map = L.map('complaint-map').setView([{{ complaint.latitude }}, {{ complaint.longitude }}], 15);
-        
-        // Add OpenStreetMap tile layer
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '© OpenStreetMap contributors'
-        }).addTo(map);
+        const map = new google.maps.Map(document.getElementById('complaint-map'), {
+            center: { lat: {{ complaint.latitude }}, lng: {{ complaint.longitude }} },
+            zoom: 15
+        });
         
         // Add marker for the complaint location
-        L.marker([{{ complaint.latitude }}, {{ complaint.longitude }}])
-            .addTo(map)
-            .bindPopup("{{ complaint.title }}")
-            .openPopup();
+        const marker = new google.maps.Marker({
+            position: { lat: {{ complaint.latitude }}, lng: {{ complaint.longitude }} },
+            map: map,
+            title: "{{ complaint.title }}"
+        });
+        
+        // Add info window
+        const infoWindow = new google.maps.InfoWindow({
+            content: "{{ complaint.title }}"
+        });
+        
+        marker.addListener('click', function() {
+            infoWindow.open(map, marker);
+        });
     });
 </script>
 {% endif %}

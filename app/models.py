@@ -20,6 +20,7 @@ class User(UserMixin, db.Model):
     role = db.Column(db.String(20), default='citizen')  # citizen, official, admin
     department = db.Column(db.String(64), nullable=True)  # for officials only
     is_active = db.Column(db.Boolean, default=True)
+    is_online = db.Column(db.Boolean, default=False)  # Track if user is currently logged in
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     last_login = db.Column(db.DateTime, nullable=True)
     
@@ -68,12 +69,6 @@ class User(UserMixin, db.Model):
         return f'<User {self.username}>'
 
 
-@login_manager.user_loader
-def load_user(user_id):
-    """Load user by ID"""
-    return User.query.get(int(user_id))
-
-
 class Category(db.Model):
     """Category model for complaint categories"""
     __tablename__ = 'categories'
@@ -99,8 +94,8 @@ class Complaint(db.Model):
     title = db.Column(db.String(128), nullable=False)
     description = db.Column(db.Text, nullable=False)
     location = db.Column(db.String(256), nullable=False)
-    latitude = db.Column(db.Float, nullable=True)
-    longitude = db.Column(db.Float, nullable=True)
+    latitude = db.Column(db.Float, nullable=False)
+    longitude = db.Column(db.Float, nullable=False)
     category_id = db.Column(db.Integer, db.ForeignKey('categories.id'), nullable=False)
     status = db.Column(db.String(20), default='pending')  # pending, in_progress, resolved, rejected
     priority = db.Column(db.String(20), default='medium')  # low, medium, high, urgent
@@ -110,11 +105,13 @@ class Complaint(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     resolved_at = db.Column(db.DateTime, nullable=True)
-    image_path = db.Column(db.String(256), nullable=True)
+    media_path = db.Column(db.String(256), nullable=True)  # Legacy field, kept for backward compatibility
+    media_type = db.Column(db.String(10), nullable=True)   # Legacy field, kept for backward compatibility
     
     # Relationships
     updates = db.relationship('ComplaintUpdate', backref='complaint', lazy='dynamic')
     feedback = db.relationship('Feedback', backref='complaint', uselist=False)
+    media_attachments = db.relationship('ComplaintMedia', backref='complaint', lazy='dynamic')
     
     def __repr__(self):
         return f'<Complaint {self.id}>'
@@ -218,4 +215,18 @@ class OfficialRequest(db.Model):
     reviewer = db.relationship('User', foreign_keys=[reviewed_by], backref='reviewed_requests')
     
     def __repr__(self):
-        return f'<OfficialRequest {self.id}>' 
+        return f'<OfficialRequest {self.id}>'
+
+
+class ComplaintMedia(db.Model):
+    """Model for storing multiple media attachments for complaints"""
+    __tablename__ = 'complaint_media'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    complaint_id = db.Column(db.Integer, db.ForeignKey('complaints.id'), nullable=False)
+    file_path = db.Column(db.String(256), nullable=False)
+    media_type = db.Column(db.String(10), nullable=False)  # 'image' or 'video'
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    def __repr__(self):
+        return f'<ComplaintMedia {self.id}>' 

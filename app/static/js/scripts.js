@@ -19,13 +19,11 @@ function initializeComplaintMap() {
     
     if (!latInput || !lngInput) return; // Exit if these elements don't exist
 
-    // Initialize the map
-    const map = L.map('complaint-map').setView([20.5937, 78.9629], 5); // Default center on India
-
-    // Add OpenStreetMap tile layer
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '© OpenStreetMap contributors'
-    }).addTo(map);
+    // Initialize the map with Google Maps
+    const map = new google.maps.Map(mapElement, {
+        center: { lat: 20.5937, lng: 78.9629 }, // Default center on India
+        zoom: 5
+    });
 
     // Add marker for the complaint location (if editing a complaint)
     let marker;
@@ -33,21 +31,32 @@ function initializeComplaintMap() {
         const lat = parseFloat(latInput.value);
         const lng = parseFloat(lngInput.value);
         
-        map.setView([lat, lng], 15);
-        marker = L.marker([lat, lng]).addTo(map);
+        map.setCenter({ lat, lng });
+        map.setZoom(15);
+        
+        marker = new google.maps.Marker({
+            position: { lat, lng },
+            map: map
+        });
     }
 
     // Handle map clicks to set location
-    map.on('click', function(e) {
+    map.addListener('click', function(e) {
+        const lat = e.latLng.lat();
+        const lng = e.latLng.lng();
+        
         // Update hidden form fields
-        latInput.value = e.latlng.lat;
-        lngInput.value = e.latlng.lng;
+        latInput.value = lat;
+        lngInput.value = lng;
         
         // Update or add marker
         if (marker) {
-            marker.setLatLng(e.latlng);
+            marker.setPosition(e.latLng);
         } else {
-            marker = L.marker(e.latlng).addTo(map);
+            marker = new google.maps.Marker({
+                position: e.latLng,
+                map: map
+            });
         }
         
         // Check if location element exists
@@ -55,15 +64,25 @@ function initializeComplaintMap() {
         if (!locationInput) return;
         
         // Reverse geocode to get address
-        fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${e.latlng.lat}&lon=${e.latlng.lng}`)
-            .then(response => response.json())
-            .then(data => {
-                if (data.display_name) {
-                    locationInput.value = data.display_name;
-                }
-            })
-            .catch(error => console.error('Error getting location name:', error));
+        const geocoder = new google.maps.Geocoder();
+        geocoder.geocode({ location: e.latLng }, function(results, status) {
+            if (status === 'OK' && results[0]) {
+                locationInput.value = results[0].formatted_address;
+            }
+        });
     });
+    
+    // Add form validation for complaint submission
+    const form = document.querySelector('form');
+    if (form) {
+        form.addEventListener('submit', function(event) {
+            if (!latInput.value || !lngInput.value) {
+                event.preventDefault();
+                alert('Please select a location on the map. This is required for verification purposes.');
+                document.getElementById('complaint-map').scrollIntoView({ behavior: 'smooth' });
+            }
+        });
+    }
 }
 
 // Function to initialize the dashboard charts
@@ -184,30 +203,29 @@ function initializeComplaintsMap() {
     const mapElement = document.getElementById('complaints-map');
     if (!mapElement) return;
     
-    // Check if map is already initialized
-    if (mapElement._leaflet_id) {
-        console.log('Map already initialized');
-        return;
-    }
-
-    // Initialize the map
-    const map = L.map('complaints-map').setView([20.5937, 78.9629], 5); // Default center on India
-
-    // Add OpenStreetMap tile layer
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '© OpenStreetMap contributors'
-    }).addTo(map);
+    // Initialize the map with Google Maps
+    const map = new google.maps.Map(mapElement, {
+        center: { lat: 20.5937, lng: 78.9629 }, // Default center on India
+        zoom: 5
+    });
     
     // Fetch complaint data for the map
     fetch('/api/map/complaints')
         .then(response => response.json())
         .then(data => {
-            // Add GeoJSON layer with custom styling based on status
-            L.geoJSON(data, {
-                pointToLayer: function(feature, latlng) {
+            // Create bounds to fit all markers
+            const bounds = new google.maps.LatLngBounds();
+            
+            // Add markers for each complaint
+            if (data.features && data.features.length > 0) {
+                data.features.forEach(feature => {
+                    // Get coordinates
+                    const lng = feature.geometry.coordinates[0];
+                    const lat = feature.geometry.coordinates[1];
+                    const position = new google.maps.LatLng(lat, lng);
+                    
                     // Choose marker color based on status
                     let markerColor = '#f0ad4e'; // Default/pending - yellow
-                    
                     if (feature.properties.status === 'in_progress') {
                         markerColor = '#5bc0de'; // Blue
                     } else if (feature.properties.status === 'resolved') {
@@ -216,34 +234,56 @@ function initializeComplaintsMap() {
                         markerColor = '#d9534f'; // Red
                     }
                     
-                    return L.circleMarker(latlng, {
-                        radius: 8,
-                        fillColor: markerColor,
-                        color: '#fff',
-                        weight: 1,
-                        opacity: 1,
-                        fillOpacity: 0.8
+                    // Create marker using custom SVG icon
+                    const marker = new google.maps.Marker({
+                        position: position,
+                        map: map,
+                        title: feature.properties.title,
+                        icon: {
+                            path: google.maps.SymbolPath.CIRCLE,
+                            fillColor: markerColor,
+                            fillOpacity: 0.8,
+                            strokeWeight: 1,
+                            strokeColor: '#FFFFFF',
+                            scale: 10
+                        }
                     });
-                },
-                onEachFeature: function(feature, layer) {
-                    // Create popup content
-                    let popupContent = `
-                        <strong>${feature.properties.title}</strong><br>
-                        Category: ${feature.properties.category}<br>
-                        Status: ${feature.properties.status}<br>
-                        Priority: ${feature.properties.priority}<br>
-                        Date: ${feature.properties.created_at}<br>
-                        <a href="/complaint/${feature.properties.id}" class="btn btn-sm btn-primary mt-2">View Details</a>
+                    
+                    // Create info window content
+                    const contentString = `
+                        <div>
+                            <strong>${feature.properties.title}</strong><br>
+                            Category: ${feature.properties.category}<br>
+                            Status: ${feature.properties.status}<br>
+                            Priority: ${feature.properties.priority}<br>
+                            Date: ${feature.properties.created_at}<br>
+                            <a href="/complaint/${feature.properties.id}" class="btn btn-sm btn-primary mt-2">View Details</a>
+                        </div>
                     `;
                     
-                    layer.bindPopup(popupContent);
-                }
-            }).addTo(map);
-            
-            // If we have complaints, fit the map to their bounds
-            if (data.features && data.features.length > 0) {
-                const bounds = L.geoJSON(data).getBounds();
+                    // Create info window
+                    const infoWindow = new google.maps.InfoWindow({
+                        content: contentString
+                    });
+                    
+                    // Add click listener to open info window
+                    marker.addListener('click', function() {
+                        infoWindow.open(map, marker);
+                    });
+                    
+                    // Extend bounds to include this marker
+                    bounds.extend(position);
+                });
+                
+                // Fit the map to show all markers
                 map.fitBounds(bounds);
+                
+                // If only one marker, zoom out a bit
+                if (data.features.length === 1) {
+                    google.maps.event.addListenerOnce(map, 'bounds_changed', function() {
+                        map.setZoom(Math.min(15, map.getZoom()));
+                    });
+                }
             }
         })
         .catch(error => console.error('Error fetching map data:', error));

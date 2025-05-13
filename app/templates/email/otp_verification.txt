@@ -1,0 +1,14 @@
+Hello {{ name }},
+
+Thank you for registering with CitySeva. To verify your email address and activate your account, please use the verification code below:
+
+{{ otp }}
+
+Enter this code on the verification page to complete your registration. This code will expire in 10 minutes.
+
+If you didn't create an account with CitySeva, you can safely ignore this email.
+
+Best regards,
+The CitySeva Team
+
+This is an automated message. Please do not reply to this email. 

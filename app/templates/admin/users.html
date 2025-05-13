@@ -44,7 +44,6 @@
                         <tr>
                             <th>ID</th>
                             <th>Name</th>
-                            <th>Username</th>
                             <th>Email</th>
                             <th>Role</th>
                             <th>Department</th>
@@ -56,10 +55,26 @@
                     <tbody>
                         {% if users %}
                             {% for user in users %}
+                                {% set firebase = firebase_enabled|default(false) %}
                                 <tr>
                                     <td>{{ user.id }}</td>
-                                    <td>{{ user.full_name() }}</td>
-                                    <td>{{ user.username }}</td>
+                                    <td>
+                                        {% if firebase %}
+                                            {% if user.display_name %}
+                                                {{ user.display_name }}
+                                            {% else %}
+                                                {% set first = user.first_name|default('') %}
+                                                {% set last = user.last_name|default('') %}
+                                                {% if first or last %}
+                                                    {{ first }} {{ last }}
+                                                {% else %}
+                                                    {{ user.email.split('@')[0] }}
+                                                {% endif %}
+                                            {% endif %}
+                                        {% else %}
+                                            {{ user.full_name() }}
+                                        {% endif %}
+                                    </td>
                                     <td>{{ user.email }}</td>
                                     <td>
                                         {% if user.role == 'admin' %}
@@ -72,13 +87,45 @@
                                     </td>
                                     <td>{{ user.department or 'N/A' }}</td>
                                     <td>
-                                        {% if user.is_active %}
-                                            <span class="badge bg-success">Active</span>
+                                        {% if firebase %}
+                                            {% if user.is_active|default(true) %}
+                                                <span class="badge bg-success">Active</span>
+                                                {% if user.is_online|default(false) %}
+                                                    <span class="badge bg-primary ms-1">Online</span>
+                                                {% else %}
+                                                    <span class="badge bg-secondary ms-1">Offline</span>
+                                                {% endif %}
+                                            {% else %}
+                                                <span class="badge bg-danger">Inactive</span>
+                                            {% endif %}
                                         {% else %}
-                                            <span class="badge bg-danger">Inactive</span>
+                                            {% if user.is_active %}
+                                                <span class="badge bg-success">Active</span>
+                                                {% if user.is_online %}
+                                                    <span class="badge bg-primary ms-1">Online</span>
+                                                {% else %}
+                                                    <span class="badge bg-secondary ms-1">Offline</span>
+                                                {% endif %}
+                                            {% else %}
+                                                <span class="badge bg-danger">Inactive</span>
+                                            {% endif %}
                                         {% endif %}
                                     </td>
-                                    <td>{{ user.created_at.strftime('%Y-%m-%d') }}</td>
+                                    <td>
+                                        {% if firebase %}
+                                            {% if user.created_at %}
+                                                {% if user.created_at is string %}
+                                                    {{ user.created_at }}
+                                                {% else %}
+                                                    {{ user.created_at.strftime('%Y-%m-%d') if user.created_at.strftime else user.created_at }}
+                                                {% endif %}
+                                            {% else %}
+                                                N/A
+                                            {% endif %}
+                                        {% else %}
+                                            {{ user.created_at.strftime('%Y-%m-%d') }}
+                                        {% endif %}
+                                    </td>
                                     <td>
                                         <div class="dropdown">
                                             <button class="btn btn-sm btn-secondary dropdown-toggle" type="button" 
@@ -87,18 +134,34 @@
                                                 Actions
                                             </button>
                                             <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton{{ user.id }}">
-                                                {% if user.id != current_user.id %}
-                                                    <li>
-                                                        <form action="{{ url_for('admin.toggle_user_active', user_id=user.id) }}" method="post">
-                                                            <button type="submit" class="dropdown-item">
-                                                                {% if user.is_active %}
-                                                                    Deactivate
-                                                                {% else %}
-                                                                    Activate
-                                                                {% endif %}
-                                                            </button>
-                                                        </form>
-                                                    </li>
+                                                {% if firebase %}
+                                                    {% if user.id != current_user.uid %}
+                                                        <li>
+                                                            <form action="{{ url_for('admin.toggle_user_active', user_id=user.id) }}" method="post">
+                                                                <button type="submit" class="dropdown-item">
+                                                                    {% if user.is_active|default(true) %}
+                                                                        Deactivate
+                                                                    {% else %}
+                                                                        Activate
+                                                                    {% endif %}
+                                                                </button>
+                                                            </form>
+                                                        </li>
+                                                    {% endif %}
+                                                {% else %}
+                                                    {% if user.id != current_user.id %}
+                                                        <li>
+                                                            <form action="{{ url_for('admin.toggle_user_active', user_id=user.id) }}" method="post">
+                                                                <button type="submit" class="dropdown-item">
+                                                                    {% if user.is_active %}
+                                                                        Deactivate
+                                                                    {% else %}
+                                                                        Activate
+                                                                    {% endif %}
+                                                                </button>
+                                                            </form>
+                                                        </li>
+                                                    {% endif %}
                                                 {% endif %}
                                                 
                                                 {% if user.role == 'citizen' %}
@@ -110,14 +173,48 @@
                                                     </li>
                                                 {% endif %}
                                                 
-                                                {% if user.role != 'admin' and user.id != current_user.id %}
-                                                    <li>
-                                                        <form action="{{ url_for('admin.make_admin', user_id=user.id) }}" method="post">
-                                                            <button type="submit" class="dropdown-item">
-                                                                Make Admin
+                                                {% if firebase %}
+                                                    {% if user.role != 'admin' and user.id != current_user.uid %}
+                                                        <li>
+                                                            <form action="{{ url_for('admin.make_admin', user_id=user.id) }}" method="post">
+                                                                <button type="submit" class="dropdown-item">
+                                                                    Make Admin
+                                                                </button>
+                                                            </form>
+                                                        </li>
+                                                    {% endif %}
+                                                {% else %}
+                                                    {% if user.role != 'admin' and user.id != current_user.id %}
+                                                        <li>
+                                                            <form action="{{ url_for('admin.make_admin', user_id=user.id) }}" method="post">
+                                                                <button type="submit" class="dropdown-item">
+                                                                    Make Admin
+                                                                </button>
+                                                            </form>
+                                                        </li>
+                                                    {% endif %}
+                                                {% endif %}
+                                                
+                                                {% if firebase %}
+                                                    {% if user.id != current_user.uid %}
+                                                        <li><hr class="dropdown-divider"></li>
+                                                        <li>
+                                                            <button type="button" class="dropdown-item text-danger" 
+                                                                    data-bs-toggle="modal" data-bs-target="#deleteUserModal{{ user.id }}">
+                                                                <i class="fas fa-trash-alt me-2"></i> Delete User
                                                             </button>
-                                                        </form>
-                                                    </li>
+                                                        </li>
+                                                    {% endif %}
+                                                {% else %}
+                                                    {% if user.id != current_user.id %}
+                                                        <li><hr class="dropdown-divider"></li>
+                                                        <li>
+                                                            <button type="button" class="dropdown-item text-danger" 
+                                                                    data-bs-toggle="modal" data-bs-target="#deleteUserModal{{ user.id }}">
+                                                                <i class="fas fa-trash-alt me-2"></i> Delete User
+                                                            </button>
+                                                        </li>
+                                                    {% endif %}
                                                 {% endif %}
                                             </ul>
                                         </div>
@@ -130,7 +227,11 @@
                                                     <div class="modal-content">
                                                         <div class="modal-header">
                                                             <h5 class="modal-title" id="makeOfficialModalLabel{{ user.id }}">
-                                                                Make {{ user.full_name() }} an Official
+                                                                {% if firebase %}
+                                                                    Make {% if user.display_name %}{{ user.display_name }}{% else %}{{ user.email }}{% endif %} an Official
+                                                                {% else %}
+                                                                    Make {{ user.full_name() }} an Official
+                                                                {% endif %}
                                                             </h5>
                                                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                                         </div>
@@ -148,8 +249,13 @@
                                                                         <option value="Transport">Transport</option>
                                                                         <option value="Animal Control">Animal Control</option>
                                                                         <option value="General Administration">General Administration</option>
-                                                                        <option value="Other">Other</option>
+                                                                        <option value="Other">Other (specify)</option>
                                                                     </select>
+                                                                </div>
+                                                                <div class="mb-3" id="otherDepartmentContainer{{ user.id }}" style="display: none;">
+                                                                    <label for="otherDepartment{{ user.id }}" class="form-label">Custom Department Name <span class="text-danger">*</span></label>
+                                                                    <input type="text" class="form-control" id="otherDepartment{{ user.id }}" name="other_department">
+                                                                    <div class="form-text">Please specify the custom department name.</div>
                                                                 </div>
                                                                 <p class="text-danger">
                                                                     <i class="fas fa-exclamation-triangle me-1"></i>
@@ -165,12 +271,86 @@
                                                 </div>
                                             </div>
                                         {% endif %}
+                                        
+                                        <!-- Delete User Modal -->
+                                        {% if firebase %}
+                                            {% if user.id != current_user.uid %}
+                                                <div class="modal fade" id="deleteUserModal{{ user.id }}" tabindex="-1" 
+                                                    aria-labelledby="deleteUserModalLabel{{ user.id }}" aria-hidden="true">
+                                                    <div class="modal-dialog">
+                                                        <div class="modal-content">
+                                                            <div class="modal-header bg-danger text-white">
+                                                                <h5 class="modal-title" id="deleteUserModalLabel{{ user.id }}">
+                                                                    Confirm User Deletion
+                                                                </h5>
+                                                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                            </div>
+                                                            <form action="{{ url_for('admin.delete_user', user_id=user.id) }}" method="post">
+                                                                <div class="modal-body">
+                                                                    <div class="alert alert-warning">
+                                                                        <i class="fas fa-exclamation-triangle me-2"></i>
+                                                                        <strong>Warning:</strong> You are about to permanently delete the user 
+                                                                        <strong>{% if user.display_name %}{{ user.display_name }}{% else %}{{ user.email }}{% endif %}</strong>.
+                                                                    </div>
+                                                                    <p>This action cannot be undone. All data associated with this user may also be deleted.</p>
+                                                                    <div class="form-check mb-3">
+                                                                        <input class="form-check-input" type="checkbox" value="confirm" id="confirmDelete{{ user.id }}" name="confirm" required>
+                                                                        <label class="form-check-label" for="confirmDelete{{ user.id }}">
+                                                                            I understand that this action is permanent
+                                                                        </label>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="modal-footer">
+                                                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                                                    <button type="submit" class="btn btn-danger">Delete User</button>
+                                                                </div>
+                                                            </form>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            {% endif %}
+                                        {% else %}
+                                            {% if user.id != current_user.id %}
+                                                <div class="modal fade" id="deleteUserModal{{ user.id }}" tabindex="-1" 
+                                                    aria-labelledby="deleteUserModalLabel{{ user.id }}" aria-hidden="true">
+                                                    <div class="modal-dialog">
+                                                        <div class="modal-content">
+                                                            <div class="modal-header bg-danger text-white">
+                                                                <h5 class="modal-title" id="deleteUserModalLabel{{ user.id }}">
+                                                                    Confirm User Deletion
+                                                                </h5>
+                                                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                            </div>
+                                                            <form action="{{ url_for('admin.delete_user', user_id=user.id) }}" method="post">
+                                                                <div class="modal-body">
+                                                                    <div class="alert alert-warning">
+                                                                        <i class="fas fa-exclamation-triangle me-2"></i>
+                                                                        <strong>Warning:</strong> You are about to permanently delete the user <strong>{{ user.full_name() }}</strong> ({{ user.username }}).
+                                                                    </div>
+                                                                    <p>This action cannot be undone. All data associated with this user may also be deleted.</p>
+                                                                    <div class="form-check mb-3">
+                                                                        <input class="form-check-input" type="checkbox" value="confirm" id="confirmDelete{{ user.id }}" name="confirm" required>
+                                                                        <label class="form-check-label" for="confirmDelete{{ user.id }}">
+                                                                            I understand that this action is permanent
+                                                                        </label>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="modal-footer">
+                                                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                                                    <button type="submit" class="btn btn-danger">Delete User</button>
+                                                                </div>
+                                                            </form>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            {% endif %}
+                                        {% endif %}
                                     </td>
                                 </tr>
                             {% endfor %}
                         {% else %}
                             <tr>
-                                <td colspan="9" class="text-center">No users found.</td>
+                                <td colspan="8" class="text-center">No users found.</td>
                             </tr>
                         {% endif %}
                     </tbody>
@@ -179,4 +359,22 @@
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    $(document).ready(function() {
+        // Handle other department field display
+        $('select[id^="department"]').on('change', function() {
+            var userId = this.id.replace('department', '');
+            if ($(this).val() === 'Other') {
+                $('#otherDepartmentContainer' + userId).show();
+                $('#otherDepartment' + userId).prop('required', true);
+            } else {
+                $('#otherDepartmentContainer' + userId).hide();
+                $('#otherDepartment' + userId).prop('required', false);
+            }
+        });
+    });
+</script>
 {% endblock %} 

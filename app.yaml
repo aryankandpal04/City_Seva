@@ -1,0 +1,17 @@
+runtime: python39
+service: default
+entrypoint: gunicorn -b :$PORT run:app
+
+env_variables:
+  FLASK_APP: "run.py"
+  FLASK_ENV: "production"
+  SECRET_KEY: "change-this-to-a-secure-key"
+  DATABASE_URL: "sqlite:///cityseva.db"
+  # Add other environment variables from your .env file here
+
+handlers:
+- url: /static
+  static_dir: app/static
+  
+- url: /.*
+  script: auto 

@@ -126,6 +126,12 @@
                                         {% endfor %}
                                     </div>
                                     
+                                    <div class="mb-3" id="otherDepartmentContainer" style="display: none;">
+                                        <label for="otherDepartment" class="form-label">Custom Department Name <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" id="otherDepartment" name="other_department">
+                                        <div class="form-text">Please specify the custom department name.</div>
+                                    </div>
+                                    
                                     <div class="mb-3">
                                         {{ form.position.label(class="form-label") }}
                                         {{ form.position(class="form-control", placeholder="Your job title or position") }}
@@ -217,6 +223,27 @@ document.addEventListener('DOMContentLoaded', function() {
             radio.dispatchEvent(event);
         });
     });
+    
+    // Handle Other department selection
+    const departmentSelect = document.getElementById('department');
+    const otherDepartmentContainer = document.getElementById('otherDepartmentContainer');
+    const otherDepartmentField = document.getElementById('otherDepartment');
+    
+    departmentSelect.addEventListener('change', function() {
+        if (this.value === 'Other') {
+            otherDepartmentContainer.style.display = 'block';
+            otherDepartmentField.setAttribute('required', 'required');
+        } else {
+            otherDepartmentContainer.style.display = 'none';
+            otherDepartmentField.removeAttribute('required');
+        }
+    });
+    
+    // Check initial state
+    if (departmentSelect.value === 'Other') {
+        otherDepartmentContainer.style.display = 'block';
+        otherDepartmentField.setAttribute('required', 'required');
+    }
 });
 </script>
 {% endblock %} 

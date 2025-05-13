@@ -79,6 +79,11 @@
                     <div class="d-flex justify-content-between align-items-center">
                         <h5 class="mb-0">Complaint #{{ complaint.id }}</h5>
                         <div>
+                            {% if current_user.role == 'admin' %}
+                                <button type="button" class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#deleteComplaintModal">
+                                    <i class="fas fa-trash me-1"></i> Delete
+                                </button>
+                            {% endif %}
                             {% if complaint.status == 'pending' %}
                                 <span class="badge bg-warning">Pending</span>
                             {% elif complaint.status == 'in_progress' %}
@@ -106,19 +111,41 @@
                     
                     <div class="row mb-3">
                         <div class="col-md-6">
-                            <strong>Category:</strong> <span class="badge bg-light text-dark">{{ complaint.category.name }}</span>
+                            <strong>Category:</strong> <span class="badge bg-light text-dark">
+                                {% if complaint is mapping %}
+                                    {{ complaint.category_name if 'category_name' in complaint else 'Unknown' }}
+                                {% else %}
+                                    {{ complaint.category.name if complaint.category else 'Unknown' }}
+                                {% endif %}
+                            </span>
                         </div>
                         <div class="col-md-6">
-                            <strong>Department:</strong> <span class="badge bg-light text-dark">{{ complaint.category.department }}</span>
+                            <strong>Department:</strong> <span class="badge bg-light text-dark">
+                                {% if complaint is mapping %}
+                                    {{ complaint.department if 'department' in complaint else 'Unknown' }}
+                                {% else %}
+                                    {{ complaint.category.department if complaint.category else 'Unknown' }}
+                                {% endif %}
+                            </span>
                         </div>
                     </div>
                     
                     <div class="row mb-3">
                         <div class="col-md-6">
-                            <strong>Submitted By:</strong> {{ complaint.author.full_name() }}
+                            <strong>Submitted By:</strong> 
+                            {% if complaint is mapping %}
+                                {{ complaint.user_name if 'user_name' in complaint else 'Unknown' }}
+                            {% else %}
+                                {{ complaint.author.full_name() if complaint.author else 'Unknown' }}
+                            {% endif %}
                         </div>
                         <div class="col-md-6">
-                            <strong>Submitted On:</strong> {{ complaint.created_at.strftime('%Y-%m-%d %H:%M') }}
+                            <strong>Submitted On:</strong> 
+                            {% if complaint is mapping %}
+                                {{ complaint.created_at }}
+                            {% else %}
+                                {{ complaint.created_at.strftime('%Y-%m-%d %H:%M') }}
+                            {% endif %}
                         </div>
                     </div>
                     
@@ -134,13 +161,29 @@
                     <div class="row mb-3">
                         <div class="col-md-12">
                             <strong>Assigned To:</strong> 
-                            {% if complaint.assigned_to %}
-                                {{ complaint.assigned_to.full_name() }} ({{ complaint.assigned_to.department }})
-                                <small class="text-muted">
-                                    Assigned on {{ complaint.assigned_at.strftime('%Y-%m-%d') if complaint.assigned_at }}
-                                </small>
+                            {% if complaint is mapping %}
+                                {% if 'assigned_to' in complaint and complaint.assigned_to %}
+                                    {{ complaint.assigned_to }} 
+                                    {% if 'assigned_department' in complaint %}
+                                        ({{ complaint.assigned_department }})
+                                    {% endif %}
+                                    {% if 'assigned_at' in complaint %}
+                                        <small class="text-muted">
+                                            Assigned on {{ complaint.assigned_at }}
+                                        </small>
+                                    {% endif %}
+                                {% else %}
+                                    <span class="text-muted">Not assigned</span>
+                                {% endif %}
                             {% else %}
-                                <span class="text-muted">Not assigned</span>
+                                {% if complaint.assigned_to %}
+                                    {{ complaint.assigned_to.full_name() }} ({{ complaint.assigned_to.department }})
+                                    <small class="text-muted">
+                                        Assigned on {{ complaint.assigned_at.strftime('%Y-%m-%d') if complaint.assigned_at }}
+                                    </small>
+                                {% else %}
+                                    <span class="text-muted">Not assigned</span>
+                                {% endif %}
                             {% endif %}
                         </div>
                     </div>
@@ -152,21 +195,72 @@
                         </div>
                     </div>
                     
-                    {% if complaint.image_path %}
+                    {% if complaint is mapping %}
+                        {% if 'media_attachments' in complaint and complaint.media_attachments %}
                         <div class="row mb-3">
                             <div class="col-md-12">
-                                <strong>Attached Image:</strong><br>
-                                <img src="{{ url_for('citizen.uploaded_file', filename=complaint.image_path.split('/')[-1]) }}" 
-                                     class="img-fluid mt-2 img-thumbnail" alt="Complaint Image">
+                                <strong>Media Attachments:</strong>
+                                <div class="row mt-2">
+                                    {% for media in complaint.media_attachments %}
+                                    <div class="col-md-4 mb-3">
+                                        {% if media.media_type == 'image' %}
+                                            <a href="{{ media.file_url }}" target="_blank">
+                                                <img src="{{ media.file_url }}" alt="Attachment" class="img-thumbnail">
+                                            </a>
+                                        {% elif media.media_type == 'video' %}
+                                            <video controls class="img-fluid">
+                                                <source src="{{ media.file_url }}" type="video/mp4">
+                                                Your browser does not support the video tag.
+                                            </video>
+                                        {% else %}
+                                            <a href="{{ media.file_url }}" target="_blank" class="btn btn-sm btn-primary">
+                                                <i class="fas fa-download"></i> Download File
+                                            </a>
+                                        {% endif %}
+                                    </div>
+                                    {% endfor %}
+                                </div>
                             </div>
                         </div>
+                        {% endif %}
+                    {% else %}
+                        {% if complaint.media_attachments.count() > 0 %}
+                        <div class="row mb-3">
+                            <div class="col-md-12">
+                                <strong>Media Attachments:</strong>
+                                <div class="row mt-2">
+                                    {% for media in complaint.media_attachments %}
+                                    <div class="col-md-4 mb-3">
+                                        {% if media.media_type == 'image' %}
+                                            <a href="{{ url_for('citizen.uploaded_file', filename=media.file_path.split('/')[-1]) }}" target="_blank">
+                                                <img src="{{ url_for('citizen.uploaded_file', filename=media.file_path.split('/')[-1]) }}" alt="Attachment" class="img-thumbnail">
+                                            </a>
+                                        {% elif media.media_type == 'video' %}
+                                            <video controls class="img-fluid">
+                                                <source src="{{ url_for('citizen.uploaded_file', filename=media.file_path.split('/')[-1]) }}" type="video/mp4">
+                                                Your browser does not support the video tag.
+                                            </video>
+                                        {% else %}
+                                            <a href="{{ url_for('citizen.uploaded_file', filename=media.file_path.split('/')[-1]) }}" target="_blank" class="btn btn-sm btn-primary">
+                                                <i class="fas fa-download"></i> Download File
+                                            </a>
+                                        {% endif %}
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
                     {% endif %}
                     
                     {% if complaint.latitude and complaint.longitude %}
                         <div class="row mb-3">
                             <div class="col-md-12">
                                 <strong>Location on Map:</strong>
-                                <div id="complaint-map" class="mt-2" style="height: 300px;"></div>
+                                <div id="complaint-map" class="mt-2" style="height: 300px;"
+                                     data-lat="{{ complaint.latitude }}"
+                                     data-lng="{{ complaint.longitude }}"
+                                     data-title="{{ complaint.title }}"></div>
                             </div>
                         </div>
                     {% endif %}
@@ -195,9 +289,13 @@
                             <div class="col-md-6">
                                 <label for="assigned_to_id" class="form-label">Assign To</label>
                                 <select class="form-select" id="assigned_to_id" name="assigned_to_id">
-                                    {% for id, name in form.assigned_to_id.choices %}
-                                        <option value="{{ id }}" {% if form.assigned_to_id.data == id %}selected{% endif %}>{{ name }}</option>
-                                    {% endfor %}
+                                    {% if form.assigned_to_id and form.assigned_to_id.choices %}
+                                        {% for id, name in form.assigned_to_id.choices %}
+                                            <option value="{{ id }}" {% if form.assigned_to_id.data == id %}selected{% endif %}>{{ name }}</option>
+                                        {% endfor %}
+                                    {% else %}
+                                        <option value="0">Not Available</option>
+                                    {% endif %}
                                 </select>
                             </div>
                         </div>
@@ -223,6 +321,44 @@
                     <h5 class="mb-0">Citizen Information</h5>
                 </div>
                 <div class="card-body">
+                    {% if complaint is mapping %}
+                        {% if 'user_id' in complaint %}
+                        <div class="d-flex align-items-center mb-3">
+                            <i class="fas fa-user-circle fa-2x me-3 text-primary"></i>
+                            <div>
+                                {% if 'user_name' in complaint and complaint.user_name %}
+                                    <h6 class="mb-0">{{ complaint.user_name }}</h6>
+                                {% else %}
+                                    <h6 class="mb-0">User {{ complaint.user_id }}</h6>
+                                {% endif %}
+                                <small class="text-muted">{{ complaint.user_email if 'user_email' in complaint else 'Email not available' }}</small>
+                            </div>
+                        </div>
+                        <ul class="list-group list-group-flush">
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <span>Username:</span>
+                                <span>{{ complaint.user_username if 'user_username' in complaint else 'Not available' }}</span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <span>Phone:</span>
+                                <span>{{ complaint.user_phone if 'user_phone' in complaint else 'Not provided' }}</span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <span>Address:</span>
+                                <span>{{ complaint.user_address if 'user_address' in complaint else 'Not provided' }}</span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <span>Member Since:</span>
+                                <span>{{ complaint.user_created_at if 'user_created_at' in complaint else 'Not available' }}</span>
+                            </li>
+                        </ul>
+                        {% else %}
+                        <div class="text-center py-3">
+                            <i class="fas fa-user-slash fa-3x text-muted mb-3"></i>
+                            <p>User information unavailable (No user_id found)</p>
+                        </div>
+                        {% endif %}
+                    {% elif complaint.author %}
                     <div class="d-flex align-items-center mb-3">
                         <i class="fas fa-user-circle fa-2x me-3 text-primary"></i>
                         <div>
@@ -244,6 +380,12 @@
                             <span>{{ complaint.author.created_at.strftime('%Y-%m-%d') }}</span>
                         </li>
                     </ul>
+                    {% else %}
+                    <div class="text-center py-3">
+                        <i class="fas fa-user-slash fa-3x text-muted mb-3"></i>
+                        <p>User information unavailable</p>
+                    </div>
+                    {% endif %}
                 </div>
             </div>
             
@@ -254,7 +396,30 @@
                 </div>
                 <div class="card-body">
                     <div class="timeline">
-                        {% if updates %}
+                        {% if complaint is mapping and 'updates' in complaint %}
+                            {% for update in complaint.updates %}
+                                <div class="timeline-item {{ update.status }}">
+                                    <div class="timeline-content">
+                                        <div class="d-flex justify-content-between">
+                                            <small class="text-muted">{{ update.created_at }}</small>
+                                            {% if update.status == 'pending' %}
+                                                <span class="badge bg-warning">Pending</span>
+                                            {% elif update.status == 'in_progress' %}
+                                                <span class="badge bg-info">In Progress</span>
+                                            {% elif update.status == 'resolved' %}
+                                                <span class="badge bg-success">Resolved</span>
+                                            {% else %}
+                                                <span class="badge bg-danger">Rejected</span>
+                                            {% endif %}
+                                        </div>
+                                        <p class="mb-0">{{ update.comment }}</p>
+                                        <small class="text-muted">
+                                            By {{ update.user_name if 'user_name' in update else 'System' }}
+                                        </small>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        {% elif updates %}
                             {% for update in updates %}
                                 <div class="timeline-item {{ update.status }}">
                                     <div class="timeline-content">
@@ -271,7 +436,9 @@
                                             {% endif %}
                                         </div>
                                         <p class="mb-0">{{ update.comment }}</p>
-                                        <small class="text-muted">By {{ update.user.full_name() }}</small>
+                                        <small class="text-muted">
+                                            By {% if update.user %}{{ update.user.full_name() }}{% else %}System{% endif %}
+                                        </small>
                                     </div>
                                 </div>
                             {% endfor %}
@@ -284,22 +451,75 @@
         </div>
     </div>
 </div>
+
+<!-- Delete Confirmation Modal -->
+{% if current_user.role == 'admin' %}
+<div class="modal fade" id="deleteComplaintModal" tabindex="-1" aria-labelledby="deleteComplaintModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title" id="deleteComplaintModalLabel">Confirm Deletion</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p class="mb-3">Are you sure you want to permanently delete this complaint?</p>
+                <div class="alert alert-warning">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    This action cannot be undone. All data related to this complaint, including updates, feedback, and notifications will be permanently deleted.
+                </div>
+                <p><strong>Complaint:</strong> {{ complaint.title }} (#{{ complaint.id }})</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <form method="POST" action="{{ url_for('admin.delete_complaint', complaint_id=complaint.id) }}">
+                    <input type="hidden" name="confirm" value="true">
+                    <button type="submit" class="btn btn-danger">
+                        <i class="fas fa-trash me-1"></i> Delete Permanently
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
 {% endblock %}
 
 {% block scripts %}
 {% if complaint.latitude and complaint.longitude %}
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD8atpL2upxvA99KrVaZFlv8XxgrqbGZGE&libraries=places"></script>
 <script>
+    // Wait for the document to be ready
     document.addEventListener('DOMContentLoaded', function() {
-        // Initialize the map
-        const map = L.map('complaint-map').setView([{{ complaint.latitude }}, {{ complaint.longitude }}], 15);
+        // Get map container element
+        var mapElement = document.getElementById('complaint-map');
         
-        // Add OpenStreetMap tile layer
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '© OpenStreetMap contributors'
-        }).addTo(map);
+        // Get data from HTML attributes
+        var lat = parseFloat(mapElement.getAttribute('data-lat'));
+        var lng = parseFloat(mapElement.getAttribute('data-lng'));
+        var title = mapElement.getAttribute('data-title');
         
-        // Add marker
-        L.marker([{{ complaint.latitude }}, {{ complaint.longitude }}]).addTo(map);
+        // Create map
+        var map = new google.maps.Map(mapElement, {
+            center: {lat: lat, lng: lng},
+            zoom: 15
+        });
+        
+        // Create marker
+        var marker = new google.maps.Marker({
+            position: {lat: lat, lng: lng},
+            map: map,
+            title: title
+        });
+        
+        // Create and open info window
+        var infoWindow = new google.maps.InfoWindow({
+            content: title
+        });
+        
+        // Add click event to marker
+        marker.addListener('click', function() {
+            infoWindow.open(map, marker);
+        });
     });
 </script>
 {% endif %}
