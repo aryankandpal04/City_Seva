@@ -71,6 +71,25 @@ class ResetPasswordForm(FlaskForm):
     ])
     submit = SubmitField('Reset Password')
 
+class ResetPasswordOTPForm(FlaskForm):
+    """Form for resetting password with OTP"""
+    otp_code = StringField('Verification Code', validators=[
+        DataRequired(),
+        Length(min=6, max=6, message='Verification code must be 6 digits'),
+        Regexp('^[0-9]{6}$', message='Verification code must contain only numbers')
+    ])
+    password = PasswordField('New Password', validators=[
+        DataRequired(), 
+        Length(min=8, message='Password must be at least 8 characters long'),
+        Regexp('^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$', 
+               message='Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character')
+    ])
+    confirm_password = PasswordField('Confirm Password', validators=[
+        DataRequired(), 
+        EqualTo('password')
+    ])
+    submit = SubmitField('Reset Password')
+
 class ProfileUpdateForm(FlaskForm):
     """Form for updating user profile"""
     first_name = StringField('First Name', validators=[DataRequired(), Length(1, 64)])

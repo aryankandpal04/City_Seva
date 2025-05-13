@@ -92,11 +92,15 @@ def send_email(subject, recipients, text_body, html_body, sender=None):
         current_app.logger.error(f"Traceback: {traceback.format_exc()}")
         return False
 
-def send_password_reset_email(user, reset_link):
-    """Send password reset email"""
-    # Ensure reset_link is a full URL
-    if not reset_link.startswith('http'):
-        reset_link = f"{current_app.config['BASE_URL']}/reset_password/{reset_link}"
+def send_password_reset_email(user):
+    """Send password reset email with OTP"""
+    from app.utils.otp import generate_otp, store_otp
+    
+    # Generate OTP for password reset
+    otp_code = generate_otp()
+    
+    # Store OTP in database
+    store_otp(user.email, otp_code)
     
     # Get user display name
     name = getattr(user, 'display_name', None) or getattr(user, 'full_name', lambda: user.email.split('@')[0])
@@ -106,11 +110,13 @@ def send_password_reset_email(user, reset_link):
     send_email(
         subject='CitySeva Password Reset',
         recipients=[user.email],
-        text_body=render_template('email/reset_password.txt', 
-                                 name=name, reset_url=reset_link),
-        html_body=render_template('email/reset_password.html', 
-                                 name=name, reset_url=reset_link)
+        text_body=render_template('email/password_reset_otp.txt', 
+                                 name=name, otp=otp_code),
+        html_body=render_template('email/password_reset_otp.html', 
+                                 name=name, otp=otp_code)
     )
+    
+    return otp_code
 
 def send_email_verification(user, verification_link):
     """Send email verification link"""

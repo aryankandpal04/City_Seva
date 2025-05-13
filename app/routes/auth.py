@@ -4,7 +4,7 @@ from werkzeug.urls import url_parse
 from datetime import datetime
 from app import db
 from app.models import User, AuditLog, Notification, OfficialRequest
-from app.forms import EnhancedLoginForm, EnhancedRegistrationForm, ResetPasswordRequestForm, ResetPasswordForm
+from app.forms import EnhancedLoginForm, EnhancedRegistrationForm, ResetPasswordRequestForm, ResetPasswordForm, ResetPasswordOTPForm
 from app.utils.email import send_password_reset_email, send_email_verification
 from app.utils.otp import generate_otp, store_otp, verify_otp_code, send_otp_email, OTP
 import time
@@ -254,10 +254,6 @@ def register():
                     otp_code = generate_otp()
                     current_app.logger.info(f"Generated OTP for new user {user.email}")
                     
-                    # Store the OTP code in the session for fallback display in development
-                    if current_app.debug:
-                        session['debug_otp'] = otp_code
-                    
                     # Store OTP in the database (indicates email is not yet verified)
                     if store_otp(user.email, otp_code) and send_otp_email(user, otp_code):
                         current_app.logger.info(f"OTP sent to new user {user.email}")
@@ -365,10 +361,7 @@ def verify_otp():
             current_app.logger.warning(f"OTP verification failed for {email}")
             flash('Invalid or expired verification code. Please try again.', 'danger')
     
-    # Display fallback OTP in development mode
-    debug_otp = session.get('debug_otp') if current_app.debug else None
-    
-    return render_template('auth/verify_otp.html', email=email, debug_otp=debug_otp)
+    return render_template('auth/verify_otp.html', email=email)
 
 @auth.route('/resend_otp', methods=['POST'])
 def resend_otp():
@@ -387,16 +380,11 @@ def resend_otp():
     # Generate new OTP
     otp_code = generate_otp()
     
-    # Store in session for debug in development
-    if current_app.debug:
-        session['debug_otp'] = otp_code
-    
     # Store and send OTP
     if store_otp(email, otp_code) and send_otp_email(user, otp_code):
         return jsonify({
             'success': True, 
-            'message': 'Verification code resent successfully.',
-            'debug_otp': otp_code if current_app.debug else None
+            'message': 'Verification code resent successfully.'
         })
     else:
         return jsonify({'success': False, 'message': 'Failed to send verification code.'}), 500
@@ -414,6 +402,12 @@ def reset_password_request():
         if user:
             send_password_reset_email(user)
             flash('Check your email for instructions to reset your password', 'info')
+            
+            # Store email in session for the next step
+            session['reset_email'] = user.email
+            
+            # Redirect to OTP verification page
+            return redirect(url_for('auth.reset_password_verify', email=user.email))
         else:
             # Don't reveal if email exists in database
             flash('If that email address is registered, we have sent instructions to reset your password', 'info')
@@ -422,38 +416,78 @@ def reset_password_request():
         
     return render_template('auth/reset_password_request.html', title='Reset Password', form=form)
 
-@auth.route('/reset_password/<token>', methods=['GET', 'POST'])
-def reset_password(token):
-    """Handle password reset with token"""
+@auth.route('/reset_password/verify/<email>', methods=['GET', 'POST'])
+def reset_password_verify(email):
+    """Handle password reset with OTP verification"""
     if current_user.is_authenticated:
         return redirect(url_for('citizen.dashboard'))
     
-    # Verify token and get user
-    user = User.verify_reset_token(token)
-    if not user:
-        flash('Invalid or expired token', 'warning')
+    # Verify that this email requested a reset
+    stored_email = session.get('reset_email')
+    if not stored_email or stored_email != email:
+        flash('Invalid or expired reset session', 'warning')
         return redirect(url_for('auth.reset_password_request'))
     
-    form = ResetPasswordForm()
+    form = ResetPasswordOTPForm()
+    
     if form.validate_on_submit():
-        # Set new password
-        user.password = form.password.data
-        db.session.commit()
-        
-        # Create audit log
-        create_audit_log(
-            user_id=user.id,
-            action='reset_password',
-            resource_type='user',
-            resource_id=user.id,
-            details='Password reset successfully',
-            ip_address=request.remote_addr
-        )
-        
-        flash('Your password has been reset successfully', 'success')
-        return redirect(url_for('auth.login'))
-        
-    return render_template('auth/reset_password.html', form=form)
+        # Verify OTP
+        if verify_otp_code(email, form.otp_code.data):
+            # Get user
+            user = User.query.filter_by(email=email).first()
+            if user:
+                # Set new password
+                user.password = form.password.data
+                db.session.commit()
+                
+                # Create audit log
+                create_audit_log(
+                    user_id=user.id,
+                    action='reset_password',
+                    resource_type='user',
+                    resource_id=user.id,
+                    details='Password reset successfully using OTP',
+                    ip_address=request.remote_addr
+                )
+                
+                # Clear session data
+                session.pop('reset_email', None)
+                
+                flash('Your password has been reset successfully', 'success')
+                return redirect(url_for('auth.login'))
+            else:
+                flash('User not found', 'danger')
+        else:
+            flash('Invalid or expired verification code', 'danger')
+    
+    return render_template(
+        'auth/reset_password_otp.html', 
+        title='Reset Password', 
+        form=form,
+        email=email
+    )
+
+@auth.route('/resend_password_reset_otp', methods=['POST'])
+def resend_password_reset_otp():
+    """Resend password reset OTP"""
+    email = request.form.get('email') or session.get('reset_email')
+    
+    if not email:
+        return jsonify({'success': False, 'message': 'Email not provided.'}), 400
+    
+    # Find user
+    user = User.query.filter_by(email=email).first()
+    
+    if not user:
+        return jsonify({'success': False, 'message': 'User not found.'}), 404
+    
+    # Generate and send new OTP
+    otp_code = send_password_reset_email(user)
+    
+    return jsonify({
+        'success': True, 
+        'message': 'Password reset code resent successfully.'
+    })
 
 @auth.route('/request_official_account', methods=['GET', 'POST'])
 @login_required
