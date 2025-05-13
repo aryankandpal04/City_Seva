@@ -12,7 +12,8 @@ instance/
 .env.*
 !.env.example
 *.env
-
+*.json
+secrets/
 
 # Database
 *.db
