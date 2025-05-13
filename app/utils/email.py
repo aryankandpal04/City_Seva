@@ -22,12 +22,12 @@ def send_async_email(app, msg):
             app.logger.error(f"Failed to send email via SMTP: {str(e)}")
             app.logger.error(f"Traceback: {traceback.format_exc()}")
             
-            # Try Firebase fallback if available
+            # Try fallback if available
             try:
-                from app.utils.firebase_email import send_firebase_email, is_firebase_email_configured
+                from app.utils.fallback_email import send_fallback_email, is_fallback_email_configured
                 
-                if is_firebase_email_configured():
-                    app.logger.info(f"Attempting to send email via Firebase fallback")
+                if is_fallback_email_configured():
+                    app.logger.info(f"Attempting to send email via fallback API")
                     
                     # Get the recipients, could be a list or a string
                     to_emails = msg.to
@@ -36,19 +36,19 @@ def send_async_email(app, msg):
                     else:
                         to_email = to_emails
                     
-                    # Try to send via Firebase
-                    if send_firebase_email(
+                    # Try to send via fallback API
+                    if send_fallback_email(
                         subject=msg.subject,
                         to_email=to_email,
                         html_content=msg.html,
                         text_content=msg.body
                     ):
-                        app.logger.info(f"Email sent via Firebase to {to_email}")
+                        app.logger.info(f"Email sent via fallback API to {to_email}")
                         return True
                     else:
-                        app.logger.error("Firebase email sending failed too")
-            except Exception as firebase_error:
-                app.logger.error(f"Firebase email error: {str(firebase_error)}")
+                        app.logger.error("Fallback email sending failed too")
+            except Exception as fallback_error:
+                app.logger.error(f"Fallback email error: {str(fallback_error)}")
             
             # Both methods failed
             return False
@@ -128,25 +128,68 @@ def send_email_verification(user, verification_link):
                                  name=name, verification_link=verification_link)
     )
 
-def send_complaint_notification(complaint):
+def send_complaint_notification(complaint, category=None):
     """Send notification for new complaint"""
-    # Skip if no recipient
-    if not hasattr(complaint, 'assigned_to') or not complaint.assigned_to or not complaint.assigned_to.email:
-        return
+    from app.models import User
     
-    # Get recipient name for personalization
-    recipient_name = getattr(complaint.assigned_to, 'display_name', None) or getattr(complaint.assigned_to, 'full_name', lambda: complaint.assigned_to.email.split('@')[0])
-    if callable(recipient_name):
-        recipient_name = recipient_name()
-    
-    # Get complaint subject
-    subject = getattr(complaint, 'subject', None) or getattr(complaint, 'title', 'New Complaint')
-    
-    send_email(
-        subject=f'New Complaint: {subject}',
-        recipients=[complaint.assigned_to.email],
-        text_body=render_template('email/complaint_notification.txt', 
-                                 complaint=complaint, recipient_name=recipient_name),
-        html_body=render_template('email/complaint_notification.html', 
-                                 complaint=complaint, recipient_name=recipient_name)
-    ) 
+    try:
+        # Skip if no department or category to determine recipients
+        if not category and (not hasattr(complaint, 'category') or not complaint.category):
+            current_app.logger.error("Cannot send notification: No category provided or associated with complaint")
+            return False
+        
+        # Use provided category or get from complaint
+        dept = None
+        if category:
+            dept = category.department
+        elif hasattr(complaint, 'category') and hasattr(complaint.category, 'department'):
+            dept = complaint.category.department
+        
+        if not dept:
+            current_app.logger.error("Cannot send notification: No department associated with category")
+            return False
+        
+        # Find officials in the relevant department
+        officials = User.query.filter_by(role='official', department=dept).all()
+        
+        # Also notify admins
+        admins = User.query.filter_by(role='admin').all()
+        
+        # Combine recipients
+        recipients = officials + admins
+        
+        if not recipients:
+            current_app.logger.error(f"No officials or admins found for department: {dept}")
+            return False
+        
+        # Get complaint subject
+        subject = getattr(complaint, 'subject', None) or getattr(complaint, 'title', 'New Complaint')
+        
+        # Send to each recipient
+        sent_to_at_least_one = False
+        for recipient in recipients:
+            if not recipient.email:
+                current_app.logger.warning(f"Skipping notification to user {recipient.id}: No email address")
+                continue
+                
+            # Get recipient name for personalization
+            recipient_name = getattr(recipient, 'display_name', None) or getattr(recipient, 'full_name', lambda: recipient.email.split('@')[0])
+            if callable(recipient_name):
+                recipient_name = recipient_name()
+            
+            success = send_email(
+                subject=f'New Complaint: {subject}',
+                recipients=[recipient.email],
+                text_body=render_template('email/complaint_notification.txt', 
+                                         complaint=complaint, recipient_name=recipient_name),
+                html_body=render_template('email/complaint_notification.html', 
+                                         complaint=complaint, recipient_name=recipient_name)
+            )
+            if success:
+                sent_to_at_least_one = True
+        
+        return sent_to_at_least_one
+    except Exception as e:
+        current_app.logger.error(f"Error in send_complaint_notification: {str(e)}")
+        current_app.logger.error(traceback.format_exc())
+        return False 

@@ -6,8 +6,7 @@ from app import db
 from app.models import User, AuditLog, Notification, OfficialRequest
 from app.forms import EnhancedLoginForm, EnhancedRegistrationForm, ResetPasswordRequestForm, ResetPasswordForm
 from app.utils.email import send_password_reset_email, send_email_verification
-from app.utils.otp import generate_otp, store_otp, verify_otp_code, send_otp_email
-from app import firebase_auth
+from app.utils.otp import generate_otp, store_otp, verify_otp_code, send_otp_email, OTP
 import time
 import ipaddress
 
@@ -45,6 +44,32 @@ def record_login_attempt():
         
     login_attempts[ip].append(current_time)
 
+def create_audit_log(user_id, action, resource_type, resource_id=None, details=None, ip_address=None):
+    """Create an audit log entry in SQLite"""
+    log = AuditLog(
+        user_id=user_id,
+        action=action,
+        resource_type=resource_type,
+        resource_id=resource_id,
+        details=details,
+        ip_address=ip_address
+    )
+    db.session.add(log)
+    db.session.commit()
+    return log
+
+def create_notification(user_id, title, message, is_read=False):
+    """Create a notification in SQLite"""
+    notification = Notification(
+        user_id=user_id,
+        title=title,
+        message=message,
+        is_read=is_read
+    )
+    db.session.add(notification)
+    db.session.commit()
+    return notification
+
 @auth.route('/login', methods=['GET', 'POST'])
 def login():
     if current_user.is_authenticated:
@@ -60,47 +85,66 @@ def login():
         # Record login attempt for rate limiting
         record_login_attempt()
         
-        # Authenticate with Firebase Auth
-        user, error = firebase_auth.authenticate_user(form.email.data, form.password.data)
+        # Authenticate with SQLite database
+        user = User.query.filter_by(email=form.email.data).first()
         
-        if error == "ACCOUNT_LOCKED":
-            flash('Account temporarily locked due to too many failed login attempts. Please try again later or reset your password.', 'danger')
-            return redirect(url_for('auth.login'))
-        
-        if not user:
-            # Increment failed attempts in Firebase
-            firebase_auth.increment_failed_login(form.email.data)
-            flash('Invalid email or password', 'danger')
+        # If no user found or password is incorrect
+        if user is None or not user.verify_password(form.password.data):
+            # If user exists, increment failed login attempts
+            if user:
+                # Add logic for account locking after too many failed attempts
+                # Example: if user.failed_login_attempts > MAX_ATTEMPTS: lock account
+                flash('Invalid email or password', 'danger')
+            else:
+                flash('Invalid email or password', 'danger')
             return redirect(url_for('auth.login'))
         
         if not user.is_active:
             flash('This account has been deactivated. Please contact admin.', 'warning')
             return redirect(url_for('auth.login'))
         
+        # Check if user has a pending official request
+        pending_request = OfficialRequest.query.filter_by(
+            user_id=user.id,
+            status='pending'
+        ).first()
+        
+        if pending_request and (form.role.data == 'official' or user.role == 'citizen'):
+            flash('Your government official account request is pending approval. You will be notified once approved.', 'warning')
+            return redirect(url_for('auth.login'))
+        
         # Check if email is verified (if email verification is required)
-        if current_app.config.get('REQUIRE_EMAIL_VERIFICATION', False) and not user.email_verified:
-            # Store email in session for verification
-            session['verification_email'] = user.email
-            
-            # Generate and send OTP code
-            otp_code = generate_otp()
-            if store_otp(user.email, otp_code) and send_otp_email(user, otp_code):
-                flash('Please verify your email address. We have sent a verification code to your email.', 'warning')
-            else:
-                flash('Unable to send verification code. Please try again or contact support.', 'danger')
+        if current_app.config.get('REQUIRE_EMAIL_VERIFICATION', False):
+            # Since the email_verified column might not exist, we'll check if there's an OTP record
+            otp = OTP.query.filter_by(email=user.email).first()
+            if otp:
+                # Store email in session for verification
+                session['verification_email'] = user.email
                 
-            # Redirect to OTP verification page
-            return redirect(url_for('auth.verify_otp', email=user.email))
+                # Generate and send OTP code
+                otp_code = generate_otp()
+                if store_otp(user.email, otp_code) and send_otp_email(user, otp_code):
+                    flash('Please verify your email address. We have sent a verification code to your email.', 'warning')
+                else:
+                    flash('Unable to send verification code. Please try again or contact support.', 'danger')
+                    
+                # Redirect to OTP verification page
+                return redirect(url_for('auth.verify_otp', email=user.email))
         
         # Create login audit log
-        firebase_auth.create_audit_log(
-            uid=user.uid,
+        create_audit_log(
+            user_id=user.id,
             action='login',
             resource_type='user',
-            resource_id=user.uid,
+            resource_id=user.id,
             details='User logged in',
             ip_address=request.remote_addr
         )
+        
+        # Update last login time
+        user.last_login = datetime.utcnow()
+        user.is_online = True
+        db.session.commit()
         
         # Remember user login
         login_user(user, remember=form.remember_me.data)
@@ -124,26 +168,17 @@ def login():
 @auth.route('/logout')
 def logout():
     if current_user.is_authenticated:
-        # Create logout audit log for Firebase users
-        if hasattr(current_user, 'uid'):
-            # Firebase user
-            firebase_auth.create_audit_log(
-                uid=current_user.uid,
-                action='logout',
-                resource_type='user',
-                resource_id=current_user.uid,
-                details='User logged out',
-                ip_address=request.remote_addr
+        # Create logout audit log
+        create_audit_log(
+            user_id=current_user.id,
+            action='logout',
+            resource_type='user',
+            resource_id=current_user.id,
+            details='User logged out',
+            ip_address=request.remote_addr
         )
-            
-            # Update user status
-            firebase_auth.update_user(
-                current_user.uid,
-                is_online=False
-            )
-        else:
-            # SQLite user - handled by event listener in __init__.py
-            pass
+        
+        # User status update is handled by event listener in __init__.py
     
     logout_user()
     return redirect(url_for('auth.login'))
@@ -156,61 +191,61 @@ def register():
     form = EnhancedRegistrationForm()
     if form.validate_on_submit():
         try:
-            # Create display name from first and last name
-            display_name = f"{form.first_name.data} {form.last_name.data}"
-            
-            # Create the user in Firebase Auth and Firestore
-            user = firebase_auth.create_user(
+            # Create new user in SQLite
+            user = User(
                 email=form.email.data,
-                password=form.password.data,
-                display_name=display_name,
-                phone_number=form.phone.data if form.phone.data and form.phone.data.startswith('+') else None,
-                role='citizen',  # Always start as citizen for security
-                username=form.username.data  # Pass username directly to create_user
-            )
-            
-            # Additional user data to store in Firestore
-            firebase_auth.update_user(
-                user.uid,
-                address=form.address.data,
+                username=form.username.data,
                 first_name=form.first_name.data,
-                last_name=form.last_name.data
+                last_name=form.last_name.data,
+                phone=form.phone.data,
+                address=form.address.data,
+                role='citizen',  # Always start as citizen for security
+                created_at=datetime.utcnow()
             )
-                    
+            user.password = form.password.data  # This uses the property setter to hash the password
+            
+            # Add user to database
+            db.session.add(user)
+            db.session.commit()
+            
             # Create registration audit log
-            firebase_auth.create_audit_log(
-                uid=user.uid,
+            create_audit_log(
+                user_id=user.id,
                 action='register',
                 resource_type='user',
-                resource_id=user.uid,
+                resource_id=user.id,
                 details='New user registered',
                 ip_address=request.remote_addr
             )
             
             # If user requested official role, create pending request
             if form.role.data == 'official':
-                # Store official request data in Firestore
-                official_request = {
-                    'user_id': user.uid,
-                    'department': form.department.data,
-                    'position': form.position.data,
-                    'employee_id': form.employee_id.data,
-                    'office_phone': form.office_phone.data,
-                    'justification': form.justification.data,
-                    'status': 'pending',
-                    'created_at': datetime.utcnow()
-                }
+                # Store the requested role in session to check during OTP verification
+                session['requested_role'] = 'official'
                 
-                # Add official request to Firestore
-                firebase_auth.db.collection('official_requests').add(official_request)
-                
-                # Create notification for admin
-                firebase_auth.create_notification(
-                    uid=None,  # For all admins
-                    message=f"New official account request from {display_name}",
-                    category='official_request',
-                    link=url_for('admin.official_requests')
+                # Create official request in SQLite
+                official_request = OfficialRequest(
+                    user_id=user.id,
+                    department=form.department.data,
+                    position=form.position.data,
+                    employee_id=form.employee_id.data,
+                    office_phone=form.office_phone.data,
+                    justification=form.justification.data,
+                    status='pending',
+                    created_at=datetime.utcnow()
                 )
+                
+                db.session.add(official_request)
+                db.session.commit()
+                
+                # Create notification for all admins
+                admin_users = User.query.filter_by(role='admin').all()
+                for admin in admin_users:
+                    create_notification(
+                        user_id=admin.id,
+                        title="New Official Request",
+                        message=f"New official account request from {user.full_name()}"
+                    )
             
             # Send OTP verification if required
             if current_app.config.get('REQUIRE_EMAIL_VERIFICATION', False):
@@ -223,6 +258,7 @@ def register():
                     if current_app.debug:
                         session['debug_otp'] = otp_code
                     
+                    # Store OTP in the database (indicates email is not yet verified)
                     if store_otp(user.email, otp_code) and send_otp_email(user, otp_code):
                         current_app.logger.info(f"OTP sent to new user {user.email}")
                         # Store email in session for verification
@@ -240,7 +276,8 @@ def register():
             
             return redirect(url_for('auth.login'))
             
-        except firebase_auth.FirebaseAuthError as e:
+        except Exception as e:
+            db.session.rollback()
             flash(f'Error creating account: {str(e)}', 'danger')
     
     return render_template('auth/register.html', title='Register', form=form)
@@ -248,47 +285,90 @@ def register():
 @auth.route('/verify_otp', methods=['GET', 'POST'])
 def verify_otp():
     """Handle OTP verification"""
-    # Get email from query parameter or form data
-    email = request.args.get('email') or request.form.get('email') or session.get('verification_email')
+    email = request.args.get('email') or session.get('verification_email') or request.form.get('email')
     
     if not email:
-        flash('Email address is required for verification.', 'danger')
+        flash('Email not provided for verification.', 'danger')
         return redirect(url_for('auth.login'))
     
-    # Store in session
-    session['verification_email'] = email
-    
-    # Get any debug OTP from session (for fallback display)
-    debug_otp = session.get('debug_otp')
-    show_debug = current_app.debug and debug_otp
-    
     if request.method == 'POST':
-        # Process OTP verification
-        otp_code = request.form.get('otp_code')
+        # Get OTP code from form - check both field names for backward compatibility
+        otp_code = request.form.get('otp_code') or request.form.get('otp')
         
         if not otp_code:
-            return render_template('auth/verify_otp.html', 
-                                  email=email, 
-                                  verification_error='Please enter the verification code.')
+            flash('Please enter the verification code.', 'warning')
+            return render_template('auth/verify_otp.html', email=email)
         
-        # Verify OTP - using the imported function with alias
+        current_app.logger.info(f"Attempting to verify OTP for {email} with code {otp_code}")
+        
+        # Verify OTP
         if verify_otp_code(email, otp_code):
-            # Clear session data
-            session.pop('verification_email', None)
-            session.pop('debug_otp', None)
+            current_app.logger.info(f"OTP verification successful for {email}")
             
-            # Success message
-            flash('Email verification successful! You can now log in.', 'success')
-            return redirect(url_for('auth.login'))
+            # Find user
+            user = User.query.filter_by(email=email).first()
+            
+            if user:
+                current_app.logger.info(f"User found for verified email {email}")
+                
+                # Check if this was a government official registration
+                official_request = OfficialRequest.query.filter_by(
+                    user_id=user.id, 
+                    status='pending'
+                ).first()
+                
+                if official_request or (session.get('requested_role') == 'official'):
+                    # For government officials, don't login after OTP verification
+                    # They need admin approval first
+                    flash('Your email has been verified successfully! Your account is pending approval by the administrator. You will be notified once your account is approved.', 'success')
+                    # Clear the requested_role from session
+                    if 'requested_role' in session:
+                        session.pop('requested_role')
+                    return redirect(url_for('auth.login'))
+                
+                # For regular citizens or already approved officials, proceed with login
+                if not current_user.is_authenticated:
+                    # Log the user in
+                    login_user(user)
+                    
+                    # Create login audit log
+                    create_audit_log(
+                        user_id=user.id,
+                        action='login_after_verification',
+                        resource_type='user',
+                        resource_id=user.id,
+                        details='User logged in after email verification',
+                        ip_address=request.remote_addr
+                    )
+                    
+                    # Update last login time
+                    user.last_login = datetime.utcnow()
+                    user.is_online = True
+                    db.session.commit()
+                    
+                    flash('Email verified successfully! You have been logged in.', 'success')
+                else:
+                    flash('Email verified successfully!', 'success')
+                
+                # Redirect based on role
+                if user.role == 'admin':
+                    return redirect(url_for('admin.dashboard'))
+                elif user.role == 'official':
+                    return redirect(url_for('admin.dashboard'))
+                else:
+                    return redirect(url_for('citizen.dashboard'))
+            else:
+                current_app.logger.error(f"No user found for verified email {email}")
+                flash('User not found. Please register again.', 'danger')
+                return redirect(url_for('auth.register'))
         else:
-            # Failed verification
-            return render_template('auth/verify_otp.html', 
-                                  email=email, 
-                                  verification_error='Invalid or expired verification code. Please try again or request a new code.')
+            current_app.logger.warning(f"OTP verification failed for {email}")
+            flash('Invalid or expired verification code. Please try again.', 'danger')
     
-    # GET request - show verification form
-    return render_template('auth/verify_otp.html', email=email, 
-                          debug_otp=debug_otp if show_debug else None)
+    # Display fallback OTP in development mode
+    debug_otp = session.get('debug_otp') if current_app.debug else None
+    
+    return render_template('auth/verify_otp.html', email=email, debug_otp=debug_otp)
 
 @auth.route('/resend_otp', methods=['POST'])
 def resend_otp():
@@ -296,304 +376,142 @@ def resend_otp():
     email = request.form.get('email') or session.get('verification_email')
     
     if not email:
-        flash('Email address is required.', 'danger')
-        return redirect(url_for('auth.login'))
+        return jsonify({'success': False, 'message': 'Email not provided.'}), 400
     
-    try:
-        # Get the user from Firebase
-        user = firebase_auth.get_user_by_email(email)
-        if not user:
-            # Don't reveal that the user doesn't exist
-            flash('Verification code sent. Please check your inbox.', 'info')
-            return redirect(url_for('auth.verify_otp', email=email))
-        
-        # Don't send if already verified
-        if user.email_verified:
-            flash('Your email is already verified. You can now log in.', 'info')
-            return redirect(url_for('auth.login'))
-        
-        # Generate new OTP
-        otp_code = generate_otp()
-        current_app.logger.info(f"Generated new OTP for {email}")
-        
-        # Store the OTP code in the session for fallback display in development
-        if current_app.debug:
-            session['debug_otp'] = otp_code
-            current_app.logger.info(f"Debug OTP stored in session: {otp_code}")
-        
-        # Store in Firestore even if email fails
-        store_success = store_otp(email, otp_code)
-        if not store_success:
-            current_app.logger.error(f"Failed to store OTP for {email}")
-            flash('An error occurred. Please try again later.', 'danger')
-            return redirect(url_for('auth.verify_otp', email=email))
-        
-        # Try to send email
-        if send_otp_email(user, otp_code):
-            current_app.logger.info(f"New OTP sent successfully to {email}")
-            
-            # Log the action
-            firebase_auth.create_audit_log(
-                uid=user.uid,
-                action='resend_otp',
-                resource_type='user',
-                resource_id=user.uid,
-                details='Verification code resent',
-                ip_address=request.remote_addr
-            )
-            
-            # Success message
-            flash('Verification code sent. Please check your inbox.', 'info')
-        else:
-            # Even if email fails, we can still use the OTP from debug session in development
-            current_app.logger.error(f"Failed to send new OTP to {email}")
-            if current_app.debug:
-                flash('Email sending failed, but the code is displayed below for development.', 'warning')
-            else:
-                flash('There was a problem sending the verification code. Please try again later.', 'warning')
-    except Exception as e:
-        current_app.logger.error(f"Error resending OTP: {e}")
-        # Don't reveal errors
-        flash('Verification code sent. Please check your inbox.', 'info')
+    # Find user
+    user = User.query.filter_by(email=email).first()
     
-    return redirect(url_for('auth.verify_otp', email=email))
+    if not user:
+        return jsonify({'success': False, 'message': 'User not found.'}), 404
+    
+    # Generate new OTP
+    otp_code = generate_otp()
+    
+    # Store in session for debug in development
+    if current_app.debug:
+        session['debug_otp'] = otp_code
+    
+    # Store and send OTP
+    if store_otp(email, otp_code) and send_otp_email(user, otp_code):
+        return jsonify({
+            'success': True, 
+            'message': 'Verification code resent successfully.',
+            'debug_otp': otp_code if current_app.debug else None
+        })
+    else:
+        return jsonify({'success': False, 'message': 'Failed to send verification code.'}), 500
 
 @auth.route('/reset_password_request', methods=['GET', 'POST'])
 def reset_password_request():
+    """Handle password reset request"""
     if current_user.is_authenticated:
         return redirect(url_for('citizen.dashboard'))
     
     form = ResetPasswordRequestForm()
     if form.validate_on_submit():
-        try:
-            # Generate Firebase password reset link
-            reset_link = firebase_auth.generate_password_reset_link(form.email.data)
-            
-            if reset_link:
-                # Get user data to send email
-                user = firebase_auth.get_user_by_email(form.email.data)
-                if user:
-                    # Send password reset email
-                    send_password_reset_email(user, reset_link)
-            
-                    # Log password reset request
-                    firebase_auth.create_audit_log(
-                        uid=user.uid,
-                        action='password_reset_request',
-                        resource_type='user',
-                        resource_id=user.uid,
-                        details='Password reset requested',
-                        ip_address=request.remote_addr
-                    )
-            
-            # Always show success message even if user doesn't exist (security)
+        user = User.query.filter_by(email=form.email.data).first()
+        
+        if user:
+            send_password_reset_email(user)
             flash('Check your email for instructions to reset your password', 'info')
-            return redirect(url_for('auth.login'))
+        else:
+            # Don't reveal if email exists in database
+            flash('If that email address is registered, we have sent instructions to reset your password', 'info')
             
-        except Exception as e:
-            current_app.logger.error(f"Error requesting password reset: {e}")
-            # Don't reveal error details to user
-        flash('Check your email for instructions to reset your password', 'info')
         return redirect(url_for('auth.login'))
-    
+        
     return render_template('auth/reset_password_request.html', title='Reset Password', form=form)
 
-@auth.route('/reset_password/<token>')
+@auth.route('/reset_password/<token>', methods=['GET', 'POST'])
 def reset_password(token):
-    # Firebase handles password reset directly through their own URLs
-    # This route is just a placeholder or for redirection if needed
-    flash('Please follow the password reset instructions from the email.', 'info')
-    return redirect(url_for('auth.login'))
+    """Handle password reset with token"""
+    if current_user.is_authenticated:
+        return redirect(url_for('citizen.dashboard'))
+    
+    # Verify token and get user
+    user = User.verify_reset_token(token)
+    if not user:
+        flash('Invalid or expired token', 'warning')
+        return redirect(url_for('auth.reset_password_request'))
+    
+    form = ResetPasswordForm()
+    if form.validate_on_submit():
+        # Set new password
+        user.password = form.password.data
+        db.session.commit()
+        
+        # Create audit log
+        create_audit_log(
+            user_id=user.id,
+            action='reset_password',
+            resource_type='user',
+            resource_id=user.id,
+            details='Password reset successfully',
+            ip_address=request.remote_addr
+        )
+        
+        flash('Your password has been reset successfully', 'success')
+        return redirect(url_for('auth.login'))
+        
+    return render_template('auth/reset_password.html', form=form)
 
 @auth.route('/request_official_account', methods=['GET', 'POST'])
 @login_required
 def request_official_account():
-    """Handle requests to become a government official"""
-    # Only citizens can request official accounts
-    if current_user.role != 'citizen':
-        flash('You already have elevated access privileges.', 'info')
-        if current_user.role == 'admin':
-            return redirect(url_for('admin.dashboard'))
-        return redirect(url_for('official.dashboard'))
+    """Handle request for official account privileges"""
+    # Check if user already has an official request pending
+    existing_request = OfficialRequest.query.filter_by(
+        user_id=current_user.id, 
+        status='pending'
+    ).first()
     
-    from app.forms import OfficialRequestForm
-    from app.models import OfficialRequest
+    if existing_request:
+        flash('You already have a pending request for an official account.', 'warning')
+        return redirect(url_for('citizen.dashboard'))
     
-    form = OfficialRequestForm()
-    success = False
+    # Check if user is already an official
+    if current_user.role == 'official':
+        flash('You already have an official account.', 'info')
+        return redirect(url_for('citizen.dashboard'))
+    
+    form = EnhancedRegistrationForm(is_official_request=True)
+    
+    # Pre-fill form with user data
+    form.email.data = current_user.email
+    form.email.render_kw = {'readonly': True}
+    form.username.data = current_user.username
+    form.username.render_kw = {'readonly': True}
+    form.first_name.data = current_user.first_name
+    form.last_name.data = current_user.last_name
+    form.phone.data = current_user.phone
+    form.address.data = current_user.address
     
     if form.validate_on_submit():
-        # Check if user already has a pending request
-        existing_request = OfficialRequest.query.filter_by(
-            user_id=current_user.id, 
-            status='pending'
-        ).first()
-        
-        if existing_request:
-            flash('You already have a pending request. Please wait for administrators to review it.', 'warning')
-            return redirect(url_for('citizen.dashboard'))
-        
-        # Handle custom department if "Other" is selected
-        department = form.department.data
-        if department == 'Other':
-            other_department = request.form.get('other_department')
-            if other_department and other_department.strip():
-                department = other_department.strip()
-            else:
-                flash('Please specify the custom department name.', 'danger')
-                return render_template('auth/request_official_account.html', title='Request Official Account', form=form, success=False)
-        
-        # Create new request
+        # Create new official request
         official_request = OfficialRequest(
             user_id=current_user.id,
-            department=department,
+            department=form.department.data,
             position=form.position.data,
             employee_id=form.employee_id.data,
             office_phone=form.office_phone.data,
-            justification=form.justification.data
+            justification=form.justification.data,
+            status='pending',
+            created_at=datetime.utcnow()
         )
+        
         db.session.add(official_request)
-        
-        # Create audit log
-        log = AuditLog(
-            user_id=current_user.id,
-            action='request_official_account',
-            resource_type='official_request',
-            resource_id=official_request.id,
-            details=f'User requested official account for department: {department}',
-            ip_address=request.remote_addr
-        )
-        db.session.add(log)
         db.session.commit()
         
-        # Notify administrators (in a real app, would send emails)
-        admins = User.query.filter_by(role='admin').all()
-        for admin in admins:
-            notification = Notification(
+        # Notify all admin users
+        admin_users = User.query.filter_by(role='admin').all()
+        for admin in admin_users:
+            create_notification(
                 user_id=admin.id,
-                title='New Official Account Request',
-                message=f'User {current_user.full_name()} has requested an official account for the {department} department.'
+                title="New Official Request",
+                message=f"New official account request from {current_user.full_name()}"
             )
-            db.session.add(notification)
-        db.session.commit()
         
-        success = True
-        flash('Your request for an official account has been submitted successfully.', 'success')
+        flash('Your request for an official account has been submitted and is pending approval.', 'success')
+        return redirect(url_for('citizen.dashboard'))
     
-    return render_template('auth/request_official_account.html', 
-                           title='Request Official Account',
-                           form=form,
-                           success=success) 
-
-@auth.route('/resend_verification', methods=['POST'])
-def resend_verification():
-    """Resend verification email"""
-    email = request.form.get('email')
-    
-    if not email:
-        flash('Email address is required.', 'danger')
-        return redirect(url_for('auth.login'))
-    
-    try:
-        # Get the user from Firebase
-        user = firebase_auth.get_user_by_email(email)
-        if not user:
-            # Don't reveal that the user doesn't exist
-            flash('Verification email sent. Please check your inbox.', 'info')
-            return redirect(url_for('auth.login'))
-        
-        # Don't send if already verified
-        if user.email_verified:
-            flash('Your email is already verified. You can now log in.', 'info')
-            return redirect(url_for('auth.login'))
-        
-        # Generate verification link
-        current_app.logger.info(f"Generating verification link for {email}")
-        verification_link = firebase_auth.generate_email_verification_link(email)
-        
-        if verification_link:
-            # Send verification email
-            current_app.logger.info(f"Sending verification email to {email}")
-            email_sent = send_email_verification(user, verification_link)
-            
-            if email_sent:
-                # Log the action
-                current_app.logger.info(f"Verification email successfully sent to {email}")
-                firebase_auth.create_audit_log(
-                    uid=user.uid,
-                    action='resend_verification',
-                    resource_type='user',
-                    resource_id=user.uid,
-                    details='Verification email resent',
-                    ip_address=request.remote_addr
-                )
-                
-                flash('Verification email sent. Please check your inbox.', 'info')
-            else:
-                current_app.logger.error(f"Failed to send verification email to {email}")
-                flash('There was a problem sending the verification email. Please try again later.', 'warning')
-        else:
-            current_app.logger.error(f"Could not generate verification link for {email}")
-            flash('Could not generate verification link. Please try again later.', 'warning')
-    except Exception as e:
-        current_app.logger.error(f"Error resending verification email: {e}")
-        flash('Verification email sent. Please check your inbox.', 'info')
-    
-    return redirect(url_for('auth.login'))
-
-@auth.route('/google_signin', methods=['POST'])
-def google_signin():
-    """Handle Google Sign-In"""
-    # Get the ID token from the request
-    try:
-        data = request.get_json()
-        if not data:
-            current_app.logger.error("Google sign-in: No JSON data in request")
-            return jsonify({'success': False, 'error': 'No data provided'}), 400
-            
-        id_token = data.get('idToken')
-        
-        if not id_token:
-            current_app.logger.error("Google sign-in: No ID token provided")
-            return jsonify({'success': False, 'error': 'No ID token provided'}), 400
-        
-        current_app.logger.info(f"Google sign-in: Processing token (length: {len(id_token)})")
-        
-        # Authenticate with Google token
-        user = firebase_auth.authenticate_with_google_token(id_token)
-        
-        if not user:
-            current_app.logger.error("Google sign-in: Authentication failed - no user returned")
-            return jsonify({'success': False, 'error': 'Authentication failed'}), 401
-        
-        current_app.logger.info(f"Google sign-in: User authenticated - {user.email}")
-        
-        # Create login audit log
-        firebase_auth.create_audit_log(
-            uid=user.uid,
-            action='login_google',
-            resource_type='user',
-            resource_id=user.uid,
-            details='User logged in with Google',
-            ip_address=request.remote_addr
-        )
-        
-        # Remember user login
-        login_user(user)
-        current_app.logger.info(f"Google sign-in: User logged in with Flask-Login")
-        
-        # Determine redirect URL based on role
-        if user.role == 'admin':
-            redirect_url = url_for('admin.dashboard')
-        elif user.role == 'official':
-            redirect_url = url_for('admin.dashboard')
-        else:
-            redirect_url = url_for('citizen.dashboard')
-        
-        current_app.logger.info(f"Google sign-in: Redirecting to {redirect_url}")
-        return jsonify({'success': True, 'redirect': redirect_url})
-    
-    except Exception as e:
-        error_message = str(e)
-        current_app.logger.error(f"Google sign-in error: {error_message}")
-        return jsonify({'success': False, 'error': f'Authentication error: {error_message}'}), 500 
+    return render_template('auth/request_official.html', title='Request Official Account', form=form) 

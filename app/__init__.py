@@ -13,9 +13,6 @@ from sqlalchemy import desc
 from flask_login import user_logged_in, user_logged_out
 from datetime import datetime
 from flask_wtf.csrf import CSRFProtect
-import socket
-import ntplib
-from time import ctime
 
 # Initialize extensions
 db = SQLAlchemy()
@@ -27,14 +24,28 @@ login_manager.login_message_category = 'info'
 mail = Mail()
 csrf = CSRFProtect()
 
-# Import at the top level
-from . import firebase_auth
-
 def nl2br(value):
     """Convert newlines to <br> tags"""
     if not value:
         return ''
     return re.sub(r'\n', '<br>', value)
+
+def get_doc_attr(obj, attr, default=''):
+    """Get an attribute from an object, with a default value if not present.
+    This replaces the Firebase document attribute accessor with a SQLAlchemy model compatible version.
+    """
+    if obj is None:
+        return default
+    
+    try:
+        # Try to access as a SQLAlchemy model attribute
+        return getattr(obj, attr, default)
+    except:
+        # If that fails, try to access as a dictionary key
+        try:
+            return obj.get(attr, default)
+        except:
+            return default
 
 def create_app(config_name):
     app = Flask(__name__)
@@ -60,175 +71,44 @@ def create_app(config_name):
     # Now initialize mail after patching
     mail.init_app(app)
     
-    # Initialize Firebase
-    if app.config.get('FIREBASE_PROJECT_ID'):
-        with app.app_context():
-            # Add time synchronization check before initializing Firebase
-            try:
-                import time
-                
-                # First try NTP for the most accurate time
-                time_offset = 0
-                time_sync_success = False
-                
-                try:
-                    ntp_client = ntplib.NTPClient()
-                    server_time = time.time()
-                    
-                    for ntp_server in ['pool.ntp.org', 'time.google.com', 'time.windows.com', 'time.nist.gov']:
-                        try:
-                            # Use a short timeout to avoid hanging
-                            response = ntp_client.request(ntp_server, timeout=1)
-                            if response:
-                                ntp_time = response.tx_time
-                                time_offset = ntp_time - server_time
-                                time_diff = abs(time_offset)
-                                
-                                if time_diff > 60:  # If more than 1 minute difference
-                                    app.logger.warning(f"Server time is out of sync by {time_diff:.1f} seconds (NTP server: {ntp_server})")
-                                    app.logger.info(f"Setting time offset to {time_offset:.1f} seconds for JWT validation")
-                                else:
-                                    app.logger.info(f"Server time is in sync (difference: {time_diff:.1f} seconds, NTP server: {ntp_server})")
-                                
-                                # Store the time offset in the app config for Firebase
-                                app.time_offset = time_offset
-                                time_sync_success = True
-                                break
-                        except Exception:
-                            continue
-                except (ImportError, Exception) as e:
-                    # Fall back to HTTP-based time services if NTP fails
-                    import requests
-                    
-                    # Try multiple time servers with fallbacks
-                    time_servers = [
-                        'http://worldtimeapi.org/api/ip',
-                        'http://worldclockapi.com/api/json/utc/now',
-                        'http://date.jsontest.com'
-                    ]
-                    
-                    server_time = time.time()
-                    
-                    for time_server in time_servers:
-                        try:
-                            response = requests.get(time_server, timeout=1)
-                            if response.status_code == 200:
-                                time_data = response.json()
-                                
-                                # Different APIs return time in different formats
-                                if 'unixtime' in time_data:  # worldtimeapi.org
-                                    ntp_time = time_data.get('unixtime')
-                                elif 'currentFileTime' in time_data:  # worldclockapi.com
-                                    # Convert Windows file time to Unix time (seconds since 1970)
-                                    file_time = int(time_data.get('currentFileTime')) / 10000000 - 11644473600
-                                    ntp_time = file_time
-                                elif 'milliseconds_since_epoch' in time_data:  # date.jsontest.com
-                                    ntp_time = time_data.get('milliseconds_since_epoch') / 1000
-                                else:
-                                    continue
-                                
-                                time_offset = ntp_time - server_time
-                                time_diff = abs(time_offset)
-                                
-                                if time_diff > 60:  # If more than 1 minute difference
-                                    app.logger.warning(f"Server time is out of sync by {time_diff:.1f} seconds (HTTP server: {time_server})")
-                                    app.logger.info(f"Setting time offset to {time_offset:.1f} seconds for JWT validation")
-                                else:
-                                    app.logger.info(f"Server time is in sync (difference: {time_diff:.1f} seconds, HTTP server: {time_server})")
-                                
-                                # Store the time offset in the app config for Firebase
-                                app.time_offset = time_offset
-                                time_sync_success = True
-                                break
-                        except requests.exceptions.RequestException:
-                            continue
-                    
-                    if not time_sync_success:
-                        app.logger.info("Time synchronization check skipped - using system time with extended JWT clock skew tolerance.")
-                        app.time_offset = 0
-            except Exception as e:
-                app.logger.info(f"Time check skipped: {str(e)}. Using extended JWT clock skew tolerance.")
-                app.time_offset = 0
-                
-            # Now initialize Firebase
-            firebase_auth.init_app(app)
-            app.logger.info("Firebase initialized with time offset handling")
-            
-            # Set up user loader for Flask-Login with Firebase
-            @login_manager.user_loader
-            def load_user(user_id):
-                """Load user by UID for Flask-Login"""
-                return firebase_auth.get_user(user_id)
-            
-            # Add login/logout event listeners for Firebase
-            @user_logged_in.connect_via(app)
-            def on_user_logged_in(sender, user):
-                if hasattr(user, 'uid'):
-                    firebase_auth.update_user(user.uid, is_online=True)
-                
-            @user_logged_out.connect_via(app)
-            def on_user_logged_out(sender, user):
-                if user and hasattr(user, 'uid'):
-                    firebase_auth.update_user(user.uid, is_online=False)
-                
-            # Jinja template context processor
-            @app.context_processor
-            def inject_notifications():
-                """Inject notifications data for all templates with Firebase"""
-                if current_user.is_authenticated and hasattr(current_user, 'uid'):
-                    try:
-                        # Retrieve notifications from Firestore
-                        unread_notifications = firebase_auth.db.collection('notifications')\
-                            .where('user_id', '==', current_user.uid)\
-                            .where('is_read', '==', False)\
-                            .order_by('created_at', direction='DESCENDING')\
-                            .limit(5)\
-                            .stream()
-                        
-                        notifications = list(unread_notifications)
-                        unread_count = len(notifications)
-                        
-                        return {
-                            'unread_notifications_count': unread_count, 
-                            'recent_unread_notifications': notifications
-                        }
-                    except Exception as e:
-                        app.logger.error(f"Error retrieving notifications: {e}")
-                        return {'unread_notifications_count': 0, 'recent_unread_notifications': []}
-                return {'unread_notifications_count': 0, 'recent_unread_notifications': []}
-    else:
-        # Fallback to SQLAlchemy user loader
-        from app.models import User
-        @login_manager.user_loader
-        def load_user(user_id):
-            """Load user by ID for Flask-Login"""
+    # Set up user loader for SQLite
+    from app.models import User
+    @login_manager.user_loader
+    def load_user(user_id):
+        """Load user by ID for Flask-Login"""
+        try:
+            # Try to convert to integer (SQLite IDs)
             return User.query.get(int(user_id))
+        except ValueError:
+            app.logger.warning(f"Invalid user ID format: {user_id}")
+            return None
         
-        # Add login/logout event listeners to track user online status with SQLite
-        @user_logged_in.connect_via(app)
-        def on_user_logged_in(sender, user):
-            user.is_online = True
-            db.session.commit()
+    # Add login/logout event listeners to track user online status
+    @user_logged_in.connect_via(app)
+    def on_user_logged_in(sender, user):
+        user.is_online = True
+        user.last_login = datetime.utcnow()
+        db.session.commit()
             
-        @user_logged_out.connect_via(app)
-        def on_user_logged_out(sender, user):
-            if user:
-                user.is_online = False
-                db.session.commit()
+    @user_logged_out.connect_via(app)
+    def on_user_logged_out(sender, user):
+        if user:
+            user.is_online = False
+            db.session.commit()
         
-        # Jinja template context processor for SQLite
-        @app.context_processor
-        def inject_notifications():
-            """Inject notifications data for all templates"""
-            if current_user.is_authenticated:
-                from app.models import Notification
-                unread_count = Notification.query.filter_by(user_id=current_user.id, is_read=False).count()
-                recent_notifications = Notification.query.filter_by(user_id=current_user.id, is_read=False)\
-                                                .order_by(desc(Notification.created_at))\
-                                                .limit(5).all()
-                return {'unread_notifications_count': unread_count, 
-                        'recent_unread_notifications': recent_notifications}
-            return {'unread_notifications_count': 0, 'recent_unread_notifications': []}
+    # Context processor for notifications
+    @app.context_processor
+    def inject_notifications():
+        """Inject notifications data for all templates"""
+        if current_user.is_authenticated:
+            from app.models import Notification
+            unread_count = Notification.query.filter_by(user_id=current_user.id, is_read=False).count()
+            recent_notifications = Notification.query.filter_by(user_id=current_user.id, is_read=False)\
+                                            .order_by(desc(Notification.created_at))\
+                                            .limit(5).all()
+            return {'unread_notifications_count': unread_count, 
+                    'recent_unread_notifications': recent_notifications}
+        return {'unread_notifications_count': 0, 'recent_unread_notifications': []}
     
     # Register context processors
     app.context_processor(inject_now)
@@ -250,6 +130,7 @@ def create_app(config_name):
     
     # Register Jinja2 filters
     app.jinja_env.filters['nl2br'] = nl2br
+    app.jinja_env.filters['get_doc_attr'] = get_doc_attr
     
     # Ensure upload directory exists
     os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
@@ -277,7 +158,7 @@ def create_app(config_name):
         app.logger.error(f"Internal server error: {e}")
         return render_template('errors/500.html'), 500
     
-    # Create database tables (still needed for non-Firebase data)
+    # Create database tables
     with app.app_context():
         db.create_all()
     
@@ -297,78 +178,22 @@ def create_app(config_name):
         app.logger.setLevel(logging.INFO)
         app.logger.info('CitySeva startup')
     
-    # Add template filters for Firebase compatibility
+    # Helper template filter for timestamps
     @app.template_filter('format_timestamp')
     def format_timestamp(value, format='%Y-%m-%d %H:%M'):
-        """Format a timestamp value from Firestore"""
+        """Format a timestamp"""
         if value is None:
             return "N/A"
-            
-        timestamp = None
         
-        # If it's a DocumentSnapshot
-        if hasattr(value, 'to_dict'):
-            doc_dict = value.to_dict()
-            if 'created_at' in doc_dict:
-                timestamp = doc_dict.get('created_at')
-        
-        # If it's a dictionary 
-        elif isinstance(value, dict) and 'created_at' in value:
-            timestamp = value['created_at']
-            
-        # If it has get method (DocumentSnapshot) but not to_dict
-        elif hasattr(value, 'get'):
-            try:
-                if 'created_at' in value:
-                    timestamp = value.get('created_at')
-            except (TypeError, AttributeError):
-                pass
+        # Try accessing the attribute if it's an object
+        if hasattr(value, 'created_at'):
+            timestamp = value.created_at
         else:
-            # It might be the timestamp itself
             timestamp = value
-        
-        # Handle Firebase timestamp
-        if hasattr(timestamp, 'timestamp'):
-            try:
-                return timestamp.timestamp().strftime(format)
-            except AttributeError:
-                pass
-        elif isinstance(timestamp, datetime):
+            
+        if isinstance(timestamp, datetime):
             return timestamp.strftime(format)
             
         return "N/A"
-    
-    @app.template_filter('get_doc_attr')
-    def get_doc_attr(doc, attr, default=""):
-        """Get attribute from Firebase document snapshot safely"""
-        if doc is None:
-            return default
-            
-        # If it's a dictionary, use regular get method
-        if isinstance(doc, dict):
-            return doc.get(attr, default)
-            
-        # If it's a DocumentSnapshot (has to_dict method)
-        if hasattr(doc, 'to_dict'):
-            # Convert to dictionary first
-            doc_dict = doc.to_dict()
-            # Add the id if available
-            if hasattr(doc, 'id'):
-                doc_dict['id'] = doc.id
-            return doc_dict.get(attr, default)
-            
-        # If it has get method but doesn't accept default parameter (DocumentSnapshot)
-        if hasattr(doc, 'get'):
-            try:
-                # Check if field exists in document
-                if attr in doc:
-                    return doc.get(attr)
-                else:
-                    return default
-            except (TypeError, AttributeError):
-                # Fallback for any other errors
-                return default
-                
-        return default
     
     return app 

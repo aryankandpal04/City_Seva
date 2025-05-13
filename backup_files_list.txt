@@ -1,0 +1,31 @@
+# List of duplicate and unused migration files
+simple_migrate_categories.py
+migrate_categories.py
+run_migration.py
+complete_firebase_migration.py
+fix_firebase_migration.py
+verify_firebase_migration.py
+force_create_collections.py
+create_collections.py
+create_empty_collections.py
+create_firebase_collections.py
+create_firebase_collections_manually.py
+verify_firebase_collections.py
+
+# Duplicate documentation files
+FIREBASE_MIGRATION.md
+FIREBASE_MIGRATION_CHECKLIST.md
+SIMPLE_FIREBASE_FIX.md
+QUICK_FIREBASE_FIX.md
+MANUAL_FIREBASE_FIX.md
+
+# Unused utility scripts
+test_firebase_connection.py
+check_firebase.py
+check_firebase_credentials.py
+direct_firebase_setup.py
+fix_firebase_key.py
+extract_firebase_key.py
+simple_firebase_export.py
+update_app_to_firebase.py
+firebase_id_mapping.json 

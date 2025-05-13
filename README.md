@@ -12,12 +12,14 @@ CitySeva is a civic complaint management system that allows citizens to report i
 - Dashboard with statistics and reports
 - Mobile-responsive design
 
-## Database Support
+## Database System
 
-CitySeva supports both SQLite (for development) and Firebase Firestore (for production):
-
-- **SQLite**: Default for local development, no configuration needed
-- **Firebase Firestore**: For production use with real-time data and authentication
+CitySeva uses SQLite as its exclusive database system:
+- Simple, lightweight, and fast
+- Zero configuration required
+- File-based database stored locally
+- No external services or dependencies needed
+- Perfect for local deployment and testing
 
 ## Setup Instructions
 
@@ -25,7 +27,6 @@ CitySeva supports both SQLite (for development) and Firebase Firestore (for prod
 
 - Python 3.8+
 - Pip (Python package manager)
-- Node.js and npm (for Firebase CLI)
 
 ### Installation
 
@@ -46,53 +47,15 @@ CitySeva supports both SQLite (for development) and Firebase Firestore (for prod
    pip install -r requirements.txt
    ```
 
-4. Set up the SQLite database:
-   ```
-   flask db init
-   flask db migrate
-   flask db upgrade
-   ```
-
-### Firebase Setup (Optional, for Production)
-
-1. Create a Firebase project at https://console.firebase.google.com/
-
-2. Add a web app to your Firebase project
-
-3. Download your Firebase Admin SDK key file and save it as `cityseva-4d82b-firebase-adminsdk-fbsvc-a904038f62.json` in the project root directory
-
-4. Install Firebase CLI:
-   ```
-   npm install -g firebase-tools
-   ```
-
-5. Login to Firebase:
-   ```
-   firebase login
-   ```
-
-6. Initialize Firebase in the project:
-   ```
-   firebase init
-   ```
-   Select Firestore and Hosting options
-
-7. Set up Firebase collections:
+4. Initialize the database:
    ```
    # On Windows:
-   setup_firebase_db.bat
+   run.bat
    
    # On Mac/Linux:
-   chmod +x setup_firebase_db.sh
-   ./setup_firebase_db.sh
+   chmod +x run.sh
+   ./run.sh
    ```
-
-8. Deploy Firestore security rules:
-   ```
-   firebase deploy --only firestore:rules
-   ```
-
-9. Update the app configuration in `config.py` to use Firebase
 
 ### Running the Application
 
@@ -103,9 +66,19 @@ CitySeva supports both SQLite (for development) and Firebase Firestore (for prod
 
 2. Access the application at http://localhost:5000
 
-## Firebase Database Schema
+## Database Schema
 
-See the [Firebase Schema Documentation](FIREBASE_SCHEMA.md) for details on the Firestore collections and data structure.
+The application uses SQLAlchemy ORM with the following models:
+
+- `User`: User accounts with different roles (citizen, official, admin)
+- `Category`: Categories for complaints
+- `Complaint`: The main complaint records
+- `ComplaintUpdate`: Updates/comments on complaints
+- `Feedback`: User feedback on resolved complaints
+- `Notification`: User notifications
+- `ComplaintMedia`: Media attachments for complaints
+
+For more details on the database schema, see the `app/models.py` file.
 
 ## License
 
@@ -175,7 +148,9 @@ CitySeva_WebApp/
 │   └── __init__.py
 ├── config.py
 ├── requirements.txt
-├── init_db.py
+├── init_sqlite_db.py
+├── run.bat
+├── run.sh
 └── run.py
 ```
 

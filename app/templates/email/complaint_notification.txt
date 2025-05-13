@@ -1,10 +1,6 @@
-Hello {{ user.first_name }},
+Hello {{ recipient_name }},
 
-There has been an update to your complaint with CitySeva.
-
-{% if status_change %}
-Your complaint status has been updated {{ status_change }}.
-{% endif %}
+A new complaint has been submitted in CitySeva that requires your attention.
 
 COMPLAINT DETAILS:
 ------------------
@@ -14,18 +10,11 @@ Category: {{ complaint.category.name }}
 Location: {{ complaint.location }}
 Status: {{ complaint.status.replace('_', ' ').title() }}
 Submitted: {{ complaint.created_at.strftime('%Y-%m-%d %H:%M') }}
-{% if complaint.resolved_at %}
-Resolved: {{ complaint.resolved_at.strftime('%Y-%m-%d %H:%M') }}
-{% endif %}
 
-To view the complete details of your complaint, please visit:
-{{ url_for('citizen.complaint_detail', complaint_id=complaint.id, _external=True) }}
+To view the complete details of this complaint, please visit:
+{{ url_for('admin.complaint_detail', complaint_id=complaint.id, _external=True) }}
 
-{% if complaint.status == 'resolved' %}
-Please consider providing feedback on the resolution to help us improve our services.
-{% endif %}
-
-Thank you for using CitySeva to report civic issues.
+Thank you for your prompt attention to this matter.
 
 Regards,
 The CitySeva Team

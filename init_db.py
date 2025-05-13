@@ -5,7 +5,7 @@ from datetime import datetime, timedelta
 from werkzeug.security import generate_password_hash
 from flask import Flask
 from app import db, create_app
-from app.models import User, Category, Complaint, ComplaintUpdate, Feedback
+from app.models import User, Category, Complaint, ComplaintUpdate, Feedback, Notification, AuditLog, OfficialRequest, ComplaintMedia
 
 # Initialize the Flask application
 app = create_app('development')
@@ -67,7 +67,7 @@ users = [
         'first_name': 'Admin',
         'last_name': 'User',
         'username': 'admin123',
-        'email': 'admin123@gmail.com',
+        'email': 'admin@cityseva.com',
         'password': 'Admin@123',
         'role': 'admin',
         'phone': '1234567890',
@@ -96,13 +96,79 @@ users = [
         'address': 'Public Works Office, City Center',
     },
     {
+        'first_name': 'Electricity',
+        'last_name': 'Official',
+        'username': 'electricity_official',
+        'email': 'electricity@cityseva.com',
+        'password': 'Electricity@123',
+        'role': 'official',
+        'department': 'Electricity Board',
+        'phone': '4567890123',
+        'address': 'Electricity Board Office, City Center',
+    },
+    {
+        'first_name': 'Sanitation',
+        'last_name': 'Official',
+        'username': 'sanitation_official',
+        'email': 'sanitation@cityseva.com',
+        'password': 'Sanitation@123',
+        'role': 'official',
+        'department': 'Sanitation',
+        'phone': '5678901234',
+        'address': 'Sanitation Department Office, City Center',
+    },
+    {
+        'first_name': 'Parks',
+        'last_name': 'Official',
+        'username': 'parks_official',
+        'email': 'parks@cityseva.com',
+        'password': 'Parks@123',
+        'role': 'official',
+        'department': 'Parks & Recreation',
+        'phone': '6789012345',
+        'address': 'Parks & Recreation Office, City Center',
+    },
+    {
+        'first_name': 'Transport',
+        'last_name': 'Official',
+        'username': 'transport_official',
+        'email': 'transport@cityseva.com',
+        'password': 'Transport@123',
+        'role': 'official',
+        'department': 'Transport',
+        'phone': '7890123456',
+        'address': 'Transport Department Office, City Center',
+    },
+    {
+        'first_name': 'Animal',
+        'last_name': 'Control',
+        'username': 'animal_official',
+        'email': 'animal@cityseva.com',
+        'password': 'Animal@123',
+        'role': 'official',
+        'department': 'Animal Control',
+        'phone': '8901234567',
+        'address': 'Animal Control Department Office, City Center',
+    },
+    {
+        'first_name': 'General',
+        'last_name': 'Admin',
+        'username': 'general_official',
+        'email': 'general@cityseva.com',
+        'password': 'General@123',
+        'role': 'official',
+        'department': 'General Administration',
+        'phone': '9012345678',
+        'address': 'General Administration Office, City Center',
+    },
+    {
         'first_name': 'John',
         'last_name': 'Doe',
         'username': 'john_doe',
         'email': 'john@example.com',
         'password': 'John@123',
         'role': 'citizen',
-        'phone': '4567890123',
+        'phone': '9567890123',
         'address': '123 Main Street, Downtown',
     },
     {
@@ -112,7 +178,7 @@ users = [
         'email': 'jane@example.com',
         'password': 'Jane@123',
         'role': 'citizen',
-        'phone': '5678901234',
+        'phone': '0678901234',
         'address': '456 Oak Avenue, Uptown',
     }
 ]
@@ -175,6 +241,32 @@ feedback_comments = [
     'Satisfactory resolution but communication could be improved',
     'Issue fixed but quality of work is average',
     'Excellent service and prompt action'
+]
+
+notification_titles = [
+    'Complaint Update',
+    'Complaint Assigned',
+    'Resolution Confirmation',
+    'Feedback Required',
+    'Official Response',
+    'Complaint Status Change',
+    'Priority Update',
+    'New Assignment',
+    'Department Transfer',
+    'Service Announcement'
+]
+
+notification_messages = [
+    'Your complaint has been updated with a new status.',
+    'Your complaint has been assigned to an official.',
+    'Please confirm if your complaint has been resolved to your satisfaction.',
+    'Please provide feedback on the resolution of your complaint.',
+    'An official has responded to your complaint.',
+    'The status of your complaint has been changed.',
+    'The priority of your complaint has been updated.',
+    'You have been assigned a new complaint to handle.',
+    'Your complaint has been transferred to another department.',
+    'There will be a scheduled maintenance of our services.'
 ]
 
 priorities = ['low', 'medium', 'high', 'urgent']

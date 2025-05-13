@@ -88,8 +88,8 @@ class ComplaintForm(FlaskForm):
     latitude = HiddenField('Latitude', validators=[DataRequired()])
     longitude = HiddenField('Longitude', validators=[DataRequired()])
     priority = SelectField('Priority', choices=COMPLAINT_PRIORITIES, default='medium')
-    media_files = MultipleFileField('Attach Images or Videos (Multiple)', validators=[
-        DataRequired(),
+    media_files = MultipleFileField('Attach Images or Videos (Optional)', validators=[
+        Optional(),
         FileAllowed(['jpg', 'jpeg', 'png', 'gif', 'mp4', 'mov', 'avi'], 'Images and videos only!')
     ])
     submit = SubmitField('Submit Complaint')

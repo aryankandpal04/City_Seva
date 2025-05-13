@@ -136,7 +136,7 @@
                     {% if complaint is mapping %}
                         {% if 'media_attachments' in complaint and complaint.media_attachments %}
                         <div class="mb-4">
-                            <h5><i class="fas fa-paperclip me-2"></i>Attached Media ({{ complaint.media_attachments|length }})</h5>
+                            <h5><i class="fas fa-paperclip me-2"></i>Attached Media ({{ complaint.media_attachments.count() if hasattr(complaint.media_attachments, 'count') else complaint.media_attachments|length }})</h5>
                             <div class="row">
                                 {% for media in complaint.media_attachments %}
                                     <div class="col-md-6 mb-3">

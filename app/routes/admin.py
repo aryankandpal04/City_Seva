@@ -2,106 +2,15 @@ from flask import Blueprint, render_template, redirect, url_for, flash, request,
 from flask_login import login_required, current_user
 from datetime import datetime
 from sqlalchemy import func, desc, case
-from app import db, firebase_auth, firebase_db
-from firebase_admin import firestore
+from app import db
 from app.models import User, Complaint, Category, ComplaintUpdate, Feedback, AuditLog, Notification, OfficialRequest, ComplaintMedia
 from app.forms import ComplaintUpdateForm, SearchForm
 from app.utils.email import send_complaint_notification
+from app.utils.notifications import send_notification_to_role, send_notification_to_department
 from app.utils.decorators import admin_required, official_required
 from functools import wraps
 
 admin = Blueprint('admin', __name__)
-
-# FirestorePagination class for Firebase pagination
-class FirestorePagination:
-    """Class to mimic SQLAlchemy pagination for Firestore queries"""
-    def __init__(self, items, page, per_page, total):
-        self.items = items
-        self.page = page
-        self.per_page = per_page
-        self.total = total
-    
-    @property
-    def pages(self):
-        return (self.total + self.per_page - 1) // self.per_page
-    
-    @property
-    def has_prev(self):
-        return self.page > 1
-    
-    @property
-    def has_next(self):
-        return self.page < self.pages
-        
-    @property
-    def prev_num(self):
-        return self.page - 1 if self.has_prev else None
-        
-    @property
-    def next_num(self):
-        return self.page + 1 if self.has_next else None
-    
-    def iter_pages(self, left_edge=2, left_current=2, right_current=3, right_edge=2):
-        last = 0
-        for num in range(1, self.pages + 1):
-            if num <= left_edge or \
-               (num > self.page - left_current - 1 and num < self.page + right_current) or \
-               num > self.pages - right_edge:
-                if last + 1 != num:
-                    yield None
-                yield num
-                last = num
-
-# Helper function for fetching user information for Firebase complaints
-def fetch_user_info_for_complaint(complaint_data):
-    """Helper to fetch and add user information to Firebase complaint data"""
-    try:
-        if 'user_id' in complaint_data and complaint_data['user_id']:
-            user_id = complaint_data['user_id']
-            current_app.logger.info(f"Fetching user info for user_id: {user_id}")
-            
-            user_doc = firebase_auth.db.collection('users').document(user_id).get()
-            if user_doc.exists:
-                user_data = user_doc.to_dict()
-                # Add debug logging
-                current_app.logger.info(f"Found user data: {user_data}")
-                
-                # Set user name from first and last name, or from display_name, or from email
-                if 'first_name' in user_data and 'last_name' in user_data:
-                    complaint_data['user_name'] = f"{user_data.get('first_name', '')} {user_data.get('last_name', '')}".strip()
-                elif 'display_name' in user_data and user_data['display_name']:
-                    complaint_data['user_name'] = user_data['display_name']
-                elif 'email' in user_data:
-                    complaint_data['user_name'] = user_data['email']
-                else:
-                    complaint_data['user_name'] = f"User {user_id}"
-                
-                # Set other user fields
-                complaint_data['user_email'] = user_data.get('email', 'No email')
-                complaint_data['user_phone'] = user_data.get('phone', 'Not provided')
-                complaint_data['user_address'] = user_data.get('address', 'Not provided')
-                complaint_data['user_username'] = user_data.get('username', 'Not available')
-                
-                # Format created_at if it's a timestamp
-                if 'created_at' in user_data:
-                    if hasattr(user_data['created_at'], 'strftime'):
-                        complaint_data['user_created_at'] = user_data['created_at'].strftime('%Y-%m-%d')
-                    else:
-                        complaint_data['user_created_at'] = str(user_data['created_at'])
-                else:
-                    complaint_data['user_created_at'] = 'Unknown'
-            else:
-                current_app.logger.warning(f"User document not found for user_id: {user_id}")
-                complaint_data['user_name'] = f"Unknown User (ID: {user_id})"
-        else:
-            current_app.logger.warning(f"No user_id found in complaint data: {complaint_data}")
-    except Exception as e:
-        current_app.logger.error(f"Error getting user information: {e}")
-        # Add basic user info even if there's an error
-        complaint_data['user_name'] = 'Error retrieving user'
-        complaint_data['user_email'] = 'Error'
-    
-    return complaint_data
 
 # Decorator to restrict access to admins and officials
 def admin_required(f):
@@ -131,100 +40,104 @@ def restrict_to_admins_and_officials():
 @admin.route('/dashboard')
 def dashboard():
     """Admin dashboard route"""
-    # Get complaint stats from Firebase
+    # Get complaint stats from SQLite
     try:
         # Count complaints by status
-        complaints_ref = firebase_auth.db.collection('complaints')
+        total_complaints = Complaint.query.count()
+        pending_count = Complaint.query.filter_by(status='pending').count()
+        in_progress_count = Complaint.query.filter_by(status='in_progress').count()
+        resolved_count = Complaint.query.filter_by(status='resolved').count()
+        rejected_count = Complaint.query.filter_by(status='rejected').count()
         
-        # Get counts for each status
-        total_complaints = 0
-        pending_count = 0
-        in_progress_count = 0
-        resolved_count = 0
-        rejected_count = 0
-        
-        # Get all complaints and count by status
-        complaints = list(complaints_ref.stream())
-        total_complaints = len(complaints)
-        
-        for complaint_doc in complaints:
-            complaint = complaint_doc.to_dict()
-            status = complaint.get('status', 'pending')
-            if status == 'pending':
-                pending_count += 1
-            elif status == 'in_progress':
-                in_progress_count += 1
-            elif status == 'resolved':
-                resolved_count += 1
-            elif status == 'rejected':
-                rejected_count += 1
-        
-        # Get recent complaints
-        recent_complaints_docs = list(complaints_ref.order_by('created_at', direction='DESCENDING').limit(5).stream())
-        # Convert to dictionaries and add id
-        recent_complaints = []
-        for doc in recent_complaints_docs:
-            complaint_data = doc.to_dict()
-            complaint_data['id'] = doc.id
-            
-            # Add category name for Firebase complaints since they don't have relations
-            try:
-                if 'category_id' in complaint_data:
-                    category_doc = firebase_auth.db.collection('categories').document(complaint_data['category_id']).get()
-                    if category_doc.exists:
-                        category_data = category_doc.to_dict()
-                        complaint_data['category_name'] = category_data.get('name', 'Unknown')
-                    else:
-                        complaint_data['category_name'] = 'Unknown'
-                else:
-                    complaint_data['category_name'] = 'No Category'
-            except Exception as e:
-                current_app.logger.error(f"Error fetching category: {e}")
-                complaint_data['category_name'] = 'Error'
-            
-            # Add user information
-            complaint_data = fetch_user_info_for_complaint(complaint_data)
-                
-            recent_complaints.append(complaint_data)
+        # Get recent complaints with joined data
+        recent_complaints = Complaint.query.order_by(desc(Complaint.created_at)).limit(5).all()
         
         # Get user stats
-        users_ref = firebase_auth.db.collection('users')
-        users = list(users_ref.stream())
-        total_users = len(users)
-        citizen_count = 0
-        official_count = 0
+        total_users = User.query.count()
+        citizen_count = User.query.filter_by(role='citizen').count()
+        official_count = User.query.filter_by(role='official').count()
+        admin_count = User.query.filter_by(role='admin').count()
         
-        for user_doc in users:
-            user = user_doc.to_dict()
-            role = user.get('role', 'citizen')
-            if role == 'citizen':
-                citizen_count += 1
-            elif role == 'official':
-                official_count += 1
-        
-        # Get online users
-        online_users_docs = list(users_ref.where('is_online', '==', True).stream())
-        online_count = len(online_users_docs)
-        
-        # Get officials
-        officials_docs = list(users_ref.where('role', '==', 'official').stream())
-        # Convert to dictionaries and add id
-        officials = []
-        for doc in officials_docs:
-            official_data = doc.to_dict()
-            official_data['id'] = doc.id
-            officials.append(official_data)
-        
-        # Count pending official requests
+        # Count pending official requests (for admin)
         official_requests_count = 0
         if current_user.role == 'admin':
-            try:
-                official_requests_docs = list(firebase_auth.db.collection('official_requests')
-                                          .where('status', '==', 'pending')
-                                          .stream())
-                official_requests_count = len(official_requests_docs)
-            except Exception as e:
-                current_app.logger.error(f"Error getting official requests: {e}")
+            official_requests_count = OfficialRequest.query.filter_by(status='pending').count()
+        
+        # Get feedback stats
+        avg_rating = db.session.query(func.avg(Feedback.rating)).scalar() or 0
+        # Round to one decimal place
+        avg_rating = round(avg_rating, 1)
+        
+        # Get department stats if user is an official
+        if current_user.role == 'official' and current_user.department:
+            # Get categories for this department
+            department_categories = Category.query.filter_by(department=current_user.department).all()
+            category_ids = [c.id for c in department_categories]
+            
+            # Only count complaints in this department
+            if category_ids:
+                dept_total = Complaint.query.filter(Complaint.category_id.in_(category_ids)).count()
+                dept_pending = Complaint.query.filter(
+                    Complaint.category_id.in_(category_ids),
+                    Complaint.status == 'pending'
+                ).count()
+                dept_in_progress = Complaint.query.filter(
+                    Complaint.category_id.in_(category_ids),
+                    Complaint.status == 'in_progress'
+                ).count()
+                dept_resolved = Complaint.query.filter(
+                    Complaint.category_id.in_(category_ids),
+                    Complaint.status == 'resolved'
+                ).count()
+                
+                # Assigned to current user
+                assigned_to_me = Complaint.query.filter_by(
+                    assigned_to_id=current_user.id
+                ).count()
+            else:
+                dept_total = 0
+                dept_pending = 0
+                dept_in_progress = 0
+                dept_resolved = 0
+                assigned_to_me = 0
+                
+            department_stats = {
+                'total': dept_total,
+                'pending': dept_pending,
+                'in_progress': dept_in_progress,
+                'resolved': dept_resolved,
+                'assigned_to_me': assigned_to_me
+            }
+        else:
+            department_stats = None
+        
+        # Calculate resolution time (average days between creation and resolution)
+        resolution_time_query = db.session.query(
+            func.avg(func.julianday(Complaint.resolved_at) - func.julianday(Complaint.created_at))
+        ).filter(Complaint.status == 'resolved')
+        
+        avg_resolution_time = resolution_time_query.scalar() or 0
+        
+        # High priority complaints in pending or in_progress status
+        high_priority_count = Complaint.query.filter(
+            Complaint.priority.in_(['high', 'urgent']),
+            Complaint.status.in_(['pending', 'in_progress'])
+        ).count()
+        
+        # Prepare data for category distribution chart
+        categories = Category.query.all()
+        category_stats = []
+        
+        for category in categories:
+            count = Complaint.query.filter_by(category_id=category.id).count()
+            if count > 0:
+                category_stats.append({
+                    'name': category.name,
+                    'count': count
+                })
+        
+        # Sort by count descending
+        category_stats.sort(key=lambda x: x['count'], reverse=True)
     
         return render_template('admin/dashboard.html',
                               total_complaints=total_complaints,
@@ -236,13 +149,19 @@ def dashboard():
                               total_users=total_users,
                               citizen_count=citizen_count,
                               official_count=official_count,
-                              online_count=online_count,
-                              officials=officials,
+                              admin_count=admin_count,
+                              avg_rating=avg_rating,
+                              department_stats=department_stats,
+                              avg_resolution_time=avg_resolution_time,
+                              high_priority_count=high_priority_count,
+                              category_stats=category_stats,
                               official_requests_count=official_requests_count)
+                              
     except Exception as e:
-        current_app.logger.error(f"Firebase error: {e}")
-        flash('Error retrieving dashboard data', 'danger')
-        return render_template('admin/dashboard.html', official_requests_count=0)
+        current_app.logger.error(f"Error generating dashboard: {e}")
+        flash("There was an error loading the dashboard. Please try again later.", "danger")
+        return render_template('admin/dashboard.html',
+                              error=True)
 
 @admin.route('/complaints')
 @login_required
@@ -299,161 +218,143 @@ def complaints():
 @admin.route('/complaint/<complaint_id>', methods=['GET', 'POST'])
 @login_required
 def complaint_detail(complaint_id):
-    """View and update a specific complaint"""
-    # Check if we're using Firebase (string ID)
-    if isinstance(complaint_id, str) and not complaint_id.isdigit() and hasattr(firebase_auth, 'db'):
-        try:
-            # Get complaint data from Firestore
-            complaint_ref = firebase_auth.db.collection('complaints').document(complaint_id)
-            complaint_doc = complaint_ref.get()
+    """View details of a specific complaint"""
+    # Get complaint from SQLite
+    complaint = Complaint.query.get_or_404(complaint_id)
             
-            if not complaint_doc.exists:
-                flash('Complaint not found in Firebase.', 'danger')
-                return redirect(url_for('admin.complaints'))
-            
-            # Convert to dict and add ID
-            complaint_data = complaint_doc.to_dict()
-            complaint_data['id'] = complaint_id
-            
-            # Get category name
-            try:
-                if 'category_id' in complaint_data:
-                    category_doc = firebase_auth.db.collection('categories').document(complaint_data['category_id']).get()
-                    if category_doc.exists:
-                        category_data = category_doc.to_dict()
-                        complaint_data['category_name'] = category_data.get('name', 'Unknown')
-                    else:
-                        complaint_data['category_name'] = 'Unknown'
-            except Exception as e:
-                current_app.logger.error(f"Error getting category: {e}")
-            
-            # Get user information
-            complaint_data = fetch_user_info_for_complaint(complaint_data)
-            
-            # Use SQL Alchemy form for now, we'll render a simplified version in the template
-            form = ComplaintUpdateForm()
-            
-            # Initialize form with empty choices to prevent "NoneType is not iterable" error
-            form.assigned_to_id.choices = [(0, 'Unassigned')]
-            
-            # Pass empty updates list to prevent another potential "NoneType is not iterable" error
-            updates = []
-            
-            return render_template('admin/complaint_detail.html',
-                                complaint=complaint_data,
-                                form=form,
-                                updates=updates)
-                                
-        except Exception as e:
-            current_app.logger.error(f"Firebase error: {e}")
-            flash('Error retrieving complaint from Firebase', 'danger')
-            return redirect(url_for('admin.complaints'))
-    
-    # Continue with SQL Alchemy version for integer IDs
-    try:
-        complaint_id_int = int(complaint_id)
-        complaint = Complaint.query.get_or_404(complaint_id_int)
-    except ValueError:
-        flash('Invalid complaint ID.', 'danger')
+    # Get user information
+    user = User.query.get(complaint.user_id)
+    if not user:
+        flash('User not found.', 'danger')
         return redirect(url_for('admin.complaints'))
     
-    # If official, check if they have access to this complaint's category
-    if current_user.role == 'official' and current_user.department:
-        category = Category.query.get(complaint.category_id)
-        if category.department != current_user.department:
-            flash('You do not have permission to view this complaint.', 'danger')
-            return redirect(url_for('admin.complaints'))
+    # Get complaint updates
+    updates = ComplaintUpdate.query.filter_by(complaint_id=complaint.id).order_by(ComplaintUpdate.created_at).all()
     
-    # Get all updates for this complaint
-    updates = ComplaintUpdate.query.filter_by(complaint_id=complaint.id)\
-                              .order_by(ComplaintUpdate.created_at).all()
+    # Get category information
+    category = Category.query.get(complaint.category_id)
     
-    # Form for updating complaint
     form = ComplaintUpdateForm()
     
-    # Populate assigned_to choices with officials
-    form.assigned_to_id.choices = [(0, 'Unassigned')] + [
-        (u.id, f"{u.full_name()} ({u.department})") 
-        for u in User.query.filter_by(role='official').order_by(User.first_name).all()
-    ]
+    # Set up the assigned_to_id field based on user role
+    if current_user.role == 'admin':
+        # For admins, show dropdown with all officials
+        if category and category.department:
+            officials = User.query.filter_by(role='official', department=category.department).all()
+        else:
+            officials = User.query.filter_by(role='official').all()
+        
+        # Add empty option and officials to choices
+        form.assigned_to_id.choices = [(0, 'Unassigned')] + [(u.id, f"{u.full_name()} ({u.department})") for u in officials]
+    else:
+        # For officials, just set their own ID without showing dropdown
+        form.assigned_to_id.choices = [(current_user.id, f"{current_user.full_name()} ({current_user.department})")]
     
     if form.validate_on_submit():
-        # Check if status changed
-        status_changed = complaint.status != form.status.data
-        old_status = complaint.status
-        
-        # Update complaint
-        complaint.status = form.status.data
-        
-        # Update assigned_to if changed
-        if form.assigned_to_id.data != 0:  # Not "Unassigned"
-            complaint.assigned_to_id = form.assigned_to_id.data
-            complaint.assigned_at = datetime.utcnow()
-        elif complaint.assigned_to_id is not None:  # Was assigned before
-            complaint.assigned_to_id = None
-            complaint.assigned_at = None
-        
-        # Handle status-specific actions
-        if status_changed:
-            if form.status.data == 'resolved':
-                complaint.resolved_at = datetime.utcnow()
-            elif old_status == 'resolved':
-                # If moving from resolved to another status, clear resolved_at
-                complaint.resolved_at = None
-        
-        # Create update record
+        # Create update
         update = ComplaintUpdate(
             complaint_id=complaint.id,
             user_id=current_user.id,
             status=form.status.data,
-            comment=form.comment.data
+            comment=form.comment.data,
+            created_at=datetime.utcnow()
         )
         db.session.add(update)
         
-        # Add audit log entry
-        log = AuditLog(
+        # Update complaint status
+        old_status = complaint.status
+        complaint.status = form.status.data
+        complaint.updated_at = datetime.utcnow()
+        
+        # Auto-assign to the current official when updating status
+        # This ensures the complaint is always assigned to the person who last updated it
+        if current_user.role == 'official' and complaint.assigned_to_id != current_user.id:
+            complaint.assigned_to_id = current_user.id
+            complaint.assigned_at = datetime.utcnow()
+            
+            # Add assignment info to the update comment if empty
+            if not form.comment.data:
+                update.comment = f"Assigned to {current_user.full_name()} ({current_user.department})"
+            
+            # Create audit log for assignment
+            assignment_log = AuditLog(
+                user_id=current_user.id,
+                action='assign_complaint',
+                resource_type='complaint',
+                resource_id=complaint.id,
+                details=f'Complaint assigned to {current_user.username} ({current_user.department})',
+                ip_address=request.remote_addr
+            )
+            db.session.add(assignment_log)
+        # For admins using the dropdown
+        elif current_user.role == 'admin' and form.assigned_to_id.data != 0 and complaint.assigned_to_id != form.assigned_to_id.data:
+            # Admin selected a specific official
+            assigned_official = User.query.get(form.assigned_to_id.data)
+            if assigned_official:
+                complaint.assigned_to_id = assigned_official.id
+                complaint.assigned_at = datetime.utcnow()
+                
+                # Add assignment info to the update comment if empty
+                if not form.comment.data:
+                    update.comment = f"Assigned to {assigned_official.full_name()} ({assigned_official.department})"
+                
+                # Create audit log for assignment by admin
+                assignment_log = AuditLog(
+                    user_id=current_user.id,
+                    action='assign_complaint',
+                    resource_type='complaint',
+                    resource_id=complaint.id,
+                    details=f'Complaint assigned to {assigned_official.username} ({assigned_official.department}) by admin',
+                    ip_address=request.remote_addr
+                )
+                db.session.add(assignment_log)
+        # Maintain backward compatibility with assign_to_me checkbox
+        elif form.assign_to_me.data and complaint.assigned_to_id != current_user.id:
+            complaint.assigned_to_id = current_user.id
+            complaint.assigned_at = datetime.utcnow()
+        
+        # If status changed to resolved, set resolved date
+        if form.status.data == 'resolved' and old_status != 'resolved':
+                complaint.resolved_at = datetime.utcnow()
+            
+            # Create notification for citizen
+        notification = Notification(
+                user_id=complaint.user_id,
+                title="Complaint Resolved",
+                message=f"Your complaint '{complaint.title}' has been marked as resolved. Please provide feedback.",
+                created_at=datetime.utcnow()
+        )
+        db.session.add(notification)
+        
+        # Create audit log
+        audit = AuditLog(
             user_id=current_user.id,
-            action='update',
+            action='update_complaint',
             resource_type='complaint',
             resource_id=complaint.id,
             details=f'Updated complaint status to {form.status.data}',
             ip_address=request.remote_addr
         )
-        db.session.add(log)
-        
-        # Create notification for the complaint owner
-        notification = Notification(
-            user_id=complaint.user_id,
-            title=f'Complaint #{complaint.id} Updated',
-            message=f'Your complaint "{complaint.title}" has been updated to {form.status.data}.'
-        )
-        db.session.add(notification)
+        db.session.add(audit)
         
         db.session.commit()
         
-        # Send email notification
-        try:
-            send_complaint_notification(
-                complaint.author,
-                complaint, 
-                status_change=f'from {old_status} to {form.status.data}'
-            )
-        except Exception as e:
-            # Just log the error but don't prevent the update
-            print(f"Error sending email: {e}")
-        
-        flash('Complaint has been updated.', 'success')
+        flash('Complaint updated successfully.', 'success')
         return redirect(url_for('admin.complaint_detail', complaint_id=complaint.id))
     
-    # Pre-populate form with current values
-    if request.method == 'GET':
-        form.status.data = complaint.status
-        form.assigned_to_id.data = complaint.assigned_to_id or 0
+    # Pre-populate form with current status
+    form.status.data = complaint.status
+    
+    # Check if feedback exists
+    feedback = Feedback.query.filter_by(complaint_id=complaint.id).first()
     
     return render_template('admin/complaint_detail.html',
                           complaint=complaint,
+                          user=user,
                           updates=updates,
-                          form=form)
+                          category=category,
+                          form=form,
+                          feedback=feedback)
 
 @admin.route('/categories')
 @login_required
@@ -581,120 +482,34 @@ def edit_category(category_id):
 @login_required
 @admin_required
 def users():
-    """Manage users"""
-    role_filter = request.args.get('role', '')
+    """List all users"""
+    page = request.args.get('page', 1, type=int)
+    per_page = 10
     
-    # Check if Firebase is enabled
-    if hasattr(firebase_auth, 'db') and firebase_auth.db is not None:
-        try:
-            # Use Firebase for data retrieval
-            users_ref = firebase_auth.db.collection('users')
-            
-            # Apply role filter if provided
-            if role_filter in ['citizen', 'official', 'admin']:
-                users_query = users_ref.where('role', '==', role_filter)
-            else:
-                users_query = users_ref
-                
-            # Get users
-            user_docs = list(users_query.order_by('created_at', direction='DESCENDING').stream())
-            users = []
-            
-            for doc in user_docs:
-                user_data = doc.to_dict()
-                user_data['id'] = doc.id
-                users.append(user_data)
-                
-            return render_template('admin/users.html', users=users, firebase_enabled=True)
-        except Exception as e:
-            current_app.logger.error(f"Firebase error: {e}")
-            flash(f"Error retrieving users from Firebase: {e}", 'danger')
-            return render_template('admin/users.html', users=[], firebase_enabled=True)
-    else:
-        # Use SQLite for data retrieval
-        query = User.query
+    # Get users from SQLite
+    users = User.query.order_by(User.created_at.desc()).paginate(
+        page=page, per_page=per_page, error_out=False
+    )
         
-        if role_filter in ['citizen', 'official', 'admin']:
-            query = query.filter_by(role=role_filter)
-        
-        users = query.order_by(User.created_at.desc()).all()
-        
-        return render_template('admin/users.html', users=users, firebase_enabled=False)
+    return render_template('admin/users.html', users=users)
 
 @admin.route('/user/<string:user_id>/toggle_active', methods=['POST'])
 @login_required
 @admin_required
 def toggle_user_active(user_id):
     """Toggle a user's active status"""
-    # Check if Firebase is enabled
-    if hasattr(firebase_auth, 'db') and firebase_auth.db is not None:
-        try:
-            # Use Firebase Admin SDK
-            user_ref = firebase_auth.db.collection('users').document(user_id)
-            user_doc = user_ref.get()
-            
-            if not user_doc.exists:
-                flash('User not found.', 'danger')
-                return redirect(url_for('admin.users'))
-                
-            user_data = user_doc.to_dict()
-            
-            # Don't allow deactivating yourself
-            if user_id == current_user.uid:
-                flash('You cannot deactivate your own account.', 'danger')
-                return redirect(url_for('admin.users'))
-            
-            # Toggle is_active status
-            new_status = not user_data.get('is_active', True)
-            
-            # Update Firebase Auth user (disabled property)
-            try:
-                firebase_auth.auth.update_user(
-                    user_id,
-                    disabled=not new_status  # disabled is the opposite of is_active
-                )
-            except Exception as e:
-                current_app.logger.error(f"Firebase Auth error: {e}")
-                flash(f"Error updating user in Firebase Auth: {e}", 'danger')
-                return redirect(url_for('admin.users'))
-            
-            # Update Firestore user document
-            user_ref.update({
-                'is_active': new_status,
-                'updated_at': firestore.SERVER_TIMESTAMP
-            })
-            
-            # Log action
-            firebase_auth.create_audit_log(
-                current_user.uid,
-                'toggle_active',
-                'user',
-                user_id,
-                f'Set user active status to {new_status}',
-                request.remote_addr
-            )
-            
-            status = 'activated' if new_status else 'deactivated'
-            flash(f'User has been {status}.', 'success')
-            
-        except Exception as e:
-            current_app.logger.error(f"Firebase error: {e}")
-            flash(f"Error toggling user status: {e}", 'danger')
-            
-        return redirect(url_for('admin.users'))
-    else:
         # Use SQLite for data manipulation
-        user = User.query.get_or_404(user_id)
+    user = User.query.get_or_404(user_id)
         
         # Don't allow deactivating yourself
-        if user.id == current_user.id:
+    if user.id == current_user.id:
             flash('You cannot deactivate your own account.', 'danger')
             return redirect(url_for('admin.users'))
         
-        user.is_active = not user.is_active
+    user.is_active = not user.is_active
         
         # Log action
-        log = AuditLog(
+    log = AuditLog(
             user_id=current_user.id,
             action='toggle_active',
             resource_type='user',
@@ -702,12 +517,12 @@ def toggle_user_active(user_id):
             details=f'Set user active status to {user.is_active}',
             ip_address=request.remote_addr
         )
-        db.session.add(log)
-        db.session.commit()
+    db.session.add(log)
+    db.session.commit()
         
-        status = 'activated' if user.is_active else 'deactivated'
-        flash(f'User {user.username} has been {status}.', 'success')
-        return redirect(url_for('admin.users'))
+    status = 'activated' if user.is_active else 'deactivated'
+    flash(f'User {user.username} has been {status}.', 'success')
+    return redirect(url_for('admin.users'))
 
 @admin.route('/user/<string:user_id>/make_official', methods=['POST'])
 @login_required
@@ -729,42 +544,6 @@ def make_official(user_id):
             flash('Please specify the custom department name.', 'danger')
             return redirect(url_for('admin.users'))
     
-    # Check if Firebase is enabled
-    if hasattr(firebase_auth, 'db') and firebase_auth.db is not None:
-        try:
-            # Update user in Firestore
-            user_ref = firebase_auth.db.collection('users').document(user_id)
-            user_doc = user_ref.get()
-            
-            if not user_doc.exists:
-                flash('User not found.', 'danger')
-                return redirect(url_for('admin.users'))
-            
-            # Update user data
-            user_ref.update({
-                'role': 'official',
-                'department': department,
-                'updated_at': firestore.SERVER_TIMESTAMP
-            })
-            
-            # Log action
-            firebase_auth.create_audit_log(
-                current_user.uid,
-                'role_change',
-                'user',
-                user_id,
-                f'Changed user role to official in {department} department',
-                request.remote_addr
-            )
-            
-            flash('User has been promoted to official.', 'success')
-            
-        except Exception as e:
-            current_app.logger.error(f"Firebase error: {e}")
-            flash(f"Error promoting user: {e}", 'danger')
-            
-        return redirect(url_for('admin.users'))
-    else:
         # Use SQLite for data manipulation
         user = User.query.get_or_404(user_id)
         
@@ -792,49 +571,14 @@ def make_official(user_id):
 @admin_required
 def make_admin(user_id):
     """Promote a user to admin role"""
-    # Check if Firebase is enabled
-    if hasattr(firebase_auth, 'db') and firebase_auth.db is not None:
-        try:
-            # Update user in Firestore
-            user_ref = firebase_auth.db.collection('users').document(user_id)
-            user_doc = user_ref.get()
-            
-            if not user_doc.exists:
-                flash('User not found.', 'danger')
-                return redirect(url_for('admin.users'))
-            
-            # Update user data
-            user_ref.update({
-                'role': 'admin',
-                'updated_at': firestore.SERVER_TIMESTAMP
-            })
-            
-            # Log action
-            firebase_auth.create_audit_log(
-                current_user.uid,
-                'role_change',
-                'user',
-                user_id,
-                'Changed user role to admin',
-                request.remote_addr
-            )
-            
-            flash('User has been promoted to admin.', 'success')
-            
-        except Exception as e:
-            current_app.logger.error(f"Firebase error: {e}")
-            flash(f"Error promoting user: {e}", 'danger')
-            
-        return redirect(url_for('admin.users'))
-    else:
         # Use SQLite for data manipulation
-        user = User.query.get_or_404(user_id)
+    user = User.query.get_or_404(user_id)
         
-        # Update user
-        user.role = 'admin'
+    # Update user
+    user.role = 'admin'
         
-        # Log action
-        log = AuditLog(
+    # Log action
+    log = AuditLog(
             user_id=current_user.id,
             action='role_change',
             resource_type='user',
@@ -842,143 +586,34 @@ def make_admin(user_id):
             details='Changed user role to admin',
             ip_address=request.remote_addr
         )
-        db.session.add(log)
-        db.session.commit()
+    db.session.add(log)
+    db.session.commit()
         
-        flash(f'User {user.username} has been promoted to admin.', 'success')
-        return redirect(url_for('admin.users'))
+    flash(f'User {user.username} has been promoted to admin.', 'success')
+    return redirect(url_for('admin.users'))
 
 @admin.route('/user/<string:user_id>/delete', methods=['POST'])
 @login_required
 @admin_required
 def delete_user(user_id):
     """Delete a user from the system"""
-    # Check if Firebase is enabled
-    if hasattr(firebase_auth, 'db') and firebase_auth.db is not None:
-        try:
-            # Check for confirmation
-            if not request.form.get('confirm'):
-                flash('Please confirm the deletion.', 'warning')
-                return redirect(url_for('admin.users'))
-            
-            # Get user data before deletion
-            user_ref = firebase_auth.db.collection('users').document(user_id)
-            user_doc = user_ref.get()
-            
-            if not user_doc.exists:
-                flash('User not found.', 'danger')
-                return redirect(url_for('admin.users'))
-            
-            user_data = user_doc.to_dict()
-            
-            # Don't allow deleting yourself
-            if user_id == current_user.uid:
-                flash('You cannot delete your own account.', 'danger')
-                return redirect(url_for('admin.users'))
-            
-            # Log action before deletion
-            firebase_auth.create_audit_log(
-                current_user.uid,
-                'delete_user',
-                'user',
-                user_id,
-                f'Deleted user: {user_data.get("email")}',
-                request.remote_addr
-            )
-            
-            # Delete dependencies
-            try:
-                batch = firebase_auth.db.batch()
-                
-                # 1. Delete user's complaints
-                complaints_query = firebase_auth.db.collection('complaints').where('user_id', '==', user_id)
-                complaints = list(complaints_query.stream())
-                
-                for complaint_doc in complaints:
-                    # Get complaint updates for this complaint
-                    updates_query = firebase_auth.db.collection('complaint_updates').where('complaint_id', '==', complaint_doc.id)
-                    updates = list(updates_query.stream())
-                    
-                    # Delete updates
-                    for update_doc in updates:
-                        batch.delete(update_doc.reference)
-                    
-                    # Delete feedback
-                    feedback_query = firebase_auth.db.collection('feedbacks').where('complaint_id', '==', complaint_doc.id)
-                    feedback_docs = list(feedback_query.stream())
-                    
-                    for feedback_doc in feedback_docs:
-                        batch.delete(feedback_doc.reference)
-                    
-                    # Delete complaint
-                    batch.delete(complaint_doc.reference)
-                
-                # 2. Delete user's notifications
-                notifications_query = firebase_auth.db.collection('notifications').where('user_id', '==', user_id)
-                notifications = list(notifications_query.stream())
-                
-                for notification_doc in notifications:
-                    batch.delete(notification_doc.reference)
-                
-                # 3. Delete official requests
-                requests_query = firebase_auth.db.collection('official_requests').where('user_id', '==', user_id)
-                requests = list(requests_query.stream())
-                
-                for request_doc in requests:
-                    batch.delete(request_doc.reference)
-                
-                # 4. Update official requests where user is reviewer
-                reviewer_requests_query = firebase_auth.db.collection('official_requests').where('reviewed_by', '==', user_id)
-                reviewer_requests = list(reviewer_requests_query.stream())
-                
-                for request_doc in reviewer_requests:
-                    batch.update(request_doc.reference, {
-                        'reviewed_by': None
-                    })
-                
-                # 5. Finally delete the user document
-                batch.delete(user_ref)
-                
-                # Commit all changes in batch
-                batch.commit()
-                
-                # Delete from Firebase Auth
-                try:
-                    firebase_auth.auth.delete_user(user_id)
-                except Exception as e:
-                    # If the user doesn't exist in Firebase Auth, we can ignore this error
-                    # since we've already deleted the user from Firestore
-                    current_app.logger.warning(f"Firebase Auth delete error (continuing anyway): {e}")
-                
-                flash('User has been permanently deleted.', 'success')
-                
-            except Exception as e:
-                current_app.logger.error(f"Firebase batch operation error: {e}")
-                flash(f"Error deleting user dependencies: {e}", 'danger')
-                
-        except Exception as e:
-            current_app.logger.error(f"Firebase error: {e}")
-            flash(f"Error deleting user: {e}", 'danger')
-            
-        return redirect(url_for('admin.users'))
-    else:
-        # Use SQLite for data manipulation
-        user = User.query.get_or_404(user_id)
+    # Use SQLite for data manipulation
+    user = User.query.get_or_404(user_id)
         
-        # Don't allow deleting yourself
-        if user.id == current_user.id:
+    # Don't allow deleting yourself
+    if user.id == current_user.id:
             flash('You cannot delete your own account.', 'danger')
             return redirect(url_for('admin.users'))
             
-        # Check for confirmation
-        if not request.form.get('confirm'):
+    # Check for confirmation
+    if not request.form.get('confirm'):
             flash('Please confirm the deletion.', 'warning')
             return redirect(url_for('admin.users'))
         
-        username = user.username  # Store for the flash message
+    username = user.username  # Store for the flash message
         
-        # Log action before deletion
-        log = AuditLog(
+    # Log action before deletion
+    log = AuditLog(
             user_id=current_user.id,
             action='delete_user',
             resource_type='user',
@@ -986,9 +621,9 @@ def delete_user(user_id):
             details=f'Deleted user: {user.username} ({user.email})',
             ip_address=request.remote_addr
         )
-        db.session.add(log)
+    db.session.add(log)
         
-        try:
+    try:
             # Handle dependencies before deleting user
             
             # 1. Official Requests - delete where user is the requester
@@ -1029,11 +664,11 @@ def delete_user(user_id):
             db.session.commit()
             
             flash(f'User {username} has been permanently deleted.', 'success')
-        except Exception as e:
+    except Exception as e:
             db.session.rollback()
             flash(f'Error deleting user: {str(e)}', 'danger')
             
-        return redirect(url_for('admin.users'))
+    return redirect(url_for('admin.users'))
 
 @admin.route('/reports')
 @login_required
@@ -1171,9 +806,17 @@ def review_official_request(request_id):
             notification = Notification(
                 user_id=user.id,
                 title='Official Account Approved',
-                message=f'Your request for an official account has been approved. You now have official privileges for the {official_request.department} department.'
+                message=f'Your request for an official account has been approved. You can now log in as a government official for the {official_request.department} department.'
             )
             db.session.add(notification)
+            
+            # Create a more detailed notification with instructions
+            detailed_notification = Notification(
+                user_id=user.id,
+                title='Welcome to Government Official Portal',
+                message=f'As a verified government official for the {official_request.department} department, you now have access to department-specific features. Please log in using your credentials and select "{official_request.department}" from the department dropdown to access your administrative dashboard.'
+            )
+            db.session.add(detailed_notification)
     else:
         # If rejected, notify the user
         notification = Notification(
@@ -1205,55 +848,8 @@ def admin_notifications():
     page = request.args.get('page', 1, type=int)
     per_page = 10
     
-    # Check if Firebase is enabled
-    use_firebase = current_app.config.get('USE_FIREBASE', False)
-    
-    if use_firebase:
-        try:
-            # Create a FirestorePagination instance for notifications
-            # Get all notifications for this user
-            query = firebase_db.notifications_ref().where('user_id', '==', current_user.uid)
-            query = query.order_by('created_at', direction=firestore.Query.DESCENDING)
-            
-            # Count total notifications for pagination
-            all_docs = list(query.stream())
-            total = len(all_docs)
-            
-            # Calculate offset and limit for current page
-            offset = (page - 1) * per_page
-            limit = per_page
-            
-            # Get the limited set of notifications for this page
-            if offset < total:
-                page_docs = all_docs[offset:offset+limit]
-                notifications_data = [firebase_db.to_dict(doc) for doc in page_docs]
-            else:
-                notifications_data = []
-            
-            # Create pagination object
-            notifications = FirestorePagination(notifications_data, page, per_page, total)
-            
-            # Mark notifications as read
-            batch = firebase_db.db.batch()
-            
-            # Query only unread notifications
-            unread_query = firebase_db.notifications_ref().where('user_id', '==', current_user.uid).where('is_read', '==', False)
-            unread_docs = unread_query.stream()
-            
-            for doc in unread_docs:
-                doc_ref = firebase_db.notifications_ref().document(doc.id)
-                batch.update(doc_ref, {'is_read': True})
-            
-            # Commit the batch
-            batch.commit()
-            
-        except Exception as e:
-            current_app.logger.error(f"Error getting Firebase notifications: {e}")
-            flash("There was an error retrieving your notifications. Please try again later.", "danger")
-            return redirect(url_for('admin.dashboard'))
-    else:
-        # Use SQLite for notifications
-        notifications = Notification.query.filter_by(user_id=current_user.id)\
+    # Use SQLite for notifications
+    notifications = Notification.query.filter_by(user_id=current_user.id)\
                                 .order_by(Notification.created_at.desc())\
                                 .paginate(
                                     page=page,
@@ -1261,12 +857,12 @@ def admin_notifications():
                                     error_out=False
                                 )
         
-        # Mark notifications as read
-        unread = Notification.query.filter_by(user_id=current_user.id, is_read=False).all()
-        for notification in unread:
+    # Mark notifications as read
+    unread = Notification.query.filter_by(user_id=current_user.id, is_read=False).all()
+    for notification in unread:
             notification.is_read = True
         
-        db.session.commit()
+    db.session.commit()
     
     # Set the notification route for pagination links
     notification_route = 'admin.admin_notifications'
@@ -1292,68 +888,6 @@ def delete_complaint(complaint_id):
     complaint_id_str = str(complaint.id)
     
     try:
-        # Check if using Firebase
-        if hasattr(firebase_auth, 'db') and firebase_auth.db is not None:
-            # Get complaint data from Firestore
-            complaint_ref = firebase_auth.db.collection('complaints').document(complaint_id_str)
-            complaint_doc = complaint_ref.get()
-            
-            if not complaint_doc.exists:
-                current_app.logger.warning(f"Complaint {complaint_id} not found in Firestore but exists in SQLite. Proceeding with SQLite deletion only.")
-            else:
-                # Create a batch operation
-                batch = firebase_auth.db.batch()
-                
-                # 1. Delete all updates for this complaint
-                updates_query = firebase_auth.db.collection('complaint_updates').where('complaint_id', '==', complaint_id_str)
-                updates = list(updates_query.stream())
-                for update_doc in updates:
-                    batch.delete(update_doc.reference)
-                
-                # 2. Delete feedback for this complaint (if any)
-                feedbacks_query = firebase_auth.db.collection('feedbacks').where('complaint_id', '==', complaint_id_str)
-                feedbacks = list(feedbacks_query.stream())
-                for feedback_doc in feedbacks:
-                    batch.delete(feedback_doc.reference)
-                
-                # 3. Delete all media attachments for this complaint
-                try:
-                    firebase_db.delete_complaint_media_for_complaint(complaint_id_str)
-                except Exception as e:
-                    current_app.logger.warning(f"Could not delete media attachments: {e}")
-                
-                # 4. Delete notifications related to this complaint
-                try:
-                    notifications_query = firebase_auth.db.collection('notifications').where('complaint_id', '==', complaint_id_str)
-                    notifications = list(notifications_query.stream())
-                    for notification_doc in notifications:
-                        batch.delete(notification_doc.reference)
-                except Exception as e:
-                    current_app.logger.warning(f"Could not delete notifications by complaint_id: {e}")
-                    try:
-                        notifications_query = firebase_auth.db.collection('notifications').where('resource_id', '==', complaint_id_str)
-                        notifications = list(notifications_query.stream())
-                        for notification_doc in notifications:
-                            batch.delete(notification_doc.reference)
-                    except Exception as e:
-                        current_app.logger.warning(f"Could not delete notifications by resource_id: {e}")
-                
-                # 5. Delete the complaint document
-                batch.delete(complaint_ref)
-                
-                # 6. Create audit log entry
-                firebase_db.create_audit_log({
-                    'user_id': str(current_user.id),
-                    'action': 'delete_complaint',
-                    'resource_type': 'complaint',
-                    'resource_id': complaint_id_str,
-                    'details': f'Deleted complaint: {complaint_title} (ID: {complaint_id})',
-                    'ip_address': request.remote_addr
-                })
-                
-                # Commit all changes
-                batch.commit()
-        
         # Also delete from SQLite for consistency
         try:
             # Delete all complaint updates
@@ -1400,4 +934,68 @@ def delete_complaint(complaint_id):
         current_app.logger.error(f"Error deleting complaint: {e}")
         flash(f'Error deleting complaint: {e}', 'danger')
     
-    return redirect(url_for('admin.complaints')) 
+    return redirect(url_for('admin.complaints'))
+
+@admin.route('/send-notification', methods=['GET', 'POST'])
+@login_required
+@admin_required
+def send_notification():
+    """Send notifications to users"""
+    if request.method == 'POST':
+        # Get form data
+        title = request.form.get('title')
+        message = request.form.get('message')
+        recipients = request.form.get('recipients')
+        department = request.form.get('department')
+        
+        if not title or not message or not recipients:
+            flash('Title, message, and recipients are required.', 'danger')
+            return redirect(url_for('admin.send_notification'))
+        
+        # Send to appropriate recipients
+        sent_count = 0
+        if recipients == 'all_users':
+            # Send to all users
+            admin_count = send_notification_to_role('admin', title, message)
+            official_count = send_notification_to_role('official', title, message)
+            citizen_count = send_notification_to_role('citizen', title, message)
+            sent_count = admin_count + official_count + citizen_count
+            recipient_text = 'all users'
+        elif recipients == 'all_citizens':
+            sent_count = send_notification_to_role('citizen', title, message)
+            recipient_text = 'all citizens'
+        elif recipients == 'all_officials':
+            sent_count = send_notification_to_role('official', title, message)
+            recipient_text = 'all officials'
+        elif recipients == 'all_admins':
+            sent_count = send_notification_to_role('admin', title, message)
+            recipient_text = 'all administrators'
+        elif recipients == 'department' and department:
+            sent_count = send_notification_to_department(department, title, message)
+            recipient_text = f'officials in {department} department'
+        else:
+            flash('Invalid recipient selection.', 'danger')
+            return redirect(url_for('admin.send_notification'))
+        
+        # Create audit log
+        log = AuditLog(
+            user_id=current_user.id,
+            action='send_notification',
+            resource_type='notification',
+            resource_id=None,
+            details=f'Sent notification "{title}" to {recipient_text}',
+            ip_address=request.remote_addr
+        )
+        db.session.add(log)
+        db.session.commit()
+        
+        flash(f'Notification sent to {sent_count} recipients.', 'success')
+        return redirect(url_for('admin.dashboard'))
+    
+    # GET request - show form
+    # Get all departments for the department dropdown
+    departments = db.session.query(Category.department).distinct().all()
+    department_list = [dept[0] for dept in departments if dept[0]]
+    
+    return render_template('admin/send_notification.html', 
+                          departments=department_list) 

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Complaint Update: #{{ complaint.id }}</title>
+    <title>New Complaint: #{{ complaint.id }}</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -75,16 +75,12 @@
 </head>
 <body>
     <div class="header">
-        <h1>Complaint Update</h1>
+        <h1>New Complaint</h1>
     </div>
     <div class="content">
-        <p>Hello {{ user.first_name }},</p>
+        <p>Hello {{ recipient_name }},</p>
         
-        <p>There has been an update to your complaint with CitySeva.</p>
-        
-        {% if status_change %}
-            <p>Your complaint status has been updated <strong>{{ status_change }}</strong>.</p>
-        {% endif %}
+        <p>A new complaint has been submitted in CitySeva that requires your attention.</p>
         
         <div class="complaint-details">
             <h3>Complaint #{{ complaint.id }}</h3>
@@ -95,20 +91,13 @@
                 <span class="status status-{{ complaint.status.replace('_', '-') }}">{{ complaint.status.replace('_', ' ').title() }}</span>
             </p>
             <p><strong>Submitted:</strong> {{ complaint.created_at.strftime('%Y-%m-%d %H:%M') }}</p>
-            {% if complaint.resolved_at %}
-                <p><strong>Resolved:</strong> {{ complaint.resolved_at.strftime('%Y-%m-%d %H:%M') }}</p>
-            {% endif %}
         </div>
         
         <p style="text-align: center;">
-            <a href="{{ url_for('citizen.complaint_detail', complaint_id=complaint.id, _external=True) }}" class="button">View Complaint Details</a>
+            <a href="{{ url_for('admin.complaint_detail', complaint_id=complaint.id, _external=True) }}" class="button">View Complaint Details</a>
         </p>
         
-        {% if complaint.status == 'resolved' %}
-            <p>Please consider providing feedback on the resolution to help us improve our services.</p>
-        {% endif %}
-        
-        <p>Thank you for using CitySeva to report civic issues.</p>
+        <p>Thank you for your prompt attention to this matter.</p>
         
         <p>Regards,<br>The CitySeva Team</p>
     </div>

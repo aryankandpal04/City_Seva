@@ -13,20 +13,6 @@ class Config:
     SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or 'sqlite:///cityseva.db'
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     
-    # Firebase Configuration
-    FIREBASE_API_KEY = os.environ.get('FIREBASE_API_KEY')
-    FIREBASE_AUTH_DOMAIN = os.environ.get('FIREBASE_AUTH_DOMAIN')
-    FIREBASE_PROJECT_ID = os.environ.get('FIREBASE_PROJECT_ID')
-    FIREBASE_STORAGE_BUCKET = os.environ.get('FIREBASE_STORAGE_BUCKET')
-    FIREBASE_MESSAGING_SENDER_ID = os.environ.get('FIREBASE_MESSAGING_SENDER_ID')
-    FIREBASE_APP_ID = os.environ.get('FIREBASE_APP_ID')
-    FIREBASE_MEASUREMENT_ID = os.environ.get('FIREBASE_MEASUREMENT_ID')
-    FIREBASE_DATABASE_URL = os.environ.get('FIREBASE_DATABASE_URL')
-    FIREBASE_SERVICE_ACCOUNT_KEY = os.environ.get('FIREBASE_SERVICE_ACCOUNT_KEY', 'firebase_service_account.json')
-    
-    # Use Firebase as primary data store
-    USE_FIREBASE = os.environ.get('USE_FIREBASE', 'True').lower() in ('true', '1', 't')
-    
     # Mail configuration
     MAIL_SERVER = os.environ.get('MAIL_SERVER') or 'smtp.gmail.com'
     MAIL_PORT = int(os.environ.get('MAIL_PORT') or 587)
@@ -37,10 +23,6 @@ class Config:
     MAIL_DEFAULT_SENDER = os.environ.get('MAIL_DEFAULT_SENDER') or 'noreply@cityseva.com'
     MAIL_KEYFILE = None  # Disable keyfile for compatibility with Python 3.12
     MAIL_CERTFILE = None  # Disable certfile for compatibility with Python 3.12
-    
-    # Firebase Email Function (for email fallback)
-    FIREBASE_EMAIL_FUNCTION_URL = os.environ.get('FIREBASE_EMAIL_FUNCTION_URL')
-    FIREBASE_EMAIL_API_KEY = os.environ.get('FIREBASE_EMAIL_API_KEY')
     
     # OTP configuration
     OTP_LENGTH = int(os.environ.get('OTP_LENGTH') or 6)
@@ -76,7 +58,6 @@ class TestingConfig(Config):
     SQLALCHEMY_DATABASE_URI = 'sqlite://'  # Use in-memory database for testing
     WTF_CSRF_ENABLED = False
     REQUIRE_EMAIL_VERIFICATION = False
-    USE_FIREBASE = False  # Disable Firebase for tests
 
 
 class ProductionConfig(Config):
@@ -86,9 +67,6 @@ class ProductionConfig(Config):
     
     # Configure proper database in production
     SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL')
-    
-    # Use Firebase in production by default
-    USE_FIREBASE = os.environ.get('USE_FIREBASE', 'True').lower() in ('true', '1', 't')
     
     # Configure SSL for production
     SSL_REDIRECT = True

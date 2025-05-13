@@ -1,0 +1,76 @@
+{% extends 'admin/base.html' %}
+
+{% block title %}Send Notifications{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card shadow mt-4">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">Send Notifications</h4>
+                </div>
+                <div class="card-body">
+                    <form method="POST" action="{{ url_for('admin.send_notification') }}">
+                        <div class="mb-3">
+                            <label for="title" class="form-label">Notification Title</label>
+                            <input type="text" class="form-control" id="title" name="title" required maxlength="128">
+                            <div class="form-text">The title will appear at the top of the notification.</div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="message" class="form-label">Notification Message</label>
+                            <textarea class="form-control" id="message" name="message" rows="4" required></textarea>
+                            <div class="form-text">The message body of the notification.</div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="recipients" class="form-label">Recipients</label>
+                            <select class="form-select" id="recipients" name="recipients" required onchange="toggleDepartmentField()">
+                                <option value="">Select Recipients</option>
+                                <option value="all_users">All Users</option>
+                                <option value="all_citizens">All Citizens</option>
+                                <option value="all_officials">All Government Officials</option>
+                                <option value="all_admins">All Administrators</option>
+                                <option value="department">Specific Department Officials</option>
+                            </select>
+                            <div class="form-text">Who should receive this notification.</div>
+                        </div>
+                        
+                        <div class="mb-3" id="departmentField" style="display: none;">
+                            <label for="department" class="form-label">Department</label>
+                            <select class="form-select" id="department" name="department">
+                                <option value="">Select Department</option>
+                                {% for department in departments %}
+                                <option value="{{ department }}">{{ department }}</option>
+                                {% endfor %}
+                            </select>
+                            <div class="form-text">Officials in this department will receive the notification.</div>
+                        </div>
+                        
+                        <div class="mt-4 d-flex justify-content-between">
+                            <a href="{{ url_for('admin.dashboard') }}" class="btn btn-secondary">Cancel</a>
+                            <button type="submit" class="btn btn-primary">Send Notification</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function toggleDepartmentField() {
+    const recipients = document.getElementById('recipients').value;
+    const departmentField = document.getElementById('departmentField');
+    
+    if (recipients === 'department') {
+        departmentField.style.display = 'block';
+        document.getElementById('department').setAttribute('required', 'required');
+    } else {
+        departmentField.style.display = 'none';
+        document.getElementById('department').removeAttribute('required');
+    }
+}
+</script>
+{% endblock %} 

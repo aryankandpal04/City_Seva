@@ -9,13 +9,7 @@
             {% if needs_verification %}
             <div class="alert alert-warning">
                 <strong>Email Verification Required</strong>
-                <p>You need to verify your email address before logging in.</p>
-                <form action="{{ url_for('auth.resend_verification') }}" method="POST" class="mt-2">
-                    <input type="hidden" name="email" value="{{ verification_email }}">
-                    <button type="submit" class="btn btn-warning">
-                        <i class="fas fa-envelope me-2"></i>Resend Verification Email
-                    </button>
-                </form>
+                <p>You need to verify your email address before logging in. Please check your email for a verification code or use the OTP verification option.</p>
             </div>
             {% endif %}
             
@@ -24,17 +18,6 @@
                     <h3><i class="fas fa-sign-in-alt me-2"></i>Login</h3>
                 </div>
                 <div class="card-body">
-                    <!-- Google Sign-In Button -->
-                    <div class="d-grid mb-4">
-                        <button id="googleSignInBtn" class="btn btn-outline-danger">
-                            <i class="fab fa-google me-2"></i>Sign in with Google
-                        </button>
-                    </div>
-                    
-                    <div class="text-center mb-3">
-                        <span class="divider">OR</span>
-                    </div>
-                    
                     <form method="POST" action="{{ url_for('auth.login') }}">
                         {{ form.hidden_tag() }}
                         
@@ -112,19 +95,6 @@
                     <div class="text-center">
                         <a href="{{ url_for('auth.reset_password_request') }}">Forgot Password?</a>
                         <p class="mt-3">Don't have an account? <a href="{{ url_for('auth.register') }}">Register here</a></p>
-                        
-                        <!-- Forgot Verification Email -->
-                        <div class="mt-3">
-                            <p>Didn't receive verification email?</p>
-                            <form action="{{ url_for('auth.resend_verification') }}" method="POST" class="mt-2">
-                                <div class="input-group">
-                                    <input type="email" name="email" class="form-control" placeholder="Enter your email" required>
-                                    <button type="submit" class="btn btn-secondary">
-                                        <i class="fas fa-envelope me-1"></i>Resend
-                                    </button>
-                                </div>
-                            </form>
-                        </div>
                     </div>
                 </div>
             </div>
@@ -153,189 +123,50 @@
     </div>
 </div>
 
-<!-- Load Firebase JS SDK -->
-<script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-auth-compat.js"></script>
-
+{% block scripts %}
 <script>
-// Initialize Firebase with verbose logging
-const firebaseConfig = {
-    apiKey: "{{ config.FIREBASE_API_KEY }}",
-    authDomain: "{{ config.FIREBASE_AUTH_DOMAIN }}",
-    projectId: "{{ config.FIREBASE_PROJECT_ID }}",
-    storageBucket: "{{ config.FIREBASE_STORAGE_BUCKET }}",
-    messagingSenderId: "{{ config.FIREBASE_MESSAGING_SENDER_ID }}",
-    appId: "{{ config.FIREBASE_APP_ID }}",
-    measurementId: "{{ config.FIREBASE_MEASUREMENT_ID }}"
-};
-
-// Debug Firebase Config
-console.log("Firebase Config:", {
-    apiKey: firebaseConfig.apiKey ? "Set" : "Not Set",
-    authDomain: firebaseConfig.authDomain ? "Set" : "Not Set",
-    projectId: firebaseConfig.projectId ? "Set" : "Not Set",
-    // Other config values
-});
-
-// Initialize Firebase
-try {
-    firebase.initializeApp(firebaseConfig);
-    console.log("Firebase initialized successfully");
-} catch (error) {
-    console.error("Firebase initialization error:", error);
-    alert("Error initializing Firebase: " + error.message);
-}
-
-// Handle Google Sign-In
-document.getElementById('googleSignInBtn').addEventListener('click', function() {
-    try {
-        console.log("Google Sign-In button clicked");
-        const provider = new firebase.auth.GoogleAuthProvider();
-        provider.addScope('email');
-        
-        // Show loading state
-        const button = this;
-        button.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Signing in...';
-        button.disabled = true;
-        
-        // Sign in with popup
-        firebase.auth().signInWithPopup(provider)
-            .then((result) => {
-                console.log("Google sign-in successful, getting ID token");
-                // Get the ID token
-                return result.user.getIdToken();
-            })
-            .then((idToken) => {
-                console.log("ID token acquired, sending to server");
-                // Send the token to your server
-                return fetch('{{ url_for("auth.google_signin") }}', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ idToken: idToken })
-                });
-            })
-            .then(response => {
-                console.log("Server response received:", response.status);
-                if (!response.ok) {
-                    console.error("Server error:", response.status, response.statusText);
-                    throw new Error(`Server error: ${response.status} ${response.statusText}`);
-                }
-                return response.json();
-            })
-            .then(data => {
-                console.log("Response data:", data);
-                if (data.success) {
-                    // Redirect to the specified URL
-                    window.location.href = data.redirect;
-                } else {
-                    // Show error message
-                    console.error("Authentication failed:", data.error);
-                    alert('Authentication failed: ' + (data.error || 'Unknown error'));
-                    // Reset button
-                    button.innerHTML = '<i class="fab fa-google me-2"></i>Sign in with Google';
-                    button.disabled = false;
-                }
-            })
-            .catch((error) => {
-                console.error('Google Sign-In Error:', error);
-                alert('Sign-in failed: ' + error.message);
-                // Reset button
-                button.innerHTML = '<i class="fab fa-google me-2"></i>Sign in with Google';
-                button.disabled = false;
-            });
-    } catch (error) {
-        console.error("Caught exception during Google sign-in process:", error);
-        alert('Error during sign-in process: ' + error.message);
-        // Reset button
-        this.innerHTML = '<i class="fab fa-google me-2"></i>Sign in with Google';
-        this.disabled = false;
-    }
-});
-
+// Toggle department field based on role selection
 document.addEventListener('DOMContentLoaded', function() {
-    const citizenRadio = document.getElementById('role-citizen');
-    const officialRadio = document.getElementById('role-official');
+    const roleRadios = document.querySelectorAll('input[name="role"]');
     const departmentField = document.getElementById('department-field');
-    const departmentSelect = document.getElementById('department');
+    const departmentSelect = document.getElementById('department_id');
     const otherDepartmentContainer = document.getElementById('otherDepartmentContainer');
-    const otherDepartmentField = document.getElementById('otherDepartment');
     
-    // Set initial state based on the selected role
-    if (officialRadio.checked) {
-        departmentField.style.display = 'block';
-        // Check if 'Other' is selected
-        if (departmentSelect.value === 'Other') {
-            otherDepartmentContainer.style.display = 'block';
-            otherDepartmentField.setAttribute('required', 'required');
+    // Function to toggle department field visibility
+    function toggleDepartmentField() {
+        const selectedRole = document.querySelector('input[name="role"]:checked').value;
+        if (selectedRole === 'official') {
+            departmentField.style.display = 'block';
+        } else {
+            departmentField.style.display = 'none';
         }
     }
     
-    // Add event listeners for role changes
-    citizenRadio.addEventListener('change', function() {
-        departmentField.style.display = 'none';
-        otherDepartmentContainer.style.display = 'none';
-        otherDepartmentField.removeAttribute('required');
-    });
-    
-    officialRadio.addEventListener('change', function() {
-        departmentField.style.display = 'block';
-        // Check if 'Other' is selected
-        if (departmentSelect.value === 'Other') {
+    // Function to toggle other department field
+    function toggleOtherDepartment() {
+        if (departmentSelect && departmentSelect.value === 'Other') {
             otherDepartmentContainer.style.display = 'block';
-            otherDepartmentField.setAttribute('required', 'required');
-        }
-    });
-    
-    // Add event listener for department changes
-    departmentSelect.addEventListener('change', function() {
-        if (this.value === 'Other') {
-            otherDepartmentContainer.style.display = 'block';
-            otherDepartmentField.setAttribute('required', 'required');
         } else {
             otherDepartmentContainer.style.display = 'none';
-            otherDepartmentField.removeAttribute('required');
         }
+    }
+    
+    // Add event listeners
+    roleRadios.forEach(radio => {
+        radio.addEventListener('change', toggleDepartmentField);
     });
     
-    // Make the whole button label clickable
-    document.querySelectorAll('.form-check-label.btn').forEach(function(label) {
-        label.addEventListener('click', function() {
-            const radio = document.getElementById(this.getAttribute('for'));
-            radio.checked = true;
-            
-            // Trigger the change event
-            const event = new Event('change');
-            radio.dispatchEvent(event);
-        });
-    });
+    if (departmentSelect) {
+        departmentSelect.addEventListener('change', toggleOtherDepartment);
+    }
+    
+    // Initial toggle on page load
+    toggleDepartmentField();
+    if (departmentSelect) {
+        toggleOtherDepartment();
+    }
 });
 </script>
+{% endblock %}
 
-<style>
-/* Style for the OR divider */
-.divider {
-    position: relative;
-    margin: 0;
-    text-align: center;
-    font-size: 14px;
-    color: #6c757d;
-}
-.divider:before,
-.divider:after {
-    content: '';
-    position: absolute;
-    top: 50%;
-    width: 45%;
-    height: 1px;
-    background-color: #dee2e6;
-}
-.divider:before {
-    left: 0;
-}
-.divider:after {
-    right: 0;
-}
-</style>
 {% endblock %} 
