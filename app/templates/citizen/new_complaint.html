@@ -71,7 +71,12 @@
                                     {% endfor %}
                                 </div>
                             {% else %}
-                                {{ form.location(class="form-control", id="location-input", placeholder="Enter location or use current location") }}
+                                <gmp-place-autocomplete
+                                    id="location-input"
+                                    class="form-control"
+                                    placeholder="Enter location or use current location"
+                                    required
+                                ></gmp-place-autocomplete>
                             {% endif %}
                             <div class="form-text">
                                 <a href="#" id="use-current-location" class="text-primary">
@@ -126,13 +131,16 @@
         </div>
     </div>
 </div>
+{% endblock %}
 
 {% block scripts %}
 <script>
-let map, marker;
-const defaultLocation = { lat: 20.5937, lng: 78.9629 }; // Default to India's center
+// Define initMap before the API loads
+window.initMap = function() {
+    console.log('Initializing map for new complaint form');
+    const defaultLocation = { lat: 20.5937, lng: 78.9629 }; // Default to India's center
+    let map, marker;
 
-function initMap() {
     map = new google.maps.Map(document.getElementById('map'), {
         zoom: 5,
         center: defaultLocation,
@@ -160,20 +168,48 @@ function initMap() {
         ]
     });
 
-    const locationInput = document.getElementById('location-input');
-    const autocomplete = new google.maps.places.Autocomplete(locationInput);
-
-    autocomplete.addListener('place_changed', () => {
-        const place = autocomplete.getPlace();
-        if (!place.geometry) return;
-
-        updateMapLocation(place.geometry.location);
-    });
+    // Initialize PlaceAutocompleteElement
+    const placeAutocomplete = document.getElementById('location-input');
+    if (placeAutocomplete) {
+        placeAutocomplete.addEventListener('gmp-place-changed', () => {
+            const place = placeAutocomplete.getPlace();
+            if (!place.geometry) {
+                showLocationError('Please select a location from the dropdown suggestions.');
+                return;
+            }
+            updateMapLocation(place.geometry.location);
+        });
+    }
 
     map.addListener('click', (e) => {
         updateMapLocation(e.latLng);
         reverseGeocode(e.latLng);
     });
+
+    // Initialize current location button
+    const useCurrentLocationBtn = document.getElementById('use-current-location');
+    if (useCurrentLocationBtn) {
+        useCurrentLocationBtn.addEventListener('click', handleCurrentLocationClick);
+    }
+};
+
+// Helper functions
+function showLocationError(message) {
+    let errorDiv = document.getElementById('location-error');
+    if (!errorDiv) {
+        errorDiv = document.createElement('div');
+        errorDiv.id = 'location-error';
+        errorDiv.className = 'alert alert-warning alert-dismissible fade show mt-2';
+        errorDiv.innerHTML = `
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            <div class="d-flex align-items-center">
+                <i class="fas fa-exclamation-triangle me-2"></i>
+                <span id="location-error-message"></span>
+            </div>
+        `;
+        document.getElementById('location-input').parentNode.appendChild(errorDiv);
+    }
+    document.getElementById('location-error-message').textContent = message;
 }
 
 function updateMapLocation(location) {
@@ -197,13 +233,46 @@ function reverseGeocode(latLng) {
     geocoder.geocode({ location: latLng }, (results, status) => {
         if (status === 'OK' && results[0]) {
             document.getElementById('location-input').value = results[0].formatted_address;
+        } else {
+            showLocationError('Could not determine the address for this location. Please enter it manually.');
         }
     });
 }
 
-document.getElementById('use-current-location').addEventListener('click', (e) => {
+function handleLocationError(error) {
+    let errorMessage;
+    switch(error.code) {
+        case error.PERMISSION_DENIED:
+            errorMessage = 'Location permission was denied. Please enable location access in your browser settings or enter the location manually.';
+            break;
+        case error.POSITION_UNAVAILABLE:
+            errorMessage = 'Location information is unavailable. Please check if your device\'s location service is enabled or enter the location manually.';
+            break;
+        case error.TIMEOUT:
+            errorMessage = 'Location request timed out. Please try again or enter the location manually.';
+            break;
+        default:
+            errorMessage = 'An unknown error occurred while getting your location. Please enter it manually.';
+    }
+    showLocationError(errorMessage);
+}
+
+function handleCurrentLocationClick(e) {
     e.preventDefault();
+    
+    // Clear any existing error messages
+    const existingError = document.getElementById('location-error');
+    if (existingError) {
+        existingError.remove();
+    }
+
     if (navigator.geolocation) {
+        // Show loading state
+        const button = e.target.closest('a');
+        const originalContent = button.innerHTML;
+        button.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Getting location...';
+        button.style.pointerEvents = 'none';
+
         navigator.geolocation.getCurrentPosition(
             (position) => {
                 const location = {
@@ -212,20 +281,27 @@ document.getElementById('use-current-location').addEventListener('click', (e) =>
                 };
                 updateMapLocation(location);
                 reverseGeocode(location);
+                
+                // Reset button
+                button.innerHTML = originalContent;
+                button.style.pointerEvents = 'auto';
             },
             (error) => {
-                console.error('Error getting location:', error);
-                alert('Unable to get your current location. Please enter it manually.');
+                handleLocationError(error);
+                
+                // Reset button
+                button.innerHTML = originalContent;
+                button.style.pointerEvents = 'auto';
+            },
+            {
+                enableHighAccuracy: true,
+                timeout: 10000,
+                maximumAge: 0
             }
         );
     } else {
-        alert('Geolocation is not supported by your browser.');
+        showLocationError('Geolocation is not supported by your browser. Please enter the location manually.');
     }
-});
-
-// Initialize map when the page loads
-google.maps.event.addDomListener(window, 'load', initMap);
+}
 </script>
-{% endblock %}
-
 {% endblock %} 

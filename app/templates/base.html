@@ -5,6 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}CitySeva{% endblock %}</title>
     
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='img/favicon.svg') }}">
+    <link rel="alternate icon" type="image/x-icon" href="{{ url_for('static', filename='img/favicon.ico') }}">
+    
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Font Awesome -->
@@ -264,11 +268,31 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <!-- jQuery -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <!-- Google Maps API -->
-    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD8atpL2upxvA99KrVaZFlv8XxgrqbGZGE&libraries=places"></script>
     <!-- Custom JavaScript -->
     <script src="{{ url_for('static', filename='js/scripts.js') }}"></script>
     
     {% block scripts %}{% endblock %}
+    
+    <!-- Google Maps API -->
+    <script>
+        // Only load Google Maps API if the page needs it
+        if (document.getElementById('map')) {
+            // Function to load Google Maps API
+            function loadGoogleMapsAPI() {
+                const script = document.createElement('script');
+                script.src = `https://maps.googleapis.com/maps/api/js?key=AIzaSyD8atpL2upxvA99KrVaZFlv8XxgrqbGZGE&libraries=places&callback=initMap`;
+                script.async = true;
+                script.defer = true;
+                document.head.appendChild(script);
+            }
+
+            // Load Google Maps API when the page is ready
+            if (document.readyState === 'complete') {
+                loadGoogleMapsAPI();
+            } else {
+                window.addEventListener('load', loadGoogleMapsAPI);
+            }
+        }
+    </script>
 </body>
 </html> 

@@ -30,7 +30,7 @@
                         </div>
                         <h6 class="card-title mb-0 ms-3">Total Complaints</h6>
                     </div>
-                    <h3 class="mb-0 text-primary">{{ stats.total_complaints }}</h3>
+                    <h3 class="mb-0 text-primary">{{ total_complaints }}</h3>
                 </div>
             </div>
         </div>
@@ -43,7 +43,7 @@
                         </div>
                         <h6 class="card-title mb-0 ms-3">Resolved</h6>
                     </div>
-                    <h3 class="mb-0 text-success">{{ stats.resolved_complaints }}</h3>
+                    <h3 class="mb-0 text-success">{{ resolved_count }}</h3>
                 </div>
             </div>
         </div>
@@ -56,7 +56,7 @@
                         </div>
                         <h6 class="card-title mb-0 ms-3">Pending</h6>
                     </div>
-                    <h3 class="mb-0 text-warning">{{ stats.pending_complaints }}</h3>
+                    <h3 class="mb-0 text-warning">{{ pending_count }}</h3>
                 </div>
             </div>
         </div>
@@ -69,7 +69,7 @@
                         </div>
                         <h6 class="card-title mb-0 ms-3">In Progress</h6>
                     </div>
-                    <h3 class="mb-0 text-info">{{ stats.in_progress_complaints }}</h3>
+                    <h3 class="mb-0 text-info">{{ in_progress_count }}</h3>
                 </div>
             </div>
         </div>
@@ -91,7 +91,7 @@
                         <tr>
                             <th>ID</th>
                             <th>Category</th>
-                            <th>Subject</th>
+                            <th>Title</th>
                             <th>Status</th>
                             <th>Date</th>
                             <th>Actions</th>
@@ -102,15 +102,15 @@
                         <tr>
                             <td>#{{ complaint.id }}</td>
                             <td>{{ complaint.category.name }}</td>
-                            <td>{{ complaint.subject }}</td>
+                            <td>{{ complaint.title }}</td>
                             <td>
-                                <span class="badge bg-{{ complaint.status_color }}">
-                                    {{ complaint.status }}
+                                <span class="badge bg-{{ complaint.status|replace('pending', 'warning')|replace('in_progress', 'info')|replace('resolved', 'success')|replace('rejected', 'danger') }}">
+                                    {{ complaint.status|replace('_', ' ')|title }}
                                 </span>
                             </td>
                             <td>{{ complaint.created_at.strftime('%Y-%m-%d') }}</td>
                             <td>
-                                <a href="{{ url_for('citizen.view_complaint', complaint_id=complaint.id) }}" 
+                                <a href="{{ url_for('citizen.complaint_detail', complaint_id=complaint.id) }}" 
                                    class="btn btn-sm btn-outline-primary">
                                     <i class="fas fa-eye"></i>
                                 </a>
