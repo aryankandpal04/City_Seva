@@ -6,7 +6,7 @@ main = Blueprint('main', __name__, template_folder='templates')
 
 @main.route('/')
 def index():
-    return render_template('index.html')
+    return redirect(url_for('citizen.index'))
 
 @main.route('/about')
 def about():
@@ -23,4 +23,9 @@ def contact():
             return redirect(url_for('main.contact'))
         except Exception as e:
             flash('Sorry, there was an error sending your message. Please try again later.', 'danger')
-    return render_template('contact.html', form=form) 
+    return render_template('contact.html', form=form)
+
+@main.route('/api/docs')
+def api_docs():
+    """API documentation page"""
+    return render_template('api_docs.html') 

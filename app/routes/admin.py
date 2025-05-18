@@ -265,9 +265,7 @@ def complaint_detail(complaint_id):
         try:
             # Update complaint
             old_status = complaint.status
-            old_priority = complaint.priority
             complaint.status = form.status.data
-            complaint.priority = form.priority.data
             if form.assigned_to.data:
                 complaint.assigned_to_id = form.assigned_to.data
             complaint.updated_at = datetime.utcnow()
@@ -350,7 +348,7 @@ def complaint_detail(complaint_id):
                         )
                         notifications_to_send.append(assignment_notification)
             
-            # Notifications for status and priority changes
+            # Notifications for status changes
             notifications_to_send = []
             
             # If status changed to resolved, set resolved date
@@ -388,19 +386,7 @@ def complaint_detail(complaint_id):
                 )
                 notifications_to_send.append(notification)
             
-            # Send notification for priority changes
-            if form.priority.data != old_priority:
-                priority_display = form.priority.data.title()
-                
-                # Only send a priority notification if we haven't already sent a status change notification
-                if form.status.data == old_status:
-                    notification = Notification(
-                        user_id=complaint.user_id,
-                        title=f"Complaint Priority Updated",
-                        message=f"Your complaint '{complaint.title}' priority has been updated to {priority_display}.",
-                        created_at=datetime.utcnow()
-                    )
-                    notifications_to_send.append(notification)
+            # Priority notifications removed
             
             # Add all notifications to session and send emails
             citizen = User.query.get(complaint.user_id)
@@ -437,25 +423,16 @@ def complaint_detail(complaint_id):
                         current_app.logger.info(f"Sent email notification to {citizen.email} about complaint {complaint.id}")
                     except Exception as e:
                         current_app.logger.error(f"Failed to send email notification: {e}")
-                        # Don't stop the process if email fails
             
             # Create audit log
-            audit_details = []
-            if form.status.data != old_status:
-                audit_details.append(f"status from '{old_status}' to '{form.status.data}'")
-            if form.priority.data != old_priority:
-                audit_details.append(f"priority from '{old_priority}' to '{form.priority.data}'")
+            audit_details = f"status from '{old_status}' to '{form.status.data}'"
             
-            audit_detail_text = ", ".join(audit_details)
-            if not audit_detail_text:
-                audit_detail_text = "complaint details (no status/priority change)"
-                
             audit = AuditLog(
                 user_id=current_user.id,
                 action='update_complaint',
                 resource_type='complaint',
                 resource_id=complaint.id,
-                details=f'Updated {audit_detail_text}',
+                details=f'Updated {audit_details}',
                 ip_address=request.remote_addr
             )
             db.session.add(audit)
@@ -474,7 +451,6 @@ def complaint_detail(complaint_id):
     
     # Pre-populate form with current values
     form.status.data = complaint.status
-    form.priority.data = complaint.priority
     form.assigned_to.data = complaint.assigned_to_id
     form.complaint_id.data = complaint.id
     

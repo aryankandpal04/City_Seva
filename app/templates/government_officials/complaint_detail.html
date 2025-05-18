@@ -218,12 +218,6 @@ Comment field exists: {{ form.comment is defined }}
                         </div>
                         
                         <div class="mb-3">
-                            <label class="form-label">Priority</label>
-                            {{ form.priority(class="form-select") }}
-                            <div class="form-text">Set the priority level of this complaint.</div>
-                        </div>
-                        
-                        <div class="mb-3">
                             <label class="form-label">Comment</label>
                             {{ form.comment(class="form-control", rows=4, placeholder="Add details about this update...") }}
                             <div class="form-text">This comment will be visible to the citizen and included in email notifications.</div>

@@ -30,6 +30,7 @@ body {
     flex-direction: column;
     background-color: #f8fdff;
     color: var(--text-primary);
+    overflow-x: hidden; /* Prevent horizontal scrolling on mobile */
 }
 
 main {
@@ -647,5 +648,246 @@ footer a:hover {
     
     footer {
         padding: 2rem 0 1rem;
+    }
+}
+
+/* Mobile Optimization - Responsive Design Enhancements */
+
+/* Small devices (portrait phones, less than 576px) */
+@media (max-width: 575.98px) {
+    .container {
+        padding-left: 15px;
+        padding-right: 15px;
+    }
+    
+    h1 {
+        font-size: 1.75rem;
+    }
+    
+    h2 {
+        font-size: 1.5rem;
+    }
+    
+    /* Adjust card padding for small screens */
+    .card-body {
+        padding: 1.25rem;
+    }
+    
+    /* Make table responsive on very small screens */
+    .table-responsive-sm {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+    
+    /* Form adjustments for mobile */
+    .form-label {
+        margin-bottom: 0.5rem;
+        font-size: 0.9rem;
+    }
+    
+    .form-control, .form-select {
+        font-size: 1rem;
+        padding: 0.75rem 1rem;
+        height: auto;
+    }
+    
+    /* Adjust button size for easier tapping */
+    .btn {
+        padding: 0.65rem 1.25rem;
+        font-size: 1rem;
+    }
+    
+    /* Dashboard stats for mobile */
+    .stats-card {
+        margin-bottom: 1rem;
+    }
+    
+    .stats-card .display-4 {
+        font-size: 2rem;
+    }
+    
+    /* Fix chart containers on mobile */
+    .chart-container {
+        height: 250px !important;
+    }
+}
+
+/* Medium devices (tablets, less than 768px) */
+@media (max-width: 767.98px) {
+    /* Adjust spacing on mobile */
+    .row {
+        margin-left: -10px;
+        margin-right: -10px;
+    }
+    
+    .col, .col-1, .col-2, .col-3, .col-4, .col-5, .col-6, 
+    .col-7, .col-8, .col-9, .col-10, .col-11, .col-12, 
+    .col-sm, .col-sm-1, .col-sm-2, .col-sm-3, .col-sm-4, 
+    .col-sm-5, .col-sm-6, .col-sm-7, .col-sm-8, .col-sm-9, 
+    .col-sm-10, .col-sm-11, .col-sm-12, .col-md, .col-md-1, 
+    .col-md-2, .col-md-3, .col-md-4, .col-md-5, .col-md-6, 
+    .col-md-7, .col-md-8, .col-md-9, .col-md-10, .col-md-11, 
+    .col-md-12 {
+        padding-right: 10px;
+        padding-left: 10px;
+    }
+    
+    /* Reduce card shadow on mobile */
+    .card {
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    }
+    
+    /* Adjust navigation for mobile */
+    .navbar {
+        padding: 0.5rem 0;
+    }
+
+    .navbar-brand {
+        font-size: 1.25rem;
+    }
+    
+    /* Hide transform animations on mobile for better performance */
+    .card:hover, .dashboard-card:hover {
+        transform: none;
+    }
+    
+    /* Maps container height adjustment */
+    #complaint-map, #complaintsMap {
+        height: 250px !important;
+    }
+}
+
+/* Progressive Web App styles */
+@media (display-mode: standalone) {
+    /* Add styles specific to when app is installed on home screen */
+    body {
+        /* Remove browser UI elements when launched as PWA */
+        padding-top: env(safe-area-inset-top);
+        padding-right: env(safe-area-inset-right);
+        padding-bottom: env(safe-area-inset-bottom);
+        padding-left: env(safe-area-inset-left);
+        background-color: #f8fdff;
+    }
+
+    /* Apply full-screen styles when in PWA mode */
+    .navbar {
+        position: sticky;
+        top: 0;
+        z-index: 1030;
+    }
+}
+
+/* Touch-friendly styles */
+@media (hover: none) {
+    /* Optimize for touch devices */
+    
+    /* Increase hit target sizes for buttons */
+    .btn, .nav-link, .list-group-item, .dropdown-item {
+        min-height: 44px; /* Apple's recommended minimum tap target size */
+        display: flex;
+        align-items: center;
+    }
+    
+    /* Larger checkboxes and radio buttons */
+    .form-check-input {
+        width: 1.25rem;
+        height: 1.25rem;
+        margin-top: 0.15rem;
+    }
+    
+    /* Remove hover effects that don't make sense on touch devices */
+    .btn:hover, .card:hover, .nav-link:hover {
+        transform: none !important;
+    }
+}
+
+/* Image/Media Optimization for Mobile */
+.img-fluid {
+    max-width: 100%;
+    height: auto;
+}
+
+/* Add loading="lazy" via CSS for supported browsers */
+img:not([loading]) {
+    loading: lazy;
+}
+
+/* Responsive tables */
+.table-responsive {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+/* Dark mode support (based on device preferences) */
+@media (prefers-color-scheme: dark) {
+    body.enable-dark-mode {
+        background-color: #121212;
+        color: #f0f0f0;
+    }
+    
+    body.enable-dark-mode .card {
+        background-color: #1e1e1e;
+        color: #f0f0f0;
+    }
+    
+    body.enable-dark-mode .card-header {
+        background: linear-gradient(135deg, #007c91, #0085a1);
+    }
+    
+    body.enable-dark-mode .table th {
+        background-color: #2d2d2d;
+        color: #f0f0f0;
+    }
+    
+    body.enable-dark-mode .form-control, 
+    body.enable-dark-mode .form-select {
+        background-color: #2d2d2d;
+        color: #f0f0f0;
+        border-color: #444;
+    }
+}
+
+/* Existing media queries update */
+@media (max-width: 768px) {
+    .hero-section {
+        padding: 3rem 0;
+    }
+    
+    .hero-section h1 {
+        font-size: 2rem;
+    }
+    
+    .hero-section p {
+        font-size: 1rem;
+    }
+    
+    .hero-section .btn {
+        margin-top: 1rem;
+        font-size: 0.9rem;
+        padding: 0.5rem 1rem;
+    }
+    
+    .navbar {
+        padding: 0.75rem 0;
+    }
+    
+    .dashboard-card {
+        margin-bottom: 1rem;
+    }
+    
+    .dashboard-card .card-body {
+        padding: 1.5rem;
+    }
+    
+    .dashboard-card .card-text {
+        font-size: 1.75rem;
+    }
+    
+    .auth-card {
+        padding: 1.5rem;
+    }
+    
+    footer {
+        text-align: center;
     }
 } 

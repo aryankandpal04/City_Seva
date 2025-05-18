@@ -1,7 +1,7 @@
 from flask import Blueprint, render_template, redirect, url_for, flash, request, current_app, abort
 from flask_login import login_required, current_user
-from datetime import datetime
-from sqlalchemy import desc, func
+from datetime import datetime, timedelta
+from sqlalchemy import desc, func, case, extract
 from app import db
 from app.models import User, Complaint, Category, ComplaintUpdate, Feedback, AuditLog, Notification, ComplaintMedia
 from app.forms.admin import ComplaintUpdateForm, SearchForm
@@ -70,6 +70,83 @@ def dashboard():
             dept_complaints = Complaint.query.filter(
                 Complaint.category_id.in_(category_ids)
             ).order_by(desc(Complaint.created_at)).limit(10).all()
+
+            # Get high priority complaints for display
+            priority_complaints = Complaint.query.filter(
+                Complaint.category_id.in_(category_ids),
+                Complaint.priority.in_(['high', 'urgent']),
+                Complaint.status.in_(['pending', 'in_progress'])
+            ).order_by(desc(Complaint.created_at)).limit(5).all()
+            
+            # Get trend data for the last 12 months
+            end_date = datetime.utcnow().replace(day=1)  # First day of current month
+            start_date = end_date - timedelta(days=365)  # Approximately 12 months ago
+            
+            trend_data = db.session.query(
+                extract('year', Complaint.created_at).label('year'),
+                extract('month', Complaint.created_at).label('month'),
+                func.count(Complaint.id).label('count')
+            ).filter(
+                Complaint.category_id.in_(category_ids),
+                Complaint.created_at >= start_date,
+                Complaint.created_at < end_date
+            ).group_by('year', 'month').order_by('year', 'month').all()
+            
+            trend_dates = []
+            trend_counts = []
+            
+            # Process the trend data
+            current_date = start_date
+            while current_date < end_date:
+                month_name = current_date.strftime('%b %Y')
+                trend_dates.append(month_name)
+                
+                # Find count for this month
+                count = 0
+                for data in trend_data:
+                    if data.year == current_date.year and data.month == current_date.month:
+                        count = data.count
+                        break
+                
+                trend_counts.append(count)
+                
+                # Move to next month
+                if current_date.month == 12:
+                    current_date = current_date.replace(year=current_date.year + 1, month=1)
+                else:
+                    current_date = current_date.replace(month=current_date.month + 1)
+            
+            # Get resolution trend data
+            resolution_trend = db.session.query(
+                extract('year', Complaint.resolved_at).label('year'),
+                extract('month', Complaint.resolved_at).label('month'),
+                func.count(Complaint.id).label('count')
+            ).filter(
+                Complaint.category_id.in_(category_ids),
+                Complaint.status == 'resolved',
+                Complaint.resolved_at >= start_date,
+                Complaint.resolved_at < end_date
+            ).group_by('year', 'month').order_by('year', 'month').all()
+            
+            resolution_counts = []
+            
+            # Process the resolution trend data
+            current_date = start_date
+            while current_date < end_date:
+                # Find count for this month
+                count = 0
+                for data in resolution_trend:
+                    if data.year == current_date.year and data.month == current_date.month:
+                        count = data.count
+                        break
+                
+                resolution_counts.append(count)
+                
+                # Move to next month
+                if current_date.month == 12:
+                    current_date = current_date.replace(year=current_date.year + 1, month=1)
+                else:
+                    current_date = current_date.replace(month=current_date.month + 1)
             
         else:
             # No categories for this department
@@ -82,6 +159,10 @@ def dashboard():
             high_priority_count = 0
             assigned_complaints = []
             dept_complaints = []
+            priority_complaints = []
+            trend_dates = []
+            trend_counts = []
+            resolution_counts = []
         
         # Get feedback stats for this official
         avg_rating = db.session.query(
@@ -104,7 +185,11 @@ def dashboard():
                               assigned_to_me=assigned_to_me,
                               assigned_complaints=assigned_complaints,
                               dept_complaints=dept_complaints,
-                              avg_rating=avg_rating)
+                              priority_complaints=priority_complaints,
+                              avg_rating=avg_rating,
+                              trend_dates=trend_dates,
+                              trend_counts=trend_counts,
+                              resolution_counts=resolution_counts)
     
     except Exception as e:
         current_app.logger.error(f"Error generating dashboard: {e}")

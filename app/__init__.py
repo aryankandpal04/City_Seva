@@ -1,4 +1,4 @@
-from flask import Flask, render_template, g
+from flask import Flask, render_template, g, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, current_user
 from flask_mailman import Mail
@@ -11,8 +11,9 @@ import logging
 from logging.handlers import RotatingFileHandler
 from sqlalchemy import desc
 from flask_login import user_logged_in, user_logged_out
-from datetime import datetime
+from datetime import datetime, timezone
 from flask_wtf.csrf import CSRFProtect
+from flask_jwt_extended import JWTManager
 
 # Initialize extensions
 db = SQLAlchemy()
@@ -23,6 +24,7 @@ login_manager.login_message = 'Please log in to access this page.'
 login_manager.login_message_category = 'info'
 mail = Mail()
 csrf = CSRFProtect()
+jwt = JWTManager()
 
 def nl2br(value):
     """Convert newlines to <br> tags"""
@@ -153,6 +155,11 @@ def create_app(config_name):
     
     from app.routes.government_officials import government_officials as government_officials_blueprint
     app.register_blueprint(government_officials_blueprint, url_prefix='/government-officials')
+    
+    # Register API v1 blueprint with CSRF exemption
+    from app.routes.api_v1 import api_v1
+    app.register_blueprint(api_v1)
+    csrf.exempt(api_v1)
     
     # Register error handlers
     @app.errorhandler(404)

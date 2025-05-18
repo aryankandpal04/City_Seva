@@ -10,13 +10,6 @@ class ComplaintUpdateForm(FlaskForm):
         ('rejected', 'Rejected')
     ], validators=[DataRequired()])
     
-    priority = SelectField('Priority', choices=[
-        ('low', 'Low'),
-        ('medium', 'Medium'),
-        ('high', 'High'),
-        ('urgent', 'Urgent')
-    ], validators=[DataRequired()])
-    
     assigned_to = SelectField('Assign To', coerce=int, validators=[Optional()])
     
     comment = TextAreaField('Comment', validators=[
@@ -30,18 +23,12 @@ class ComplaintUpdateForm(FlaskForm):
     
     def __init__(self, *args, **kwargs):
         super(ComplaintUpdateForm, self).__init__(*args, **kwargs)
-        # Set default choices for status and priority
+        # Set default choices for status
         self.status.choices = [
             ('pending', 'Pending'),
             ('in_progress', 'In Progress'),
             ('resolved', 'Resolved'),
             ('rejected', 'Rejected')
-        ]
-        self.priority.choices = [
-            ('low', 'Low'),
-            ('medium', 'Medium'),
-            ('high', 'High'),
-            ('urgent', 'Urgent')
         ]
 
 class SearchForm(FlaskForm):
