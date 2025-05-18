@@ -9,6 +9,8 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Font Awesome -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <!-- Custom CSS -->
     <link href="{{ url_for('static', filename='css/styles.css') }}" rel="stylesheet">
     
@@ -16,12 +18,13 @@
 </head>
 <body>
     <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+    <nav class="navbar navbar-expand-lg navbar-dark sticky-top">
         <div class="container">
-            <a class="navbar-brand" href="{{ url_for('citizen.index') }}">
-                <i class="fas fa-city me-2"></i>CitySeva
+            <a class="navbar-brand d-flex align-items-center" href="{{ url_for('citizen.index') }}">
+                <i class="fas fa-city me-2"></i>
+                <span>CitySeva</span>
             </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+            <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
                     aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
@@ -29,74 +32,100 @@
                 <ul class="navbar-nav me-auto">
                     {% if current_user.is_authenticated %}
                         {% if current_user.role in ['admin', 'official'] %}
-                            <li class="nav-item">
-                                <a class="nav-link" href="{{ url_for('admin.dashboard') }}">Dashboard</a>
+                            <li class="nav-item mx-1">
+                                <a class="nav-link" href="{{ url_for('admin.dashboard') }}">
+                                    <i class="fas fa-chart-line me-1"></i>Dashboard
+                                </a>
                             </li>
-                            <li class="nav-item">
-                                <a class="nav-link" href="{{ url_for('admin.complaints') }}">Complaints</a>
+                            <li class="nav-item mx-1">
+                                <a class="nav-link" href="{{ url_for('admin.complaints') }}">
+                                    <i class="fas fa-clipboard-list me-1"></i>Complaints
+                                </a>
                             </li>
                             {% if current_user.role == 'admin' %}
-                                <li class="nav-item">
-                                    <a class="nav-link" href="{{ url_for('admin.categories') }}">Categories</a>
+                                <li class="nav-item mx-1">
+                                    <a class="nav-link" href="{{ url_for('admin.categories') }}">
+                                        <i class="fas fa-tags me-1"></i>Categories
+                                    </a>
                                 </li>
-                                <li class="nav-item">
-                                    <a class="nav-link" href="{{ url_for('admin.users') }}">Users</a>
+                                <li class="nav-item mx-1">
+                                    <a class="nav-link" href="{{ url_for('admin.users') }}">
+                                        <i class="fas fa-users me-1"></i>Users
+                                    </a>
                                 </li>
-                                <li class="nav-item">
-                                    <a class="nav-link" href="{{ url_for('admin.send_notification') }}">Send Notifications</a>
+                                <li class="nav-item mx-1">
+                                    <a class="nav-link" href="{{ url_for('admin.send_notification') }}">
+                                        <i class="fas fa-bell me-1"></i>Notifications
+                                    </a>
                                 </li>
                             {% endif %}
-                            <li class="nav-item">
-                                <a class="nav-link" href="{{ url_for('admin.reports') }}">Reports</a>
+                            <li class="nav-item mx-1">
+                                <a class="nav-link" href="{{ url_for('admin.reports') }}">
+                                    <i class="fas fa-chart-bar me-1"></i>Reports
+                                </a>
                             </li>
                         {% else %}
-                            <li class="nav-item">
-                                <a class="nav-link" href="{{ url_for('citizen.dashboard') }}">Dashboard</a>
+                            <li class="nav-item mx-1">
+                                <a class="nav-link" href="{{ url_for('citizen.dashboard') }}">
+                                    <i class="fas fa-home me-1"></i>Dashboard
+                                </a>
                             </li>
-                            <li class="nav-item">
-                                <a class="nav-link" href="{{ url_for('citizen.complaints') }}">My Complaints</a>
+                            <li class="nav-item mx-1">
+                                <a class="nav-link" href="{{ url_for('citizen.complaints') }}">
+                                    <i class="fas fa-list-alt me-1"></i>My Complaints
+                                </a>
                             </li>
-                            <li class="nav-item">
-                                <a class="nav-link" href="{{ url_for('citizen.new_complaint') }}">New Complaint</a>
+                            <li class="nav-item mx-1">
+                                <a class="nav-link" href="{{ url_for('citizen.new_complaint') }}">
+                                    <i class="fas fa-plus-circle me-1"></i>New Complaint
+                                </a>
                             </li>
                         {% endif %}
                     {% else %}
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{ url_for('citizen.index') }}">Home</a>
+                        <li class="nav-item mx-1">
+                            <a class="nav-link" href="{{ url_for('citizen.index') }}">
+                                <i class="fas fa-home me-1"></i>Home
+                            </a>
                         </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="#about">About</a>
+                        <li class="nav-item mx-1">
+                            <a class="nav-link" href="#about">
+                                <i class="fas fa-info-circle me-1"></i>About
+                            </a>
                         </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="#contact">Contact</a>
+                        <li class="nav-item mx-1">
+                            <a class="nav-link" href="#contact">
+                                <i class="fas fa-envelope me-1"></i>Contact
+                            </a>
                         </li>
                     {% endif %}
                 </ul>
                 <ul class="navbar-nav">
                     {% if current_user.is_authenticated %}
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="#" id="notificationsDropdown" role="button"
+                        <li class="nav-item dropdown mx-1">
+                            <a class="nav-link dropdown-toggle position-relative" href="#" id="notificationsDropdown" role="button"
                                data-bs-toggle="dropdown" aria-expanded="false">
                                 <i class="fas fa-bell"></i>
                                 {% if current_user.is_authenticated %}
                                     {% if unread_notifications_count > 0 %}
-                                        <span class="badge bg-danger">{{ unread_notifications_count }}</span>
+                                        <span class="badge rounded-pill bg-danger position-absolute" style="top: 0; right: 0;">
+                                            {{ unread_notifications_count }}
+                                        </span>
                                     {% endif %}
                                 {% endif %}
                             </a>
-                            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="notificationsDropdown">
+                            <ul class="dropdown-menu dropdown-menu-end shadow border-0" aria-labelledby="notificationsDropdown">
                                 {% if current_user.is_authenticated %}
                                     {% if recent_unread_notifications %}
                                         {% for notification in recent_unread_notifications %}
                                             <li>
                                                 {% if current_user.role == 'admin' and notification|get_doc_attr('title', '')|string and 'Official Account Request' in notification|get_doc_attr('title', '') %}
-                                                <a class="dropdown-item" href="{{ url_for('admin.official_requests') }}">
-                                                    <small class="text-muted">{{ notification|format_timestamp }}</small><br>
+                                                <a class="dropdown-item py-2" href="{{ url_for('admin.official_requests') }}">
+                                                    <small class="text-muted d-block">{{ notification|format_timestamp }}</small>
                                                     <span class="text-danger">{{ notification|get_doc_attr('title', 'Notification') }}</span>
                                                 </a>
                                                 {% else %}
-                                                <a class="dropdown-item" href="{{ url_for('admin.admin_notifications' if current_user.role in ['admin', 'official'] else 'citizen.notifications') }}">
-                                                    <small class="text-muted">{{ notification|format_timestamp }}</small><br>
+                                                <a class="dropdown-item py-2" href="{{ url_for('admin.admin_notifications' if current_user.role in ['admin', 'official'] else 'citizen.notifications') }}">
+                                                    <small class="text-muted d-block">{{ notification|format_timestamp }}</small>
                                                     {{ notification|get_doc_attr('title', 'Notification') }}
                                                 </a>
                                                 {% endif %}
@@ -105,42 +134,54 @@
                                         <li><hr class="dropdown-divider"></li>
                                         <li>
                                             {% if current_user.role in ['admin', 'official'] %}
-                                            <a class="dropdown-item text-center" href="{{ url_for('admin.admin_notifications') }}">View All</a>
+                                            <a class="dropdown-item text-center py-2" href="{{ url_for('admin.admin_notifications') }}">View All</a>
                                             {% else %}
-                                            <a class="dropdown-item text-center" href="{{ url_for('citizen.notifications') }}">View All</a>
+                                            <a class="dropdown-item text-center py-2" href="{{ url_for('citizen.notifications') }}">View All</a>
                                             {% endif %}
                                         </li>
                                     {% else %}
-                                        <li><a class="dropdown-item" href="#">No new notifications</a></li>
+                                        <li><a class="dropdown-item py-2" href="#">No new notifications</a></li>
                                     {% endif %}
                                 {% else %}
-                                    <li><a class="dropdown-item" href="{{ url_for('auth.login') }}">Login to view notifications</a></li>
+                                    <li><a class="dropdown-item py-2" href="{{ url_for('auth.login') }}">Login to view notifications</a></li>
                                 {% endif %}
                             </ul>
                         </li>
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button"
+                        <li class="nav-item dropdown mx-1">
+                            <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="userDropdown" role="button"
                                data-bs-toggle="dropdown" aria-expanded="false">
-                                <i class="fas fa-user-circle me-1"></i>
-                                {{ current_user.username }}
+                                <i class="fas fa-user-circle me-2"></i>
+                                <span>{{ current_user.username }}</span>
                                 {% if current_user.role == 'admin' %}
-                                    <span class="badge bg-danger">Admin</span>
+                                    <span class="badge bg-danger ms-2">Admin</span>
                                 {% elif current_user.role == 'official' %}
-                                    <span class="badge bg-success">Official</span>
+                                    <span class="badge bg-success ms-2">Official</span>
                                 {% endif %}
                             </a>
-                            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
-                                <li><a class="dropdown-item" href="{{ url_for('citizen.profile') }}">Profile</a></li>
+                            <ul class="dropdown-menu dropdown-menu-end shadow border-0" aria-labelledby="userDropdown">
+                                <li>
+                                    <a class="dropdown-item py-2" href="{{ url_for('citizen.profile') }}">
+                                        <i class="fas fa-user me-2"></i>Profile
+                                    </a>
+                                </li>
                                 <li><hr class="dropdown-divider"></li>
-                                <li><a class="dropdown-item" href="{{ url_for('auth.logout') }}">Logout</a></li>
+                                <li>
+                                    <a class="dropdown-item py-2" href="{{ url_for('auth.logout') }}">
+                                        <i class="fas fa-sign-out-alt me-2"></i>Logout
+                                    </a>
+                                </li>
                             </ul>
                         </li>
                     {% else %}
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{ url_for('auth.login') }}">Login</a>
+                        <li class="nav-item mx-1">
+                            <a class="nav-link" href="{{ url_for('auth.login') }}">
+                                <i class="fas fa-sign-in-alt me-1"></i>Login
+                            </a>
                         </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{ url_for('auth.register') }}">Register</a>
+                        <li class="nav-item mx-1">
+                            <a class="nav-link" href="{{ url_for('auth.register') }}">
+                                <i class="fas fa-user-plus me-1"></i>Register
+                            </a>
                         </li>
                     {% endif %}
                 </ul>
@@ -149,11 +190,11 @@
     </nav>
 
     <!-- Flash Messages -->
-    <div class="container mt-3">
+    <div class="container mt-4">
         {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
                 {% for category, message in messages %}
-                    <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                    <div class="alert alert-{{ category }} alert-dismissible fade show shadow-sm" role="alert">
                         {{ message }}
                         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                     </div>
@@ -168,38 +209,53 @@
     </main>
 
     <!-- Footer -->
-    <footer class="bg-dark text-white py-4 mt-5">
+    <footer class="text-white py-5">
         <div class="container">
-            <div class="row">
-                <div class="col-md-4">
-                    <h5>CitySeva</h5>
-                    <p>A platform to connect citizens with municipal authorities for efficient civic issue resolution.</p>
+            <div class="row gy-4">
+                <div class="col-lg-4 col-md-6">
+                    <h5 class="mb-4">CitySeva</h5>
+                    <p class="mb-4">A platform to connect citizens with municipal authorities for efficient civic issue resolution.</p>
+                    <div class="social-links">
+                        <a href="#" class="me-3"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#" class="me-3"><i class="fab fa-twitter"></i></a>
+                        <a href="#" class="me-3"><i class="fab fa-instagram"></i></a>
+                        <a href="#"><i class="fab fa-linkedin-in"></i></a>
+                    </div>
                 </div>
-                <div class="col-md-4">
-                    <h5>Quick Links</h5>
+                <div class="col-lg-4 col-md-6">
+                    <h5 class="mb-4">Quick Links</h5>
                     <ul class="list-unstyled">
-                        <li><a href="{{ url_for('citizen.index') }}" class="text-white">Home</a></li>
+                        <li class="mb-2"><a href="{{ url_for('citizen.index') }}" class="text-white"><i class="fas fa-chevron-right me-2"></i>Home</a></li>
                         {% if current_user.is_authenticated %}
-                            <li><a href="{{ url_for('citizen.new_complaint') }}" class="text-white">Report an Issue</a></li>
+                            <li class="mb-2"><a href="{{ url_for('citizen.new_complaint') }}" class="text-white"><i class="fas fa-chevron-right me-2"></i>Report an Issue</a></li>
                         {% else %}
-                            <li><a href="{{ url_for('auth.register') }}" class="text-white">Register</a></li>
+                            <li class="mb-2"><a href="{{ url_for('auth.register') }}" class="text-white"><i class="fas fa-chevron-right me-2"></i>Register</a></li>
                         {% endif %}
-                        <li><a href="#about" class="text-white">About</a></li>
-                        <li><a href="#contact" class="text-white">Contact</a></li>
+                        <li class="mb-2"><a href="#about" class="text-white"><i class="fas fa-chevron-right me-2"></i>About</a></li>
+                        <li class="mb-2"><a href="#contact" class="text-white"><i class="fas fa-chevron-right me-2"></i>Contact</a></li>
                     </ul>
                 </div>
-                <div class="col-md-4">
-                    <h5>Contact</h5>
-                    <address>
-                        <i class="fas fa-map-marker-alt me-2"></i> 123 Main Street, City Center<br>
-                        <i class="fas fa-phone me-2"></i> +1 (555) 123-4567<br>
-                        <i class="fas fa-envelope me-2"></i> info@cityseva.com
-                    </address>
+                <div class="col-lg-4 col-md-6">
+                    <h5 class="mb-4">Contact</h5>
+                    <ul class="list-unstyled">
+                        <li class="mb-3">
+                            <i class="fas fa-map-marker-alt me-2"></i>
+                            123 Main Street, City Center
+                        </li>
+                        <li class="mb-3">
+                            <i class="fas fa-phone me-2"></i>
+                            +1 (555) 123-4567
+                        </li>
+                        <li class="mb-3">
+                            <i class="fas fa-envelope me-2"></i>
+                            info@cityseva.com
+                        </li>
+                    </ul>
                 </div>
             </div>
-            <hr>
+            <hr class="mt-4 mb-3">
             <div class="text-center">
-                <p>&copy; {{ now.year }} CitySeva. All rights reserved.</p>
+                <p class="mb-0">&copy; {{ now.year }} CitySeva. All rights reserved.</p>
             </div>
         </div>
     </footer>

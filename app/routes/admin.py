@@ -937,6 +937,7 @@ def delete_complaint(complaint_id):
     return redirect(url_for('admin.complaints'))
 
 @admin.route('/send-notification', methods=['GET', 'POST'])
+@admin.route('/send_notification', methods=['GET', 'POST'])
 @login_required
 @admin_required
 def send_notification():

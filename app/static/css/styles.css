@@ -2,97 +2,154 @@
 
 /* Global Styles */
 :root {
-    --primary: #0d6efd;
-    --primary-dark: #0a58ca;
-    --secondary: #6c757d;
-    --success: #198754;
-    --danger: #dc3545;
-    --warning: #ffc107;
-    --info: #0dcaf0;
-    --light: #f8f9fa;
-    --dark: #212529;
+    --primary: #00bcd4;
+    --primary-dark: #0097a7;
+    --secondary: #81d4fa;
+    --success: #4caf50;
+    --danger: #f44336;
+    --warning: #ffeb3b;
+    --info: #03a9f4;
+    --light: #e3f2fd;
+    --dark: #263238;
+    --gradient-start: #00bcd4;
+    --gradient-end: #81d4fa;
+    --text-primary: #37474f;
+    --text-secondary: #546e7a;
+    --border-color: #e0e0e0;
+    --card-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    --hover-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
 }
 
 body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     min-height: 100vh;
     display: flex;
     flex-direction: column;
+    background-color: #f8fdff;
+    color: var(--text-primary);
 }
 
 main {
     flex: 1;
 }
 
+/* Typography */
+h1, h2, h3, h4, h5, h6 {
+    color: var(--text-primary);
+    font-weight: 600;
+}
+
+.text-primary {
+    color: var(--primary) !important;
+}
+
+.text-secondary {
+    color: var(--text-secondary) !important;
+}
+
+/* Navbar Styling */
+.navbar {
+    background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end)) !important;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    padding: 1rem 0;
+}
+
+.navbar-brand {
+    font-weight: 600;
+    font-size: 1.5rem;
+}
+
+.nav-link {
+    font-weight: 500;
+    padding: 0.5rem 1rem !important;
+    border-radius: 5px;
+    transition: all 0.3s ease;
+}
+
+.nav-link:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    transform: translateY(-1px);
+}
+
 /* Dashboard Cards */
 .dashboard-card {
+    background: white;
+    border: none;
+    border-radius: 15px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
     transition: transform 0.3s, box-shadow 0.3s;
-    border-radius: 10px;
+    margin: 1rem 0;
     overflow: hidden;
+    height: 100%;
 }
 
 .dashboard-card:hover {
     transform: translateY(-5px);
-    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
 }
 
 .dashboard-card .card-body {
-    padding: 1.5rem;
+    padding: 2rem;
 }
 
 .dashboard-card .icon {
-    font-size: 2.5rem;
-    margin-bottom: 0.5rem;
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    color: var(--primary);
 }
 
 .dashboard-card .card-title {
     font-weight: 600;
-    margin-bottom: 0.25rem;
+    margin-bottom: 1rem;
+    color: var(--dark);
 }
 
 .dashboard-card .card-text {
-    font-size: 2rem;
+    font-size: 2.25rem;
     font-weight: 700;
+    color: var(--primary);
 }
 
 /* Status Badges */
 .status-badge {
-    font-size: 0.8rem;
-    padding: 0.35em 0.65em;
+    font-size: 0.85rem;
+    padding: 0.5em 1em;
     border-radius: 50rem;
+    font-weight: 500;
+    letter-spacing: 0.5px;
 }
 
 .status-pending {
-    background-color: #f0ad4e;
-    color: #fff;
+    background-color: var(--warning);
+    color: var(--dark);
 }
 
 .status-in-progress {
-    background-color: #5bc0de;
-    color: #fff;
+    background-color: var(--info);
+    color: white;
 }
 
 .status-resolved {
-    background-color: #5cb85c;
-    color: #fff;
+    background-color: var(--success);
+    color: white;
 }
 
 .status-rejected {
-    background-color: #d9534f;
-    color: #fff;
+    background-color: var(--danger);
+    color: white;
 }
 
 /* Priority indicators */
 .priority-low {
-    border-left: 5px solid #5cb85c;
+    border-left: 5px solid var(--success);
 }
 
 .priority-medium {
-    border-left: 5px solid #f0ad4e;
+    border-left: 5px solid var(--warning);
 }
 
 .priority-high {
-    border-left: 5px solid #d9534f;
+    border-left: 5px solid var(--danger);
 }
 
 .priority-urgent {
@@ -136,51 +193,241 @@ main {
     margin-bottom: 0;
 }
 
-/* Form Styling */
-.form-card {
-    border-radius: 10px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+/* Card Styles */
+.card {
+    border: none;
+    border-radius: 15px;
+    box-shadow: var(--card-shadow);
+    transition: transform 0.3s, box-shadow 0.3s;
+    overflow: hidden;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--hover-shadow);
+}
+
+.card-header {
+    background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
+    color: white;
+    border: none;
+    padding: 1.5rem;
+}
+
+.card-body {
+    padding: 2rem;
+}
+
+/* Table Styles */
+.table {
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+.table th {
+    background-color: var(--light);
+    color: var(--text-primary);
+    font-weight: 600;
+    border: none;
+}
+
+.table td {
+    vertical-align: middle;
+    border-color: var(--border-color);
+}
+
+.table-hover tbody tr:hover {
+    background-color: rgba(0, 188, 212, 0.05);
+}
+
+/* Form Elements */
+.form-control, .form-select {
+    border-radius: 8px;
+    border: 2px solid var(--border-color);
+    padding: 0.75rem 1rem;
+    transition: all 0.3s ease;
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 0.2rem rgba(0, 188, 212, 0.25);
 }
 
 .form-label {
     font-weight: 500;
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
 }
 
-/* Feedback Stars */
-.rating-stars {
-    color: #ffc107;
-    font-size: 1.5rem;
+/* Custom Select */
+.form-select {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%2300bcd4' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3e%3c/svg%3e");
 }
 
-/* Maps */
-#complaint-map {
-    height: 400px;
-    border-radius: 10px;
-    margin-bottom: 1rem;
+/* Buttons */
+.btn {
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    font-weight: 500;
+    transition: all 0.3s ease;
 }
 
-/* Login/Register Pages */
-.auth-card {
-    max-width: 450px;
-    margin: 2rem auto;
-    border-radius: 10px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+.btn-primary {
+    background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
+    border: none;
 }
 
-.auth-card .card-header {
-    background-color: var(--primary);
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0, 188, 212, 0.3);
+}
+
+.btn-outline-primary {
+    color: var(--primary);
+    border-color: var(--primary);
+}
+
+.btn-outline-primary:hover {
+    background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
+    border-color: transparent;
+}
+
+/* Badges */
+.badge {
+    padding: 0.5em 1em;
+    border-radius: 50rem;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+}
+
+/* Tabs */
+.nav-tabs {
+    border-bottom: 2px solid var(--border-color);
+}
+
+.nav-tabs .nav-link {
+    border: none;
+    color: var(--text-secondary);
+    padding: 1rem 1.5rem;
+    font-weight: 500;
+    position: relative;
+}
+
+.nav-tabs .nav-link.active {
+    color: var(--primary);
+    background: none;
+}
+
+.nav-tabs .nav-link.active::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
+}
+
+/* Pagination */
+.pagination .page-link {
+    border: none;
+    color: var(--text-primary);
+    padding: 0.75rem 1rem;
+    margin: 0 0.25rem;
+    border-radius: 8px;
+}
+
+.pagination .page-item.active .page-link {
+    background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
     color: white;
-    text-align: center;
-    border-radius: 10px 10px 0 0;
+}
+
+/* Modal */
+.modal-content {
+    border: none;
+    border-radius: 15px;
+    box-shadow: var(--hover-shadow);
+}
+
+.modal-header {
+    background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
+    color: white;
+    border: none;
+    border-radius: 15px 15px 0 0;
     padding: 1.5rem;
 }
 
-.auth-card .card-header h3 {
-    margin-bottom: 0;
+.modal-footer {
+    border-top: 1px solid var(--border-color);
+    padding: 1.5rem;
 }
 
-.auth-card .card-body {
-    padding: 2rem;
+/* Lists */
+.list-group {
+    border-radius: 15px;
+    overflow: hidden;
+}
+
+.list-group-item {
+    border-color: var(--border-color);
+    padding: 1rem 1.5rem;
+}
+
+.list-group-item:first-child {
+    border-top-left-radius: 15px;
+    border-top-right-radius: 15px;
+}
+
+.list-group-item:last-child {
+    border-bottom-left-radius: 15px;
+    border-bottom-right-radius: 15px;
+}
+
+/* Alerts */
+.alert {
+    border: none;
+    border-radius: 12px;
+    padding: 1rem 1.5rem;
+}
+
+.alert-primary {
+    background-color: var(--light);
+    color: var(--primary-dark);
+}
+
+/* Progress bars */
+.progress {
+    height: 0.75rem;
+    border-radius: 50rem;
+    background-color: var(--light);
+}
+
+.progress-bar {
+    background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
+}
+
+/* Footer */
+footer {
+    background: linear-gradient(135deg, var(--dark), #37474f);
+    color: white;
+    padding: 4rem 0 2rem;
+    margin-top: 5rem;
+}
+
+footer h5 {
+    font-weight: 600;
+    margin-bottom: 1.5rem;
+}
+
+footer a {
+    color: rgba(255, 255, 255, 0.8) !important;
+    text-decoration: none;
+    transition: all 0.3s ease;
+}
+
+footer a:hover {
+    color: white !important;
+    transform: translateX(5px);
 }
 
 /* Landing Page */
@@ -226,17 +473,42 @@ main {
     margin-bottom: 1rem;
 }
 
-/* Responsive adjustments */
+/* Maps */
+#complaint-map {
+    height: 400px;
+    border-radius: 10px;
+    margin-bottom: 1rem;
+}
+
+/* Feedback Stars */
+.rating-stars {
+    color: #ffc107;
+    font-size: 1.5rem;
+}
+
+/* Responsive Design */
 @media (max-width: 768px) {
-    .hero-section {
-        padding: 3rem 0;
+    .navbar {
+        padding: 0.5rem 0;
     }
     
-    .hero-section h1 {
-        font-size: 2rem;
+    .dashboard-card {
+        margin: 0.5rem 0;
+    }
+    
+    .dashboard-card .card-body {
+        padding: 1.5rem;
     }
     
     .dashboard-card .card-text {
-        font-size: 1.5rem;
+        font-size: 1.75rem;
+    }
+    
+    .auth-card {
+        margin: 1rem;
+    }
+    
+    footer {
+        padding: 2rem 0 1rem;
     }
 } 

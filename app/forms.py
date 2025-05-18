@@ -1,6 +1,6 @@
 from flask_wtf import FlaskForm
-from flask_wtf.file import FileField, FileAllowed, MultipleFileField
-from wtforms import StringField, PasswordField, BooleanField, SubmitField, TextAreaField
+from flask_wtf.file import FileField, FileAllowed
+from wtforms import StringField, PasswordField, BooleanField, SubmitField, TextAreaField, MultipleFileField
 from wtforms import SelectField, HiddenField, IntegerField, FloatField
 from wtforms.validators import DataRequired, Length, Email, EqualTo, ValidationError, Optional, Regexp
 from app.models import User
@@ -27,13 +27,13 @@ class RegistrationForm(FlaskForm):
     phone = StringField('Phone Number', validators=[
         Optional(), 
         Length(10, 20),
-        Regexp('^\d+$', message='Phone number must contain only digits')
+        Regexp(r'^\d+$', message='Phone number must contain only digits')
     ])
     address = TextAreaField('Address', validators=[Optional(), Length(5, 256)])
     password = PasswordField('Password', validators=[
         DataRequired(), 
         Length(min=8, message='Password must be at least 8 characters long'),
-        Regexp('^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$', 
+        Regexp(r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$', 
                message='Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character')
     ])
     confirm_password = PasswordField('Confirm Password', validators=[
@@ -62,7 +62,7 @@ class ResetPasswordForm(FlaskForm):
     password = PasswordField('New Password', validators=[
         DataRequired(), 
         Length(min=8, message='Password must be at least 8 characters long'),
-        Regexp('^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$', 
+        Regexp(r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$', 
                message='Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character')
     ])
     confirm_password = PasswordField('Confirm Password', validators=[
@@ -81,7 +81,7 @@ class ResetPasswordOTPForm(FlaskForm):
     password = PasswordField('New Password', validators=[
         DataRequired(), 
         Length(min=8, message='Password must be at least 8 characters long'),
-        Regexp('^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$', 
+        Regexp(r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$', 
                message='Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character')
     ])
     confirm_password = PasswordField('Confirm Password', validators=[
