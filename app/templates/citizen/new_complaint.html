@@ -135,11 +135,13 @@
 
 {% block scripts %}
 <script>
+// Global variables for map and marker
+let map, marker;
+const defaultLocation = { lat: 20.5937, lng: 78.9629 }; // Default to India's center
+
 // Define initMap before the API loads
 window.initMap = function() {
     console.log('Initializing map for new complaint form');
-    const defaultLocation = { lat: 20.5937, lng: 78.9629 }; // Default to India's center
-    let map, marker;
 
     map = new google.maps.Map(document.getElementById('map'), {
         zoom: 5,
@@ -213,7 +215,14 @@ function showLocationError(message) {
 }
 
 function updateMapLocation(location) {
-    if (marker) marker.setMap(null);
+    if (!map) {
+        console.error('Map not initialized');
+        return;
+    }
+
+    if (marker) {
+        marker.setMap(null);
+    }
     
     marker = new google.maps.Marker({
         position: location,
@@ -229,6 +238,11 @@ function updateMapLocation(location) {
 }
 
 function reverseGeocode(latLng) {
+    if (!map) {
+        console.error('Map not initialized');
+        return;
+    }
+
     const geocoder = new google.maps.Geocoder();
     geocoder.geocode({ location: latLng }, (results, status) => {
         if (status === 'OK' && results[0]) {
@@ -259,6 +273,11 @@ function handleLocationError(error) {
 
 function handleCurrentLocationClick(e) {
     e.preventDefault();
+    
+    if (!map) {
+        console.error('Map not initialized');
+        return;
+    }
     
     // Clear any existing error messages
     const existingError = document.getElementById('location-error');
