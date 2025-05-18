@@ -39,6 +39,32 @@
                                 {{ form.password(class="form-control", placeholder="Enter your password") }}
                             {% endif %}
                         </div>
+                        <div class="mb-4">
+                            {{ form.role.label(class="form-label") }}
+                            {% if form.role.errors %}
+                                {{ form.role(class="form-select is-invalid") }}
+                                <div class="invalid-feedback">
+                                    {% for error in form.role.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                {{ form.role(class="form-select") }}
+                            {% endif %}
+                        </div>
+                        <div class="mb-4" id="departmentField" style="display: none;">
+                            {{ form.department.label(class="form-label") }}
+                            {% if form.department.errors %}
+                                {{ form.department(class="form-select is-invalid") }}
+                                <div class="invalid-feedback">
+                                    {% for error in form.department.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                {{ form.department(class="form-select") }}
+                            {% endif %}
+                        </div>
                         <div class="mb-4 d-flex justify-content-between align-items-center">
                             <div class="form-check">
                                 {{ form.remember_me(class="form-check-input") }}
@@ -63,4 +89,25 @@
         </div>
     </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const roleSelect = document.getElementById('role');
+    const departmentField = document.getElementById('departmentField');
+    
+    function toggleDepartmentField() {
+        if (roleSelect.value === 'official') {
+            departmentField.style.display = 'block';
+        } else {
+            departmentField.style.display = 'none';
+        }
+    }
+    
+    // Set initial state
+    toggleDepartmentField();
+    
+    // Add event listener for role changes
+    roleSelect.addEventListener('change', toggleDepartmentField);
+});
+</script>
 {% endblock %} 

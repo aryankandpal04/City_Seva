@@ -274,35 +274,30 @@
                 </div>
                 <div class="card-body">
                     <form method="post" action="{{ url_for('admin.complaint_detail', complaint_id=complaint.id) }}">
-                        {{ form.hidden_tag() }}
+                        {{ form.csrf_token }}
+                        {{ form.complaint_id(value=complaint.id) }}
                         
                         <div class="row mb-3">
                             <div class="col-md-6">
                                 <label for="status" class="form-label">Status</label>
-                                <select class="form-select" id="status" name="status">
-                                    <option value="pending" {% if form.status.data == 'pending' %}selected{% endif %}>Pending</option>
-                                    <option value="in_progress" {% if form.status.data == 'in_progress' %}selected{% endif %}>In Progress</option>
-                                    <option value="resolved" {% if form.status.data == 'resolved' %}selected{% endif %}>Resolved</option>
-                                    <option value="rejected" {% if form.status.data == 'rejected' %}selected{% endif %}>Rejected</option>
-                                </select>
+                                {{ form.status(class="form-select") }}
                             </div>
                             <div class="col-md-6">
-                                <label for="assigned_to_id" class="form-label">Assign To</label>
-                                <select class="form-select" id="assigned_to_id" name="assigned_to_id">
-                                    {% if form.assigned_to_id and form.assigned_to_id.choices %}
-                                        {% for id, name in form.assigned_to_id.choices %}
-                                            <option value="{{ id }}" {% if form.assigned_to_id.data == id %}selected{% endif %}>{{ name }}</option>
-                                        {% endfor %}
-                                    {% else %}
-                                        <option value="0">Not Available</option>
-                                    {% endif %}
-                                </select>
+                                <label for="priority" class="form-label">Priority</label>
+                                {{ form.priority(class="form-select") }}
+                            </div>
+                        </div>
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-12">
+                                <label for="assigned_to" class="form-label">Assign To</label>
+                                {{ form.assigned_to(class="form-select") }}
                             </div>
                         </div>
                         
                         <div class="mb-3">
                             <label for="comment" class="form-label">Comment</label>
-                            <textarea class="form-control" id="comment" name="comment" rows="3" required></textarea>
+                            {{ form.comment(class="form-control", rows=3, required=true) }}
                             <div class="form-text">Provide details about the status update. This will be visible to the citizen.</div>
                         </div>
                         

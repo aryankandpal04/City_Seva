@@ -39,81 +39,40 @@
                                     <td>{{ request.employee_id }}</td>
                                     <td>{{ request.created_at.strftime('%Y-%m-%d') }}</td>
                                     <td>
-                                        <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" 
-                                                data-bs-target="#viewRequestModal{{ request.id }}">
+                                        <a href="{{ url_for('admin.view_request', request_id=request.id) }}" class="btn btn-sm btn-primary">
                                             <i class="fas fa-eye"></i> View
+                                        </a>
+                                        <button type="button" class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#deleteRequestModal{{ request.id }}">
+                                            <i class="fas fa-trash"></i>
                                         </button>
                                     </td>
                                 </tr>
                                 
-                                <!-- View Request Modal -->
-                                <div class="modal fade" id="viewRequestModal{{ request.id }}" tabindex="-1" 
-                                     aria-labelledby="viewRequestModalLabel{{ request.id }}" aria-hidden="true">
-                                    <div class="modal-dialog modal-lg">
+                                <!-- Delete Request Modal -->
+                                <div class="modal fade" id="deleteRequestModal{{ request.id }}" tabindex="-1" 
+                                     aria-labelledby="deleteRequestModalLabel{{ request.id }}" aria-hidden="true">
+                                    <div class="modal-dialog">
                                         <div class="modal-content">
-                                            <div class="modal-header">
-                                                <h5 class="modal-title" id="viewRequestModalLabel{{ request.id }}">
-                                                    Official Account Request #{{ request.id }}
+                                            <div class="modal-header bg-danger text-white">
+                                                <h5 class="modal-title" id="deleteRequestModalLabel{{ request.id }}">
+                                                    Delete Official Account Request
                                                 </h5>
                                                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                             </div>
                                             <div class="modal-body">
-                                                <div class="mb-4">
-                                                    <h6>User Information</h6>
-                                                    <div class="row">
-                                                        <div class="col-md-6">
-                                                            <p><strong>Name:</strong> {{ request.user.full_name() }}</p>
-                                                            <p><strong>Email:</strong> {{ request.user.email }}</p>
-                                                            <p><strong>Phone:</strong> {{ request.user.phone }}</p>
-                                                        </div>
-                                                        <div class="col-md-6">
-                                                            <p><strong>Address:</strong> {{ request.user.address }}</p>
-                                                            <p><strong>Registered:</strong> {{ request.user.created_at.strftime('%Y-%m-%d') }}</p>
-                                                        </div>
-                                                    </div>
+                                                <p>Are you sure you want to delete this request?</p>
+                                                <p><strong>User:</strong> {{ request.user.full_name() }}</p>
+                                                <p><strong>Department:</strong> {{ request.department }}</p>
+                                                <div class="alert alert-warning">
+                                                    <i class="fas fa-exclamation-triangle me-2"></i>
+                                                    This action cannot be undone.
                                                 </div>
-                                                
-                                                <div class="mb-4">
-                                                    <h6>Official Details</h6>
-                                                    <div class="row">
-                                                        <div class="col-md-6">
-                                                            <p><strong>Department:</strong> {{ request.department }}</p>
-                                                            <p><strong>Position:</strong> {{ request.position }}</p>
-                                                            <p><strong>Employee ID:</strong> {{ request.employee_id }}</p>
-                                                        </div>
-                                                        <div class="col-md-6">
-                                                            <p><strong>Office Phone:</strong> {{ request.office_phone }}</p>
-                                                            <p><strong>Requested:</strong> {{ request.created_at.strftime('%Y-%m-%d %H:%M') }}</p>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                
-                                                <div class="mb-4">
-                                                    <h6>Justification</h6>
-                                                    <div class="p-3 bg-light rounded">
-                                                        {{ request.justification }}
-                                                    </div>
-                                                </div>
-                                                
-                                                <form id="reviewForm{{ request.id }}" method="post" 
-                                                      action="{{ url_for('admin.review_official_request', request_id=request.id) }}">
-                                                    <div class="mb-3">
-                                                        <label for="review_notes{{ request.id }}" class="form-label">Review Notes</label>
-                                                        <textarea class="form-control" id="review_notes{{ request.id }}" name="review_notes" rows="3"></textarea>
-                                                    </div>
-                                                    <input type="hidden" name="decision" id="decision{{ request.id }}" value="">
-                                                </form>
                                             </div>
                                             <div class="modal-footer">
-                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                                                <button type="button" class="btn btn-danger" 
-                                                        onclick="document.getElementById('decision{{ request.id }}').value='rejected'; document.getElementById('reviewForm{{ request.id }}').submit();">
-                                                    <i class="fas fa-times-circle me-1"></i> Reject
-                                                </button>
-                                                <button type="button" class="btn btn-success" 
-                                                        onclick="document.getElementById('decision{{ request.id }}').value='approved'; document.getElementById('reviewForm{{ request.id }}').submit();">
-                                                    <i class="fas fa-check-circle me-1"></i> Approve
-                                                </button>
+                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                                <form method="POST" action="{{ url_for('admin.delete_request', request_id=request.id) }}">
+                                                    <button type="submit" class="btn btn-danger">Delete Request</button>
+                                                </form>
                                             </div>
                                         </div>
                                     </div>

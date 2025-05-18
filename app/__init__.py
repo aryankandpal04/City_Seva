@@ -151,6 +151,9 @@ def create_app(config_name):
     from app.routes.main import main as main_blueprint
     app.register_blueprint(main_blueprint)
     
+    from app.routes.government_officials import government_officials as government_officials_blueprint
+    app.register_blueprint(government_officials_blueprint, url_prefix='/government-officials')
+    
     # Register error handlers
     @app.errorhandler(404)
     def page_not_found(e):

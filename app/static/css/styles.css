@@ -364,24 +364,98 @@ h1, h2, h3, h4, h5, h6 {
     color: white;
 }
 
-/* Modal */
+/* Modal Styles */
 .modal-content {
     border: none;
     border-radius: var(--border-radius-lg);
-    box-shadow: var(--hover-shadow);
+    box-shadow: var(--card-shadow);
+    background-color: #ffffff;
+    transform: none !important;
+    transition: none !important;
 }
 
 .modal-header {
     background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
-    color: white;
+    color: #ffffff;
     border: none;
-    border-radius: var(--border-radius-lg) var(--border-radius-lg) 0 0;
     padding: 1.5rem;
+    border-radius: var(--border-radius-lg) var(--border-radius-lg) 0 0;
+    position: relative;
+    z-index: 2;
+    transform: none !important;
+    transition: none !important;
+}
+
+.modal-body {
+    padding: 2rem;
+    position: relative;
+    z-index: 2;
+    transform: none !important;
+    transition: none !important;
 }
 
 .modal-footer {
     border-top: 1px solid var(--border-color);
     padding: 1.5rem;
+    position: relative;
+    z-index: 2;
+    transform: none !important;
+    transition: none !important;
+}
+
+/* Remove all hover effects from modal elements */
+.modal-content:hover,
+.modal-header:hover,
+.modal-body:hover,
+.modal-footer:hover,
+.modal .card:hover,
+.modal .btn:hover,
+.modal .form-control:hover,
+.modal .form-select:hover {
+    transform: none !important;
+    box-shadow: var(--card-shadow) !important;
+    transition: none !important;
+}
+
+/* Ensure modal content is always accessible */
+.modal {
+    z-index: 1050 !important;
+}
+
+.modal-backdrop {
+    z-index: 1040 !important;
+}
+
+/* Disable all transitions and transforms in modal */
+.modal * {
+    transition: none !important;
+}
+
+.modal .card,
+.modal .btn,
+.modal .form-control,
+.modal .form-select,
+.modal .nav-link,
+.modal .list-group-item {
+    transform: none !important;
+    transition: none !important;
+}
+
+/* Ensure modal buttons maintain their style without hover effects */
+.modal .btn {
+    box-shadow: none !important;
+}
+
+.modal .btn:hover {
+    transform: none !important;
+    box-shadow: none !important;
+}
+
+/* Ensure form elements in modal don't have hover effects */
+.modal .form-control:focus,
+.modal .form-select:focus {
+    box-shadow: 0 0 0 0.2rem rgba(0, 188, 212, 0.25) !important;
+    transform: none !important;
 }
 
 /* Lists */
