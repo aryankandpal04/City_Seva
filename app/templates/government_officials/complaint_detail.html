@@ -195,7 +195,7 @@ Form status: {{ 'Valid' if form.validate() else 'Invalid' }}
 Form errors: {{ form.errors }}
 Status field exists: {{ form.status is defined }}
 Status data: {{ form.status.data if form.status is defined else 'Not available' }}
-Priority field exists: {{ form.priority is defined }}
+Priority field removed (as intended)
 Comment field exists: {{ form.comment is defined }}
                     </pre>
                 </div>

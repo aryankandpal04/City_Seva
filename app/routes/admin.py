@@ -258,7 +258,7 @@ def complaint_detail(complaint_id):
     # Debug log for form validation
     if request.method == 'POST':
         current_app.logger.debug(f"Form validation errors: {form.errors}")
-        current_app.logger.debug(f"Form data before validation: status={form.status.data}, priority={form.priority.data}, comment={form.comment.data}")
+        current_app.logger.debug(f"Form data before validation: status={form.status.data}, comment={form.comment.data}")
     
     if form.validate_on_submit():
         current_app.logger.debug("Form validation successful")
