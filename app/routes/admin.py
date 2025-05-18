@@ -236,7 +236,7 @@ def complaint_detail(complaint_id):
     
     form = ComplaintUpdateForm()
     
-    # Set up the assigned_to_id field based on user role
+    # Set up the assigned_to field based on user role
     if current_user.role == 'admin':
         # For admins, show dropdown with all officials
         if category and category.department:
@@ -245,26 +245,29 @@ def complaint_detail(complaint_id):
             officials = User.query.filter_by(role='official').all()
         
         # Add empty option and officials to choices
-        form.assigned_to_id.choices = [(0, 'Unassigned')] + [(u.id, f"{u.full_name()} ({u.department})") for u in officials]
+        form.assigned_to.choices = [(0, 'Unassigned')] + [(u.id, f"{u.full_name()} ({u.department})") for u in officials]
     else:
         # For officials, just set their own ID without showing dropdown
-        form.assigned_to_id.choices = [(current_user.id, f"{current_user.full_name()} ({current_user.department})")]
+        form.assigned_to.choices = [(current_user.id, f"{current_user.full_name()} ({current_user.department})")]
     
     if form.validate_on_submit():
-        # Create update
+        # Update complaint
+        complaint.status = form.status.data
+        complaint.priority = form.priority.data
+        if form.assigned_to.data:
+            complaint.assigned_to_id = form.assigned_to.data
+        complaint.admin_notes = form.admin_notes.data
+        complaint.updated_at = datetime.utcnow()
+        
+        # Create status update
         update = ComplaintUpdate(
             complaint_id=complaint.id,
             user_id=current_user.id,
             status=form.status.data,
-            comment=form.comment.data,
+            comment=form.admin_notes.data,
             created_at=datetime.utcnow()
         )
         db.session.add(update)
-        
-        # Update complaint status
-        old_status = complaint.status
-        complaint.status = form.status.data
-        complaint.updated_at = datetime.utcnow()
         
         # Auto-assign to the current official when updating status
         # This ensures the complaint is always assigned to the person who last updated it
@@ -273,7 +276,7 @@ def complaint_detail(complaint_id):
             complaint.assigned_at = datetime.utcnow()
             
             # Add assignment info to the update comment if empty
-            if not form.comment.data:
+            if not form.admin_notes.data:
                 update.comment = f"Assigned to {current_user.full_name()} ({current_user.department})"
             
             # Create audit log for assignment
@@ -287,15 +290,15 @@ def complaint_detail(complaint_id):
             )
             db.session.add(assignment_log)
         # For admins using the dropdown
-        elif current_user.role == 'admin' and form.assigned_to_id.data != 0 and complaint.assigned_to_id != form.assigned_to_id.data:
+        elif current_user.role == 'admin' and form.assigned_to.data != 0 and complaint.assigned_to_id != form.assigned_to.data:
             # Admin selected a specific official
-            assigned_official = User.query.get(form.assigned_to_id.data)
+            assigned_official = User.query.get(form.assigned_to.data)
             if assigned_official:
                 complaint.assigned_to_id = assigned_official.id
                 complaint.assigned_at = datetime.utcnow()
                 
                 # Add assignment info to the update comment if empty
-                if not form.comment.data:
+                if not form.admin_notes.data:
                     update.comment = f"Assigned to {assigned_official.full_name()} ({assigned_official.department})"
                 
                 # Create audit log for assignment by admin
@@ -314,15 +317,15 @@ def complaint_detail(complaint_id):
             complaint.assigned_at = datetime.utcnow()
         
         # If status changed to resolved, set resolved date
-        if form.status.data == 'resolved' and old_status != 'resolved':
-                complaint.resolved_at = datetime.utcnow()
+        if form.status.data == 'resolved' and complaint.status != 'resolved':
+            complaint.resolved_at = datetime.utcnow()
             
-            # Create notification for citizen
+        # Create notification for citizen
         notification = Notification(
-                user_id=complaint.user_id,
-                title="Complaint Resolved",
-                message=f"Your complaint '{complaint.title}' has been marked as resolved. Please provide feedback.",
-                created_at=datetime.utcnow()
+            user_id=complaint.user_id,
+            title="Complaint Resolved",
+            message=f"Your complaint '{complaint.title}' has been marked as resolved. Please provide feedback.",
+            created_at=datetime.utcnow()
         )
         db.session.add(notification)
         

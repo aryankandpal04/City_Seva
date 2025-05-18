@@ -130,7 +130,7 @@ def new_complaint():
     form = ComplaintForm()
     
     # Populate category choices
-    form.category_id.choices = [(c.id, c.name) for c in Category.query.order_by('name')]
+    form.category.choices = [(c.id, c.name) for c in Category.query.order_by('name')]
     
     if form.validate_on_submit():
         try:
@@ -138,7 +138,7 @@ def new_complaint():
             complaint = Complaint(
                 title=form.title.data,
                 description=form.description.data,
-                category_id=form.category_id.data,
+                category_id=form.category.data,
                 location=form.location.data,
                 latitude=float(form.latitude.data),
                 longitude=float(form.longitude.data),
@@ -163,9 +163,12 @@ def new_complaint():
             db.session.add(update)
             
             # Handle file upload if provided
-            if form.media_files.data and form.media_files.data[0]:
-                for media_file in form.media_files.data:
-                    if media_file:
+            if form.media_files.data:
+                # Handle single file or multiple files
+                files_to_process = form.media_files.data if isinstance(form.media_files.data, list) else [form.media_files.data]
+                
+                for media_file in files_to_process:
+                    if media_file and media_file.filename:  # Check if file exists and has a filename
                         filename = secure_filename(media_file.filename)
                         # Generate unique filename
                         _, file_extension = os.path.splitext(filename)
@@ -206,7 +209,7 @@ def new_complaint():
             db.session.commit()
                 
             # Send notification to officials
-            category = Category.query.get(form.category_id.data)
+            category = Category.query.get(form.category.data)
             if category:
                 # Send email notification
                 email_success = False

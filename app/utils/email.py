@@ -198,4 +198,24 @@ def send_complaint_notification(complaint, category=None):
     except Exception as e:
         current_app.logger.error(f"Error in send_complaint_notification: {str(e)}")
         current_app.logger.error(traceback.format_exc())
-        return False 
+        return False
+
+def send_contact_email(name, email, subject, message):
+    """Send contact form submission email to admin."""
+    msg = Message(
+        subject=f'New Contact Form Submission: {subject}',
+        sender=current_app.config['MAIL_DEFAULT_SENDER'],
+        recipients=[current_app.config['ADMIN_EMAIL']]
+    )
+    
+    msg.body = f"""
+    New contact form submission from CitySeva website:
+    
+    From: {name} <{email}>
+    Subject: {subject}
+    
+    Message:
+    {message}
+    """
+    
+    mail.send(msg) 
