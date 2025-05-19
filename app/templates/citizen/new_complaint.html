@@ -60,36 +60,23 @@
                             {% endif %}
                         </div>
 
-                        <!-- Location -->
+                        <!-- Map Preview -->
                         <div class="mb-4">
-                            {{ form.location.label(class="form-label") }}
-                            {% if form.location.errors %}
-                                {{ form.location(class="form-control is-invalid", id="location-input") }}
-                                <div class="invalid-feedback">
-                                    {% for error in form.location.errors %}
-                                        {{ error }}
-                                    {% endfor %}
-                                </div>
-                            {% else %}
-                                <gmp-place-autocomplete
-                                    id="location-input"
-                                    class="form-control"
-                                    placeholder="Enter location or use current location"
-                                    required
-                                ></gmp-place-autocomplete>
-                            {% endif %}
-                            <div class="form-text">
+                            <div class="input-group mb-3">
+                                <input type="text" id="map-location-input" class="form-control" placeholder="Search location on map...">
+                                <button class="btn btn-outline-primary" type="button" id="search-location-btn">
+                                    <i class="fas fa-search"></i>
+                                </button>
+                            </div>
+                            <div id="map" style="height: 300px; border-radius: 12px;"></div>
+                            {{ form.location(id="location-input", type="hidden") }}
+                            {{ form.latitude(id="latitude-input", type="hidden") }}
+                            {{ form.longitude(id="longitude-input", type="hidden") }}
+                            <div class="form-text mt-2">
                                 <a href="#" id="use-current-location" class="text-primary">
                                     <i class="fas fa-map-marker-alt me-1"></i>Use current location
                                 </a>
                             </div>
-                        </div>
-
-                        <!-- Map Preview -->
-                        <div class="mb-4">
-                            <div id="map" style="height: 300px; border-radius: 12px;"></div>
-                            {{ form.latitude(id="latitude-input") }}
-                            {{ form.longitude(id="longitude-input") }}
                         </div>
 
                         <!-- Priority -->
@@ -110,7 +97,7 @@
                         <!-- Media Files -->
                         <div class="mb-4">
                             {{ form.media_files.label(class="form-label") }}
-                            {{ form.media_files(class="form-control", multiple=True, accept="image/*,video/*") }}
+                            {{ form.media_files(class="form-control", multiple=True, accept="image/*,video/*", id="media-files-input") }}
                             {% if form.media_files.errors %}
                                 <div class="invalid-feedback d-block">
                                     {% for error in form.media_files.errors %}
@@ -119,6 +106,11 @@
                                 </div>
                             {% endif %}
                             <div class="form-text">You can upload up to 5 images or videos (optional)</div>
+                            
+                            <!-- Media Preview -->
+                            <div id="media-preview" class="mt-3">
+                                <div class="row g-2" id="preview-container"></div>
+                            </div>
                         </div>
 
                         <!-- Submit Button -->
@@ -183,6 +175,48 @@ window.initMap = function() {
         });
     }
 
+    // Initialize map location search
+    const mapLocationInput = document.getElementById('map-location-input');
+    const searchLocationBtn = document.getElementById('search-location-btn');
+    
+    if (mapLocationInput && searchLocationBtn) {
+        // Create autocomplete for map location input
+        const autocomplete = new google.maps.places.Autocomplete(mapLocationInput);
+        
+        // Handle place selection
+        autocomplete.addListener('place_changed', () => {
+            const place = autocomplete.getPlace();
+            if (!place.geometry) {
+                showLocationError('Please select a location from the dropdown suggestions.');
+                return;
+            }
+            updateMapLocation(place.geometry.location);
+            document.getElementById('location-input').value = place.formatted_address;
+        });
+
+        // Handle search button click
+        searchLocationBtn.addEventListener('click', () => {
+            const geocoder = new google.maps.Geocoder();
+            geocoder.geocode({ address: mapLocationInput.value }, (results, status) => {
+                if (status === 'OK' && results[0]) {
+                    updateMapLocation(results[0].geometry.location);
+                    document.getElementById('location-input').value = results[0].formatted_address;
+                } else {
+                    showLocationError('Could not find the location. Please try a different search term.');
+                }
+            });
+        });
+
+        // Handle enter key press
+        mapLocationInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                searchLocationBtn.click();
+            }
+        });
+    }
+
+    // Add marker drag event listener
     map.addListener('click', (e) => {
         updateMapLocation(e.latLng);
         reverseGeocode(e.latLng);
@@ -227,12 +261,19 @@ function updateMapLocation(location) {
     marker = new google.maps.Marker({
         position: location,
         map: map,
-        animation: google.maps.Animation.DROP
+        animation: google.maps.Animation.DROP,
+        draggable: true // Make marker draggable
+    });
+
+    // Add drag event listener to marker
+    marker.addListener('dragend', function(e) {
+        reverseGeocode(e.latLng);
     });
 
     map.setCenter(location);
     map.setZoom(15);
 
+    // Update hidden inputs with coordinates
     document.getElementById('latitude-input').value = location.lat();
     document.getElementById('longitude-input').value = location.lng();
 }
@@ -246,7 +287,13 @@ function reverseGeocode(latLng) {
     const geocoder = new google.maps.Geocoder();
     geocoder.geocode({ location: latLng }, (results, status) => {
         if (status === 'OK' && results[0]) {
-            document.getElementById('location-input').value = results[0].formatted_address;
+            const locationInput = document.getElementById('location-input');
+            if (locationInput) {
+                locationInput.value = results[0].formatted_address;
+            }
+            // Update coordinates
+            document.getElementById('latitude-input').value = latLng.lat();
+            document.getElementById('longitude-input').value = latLng.lng();
         } else {
             showLocationError('Could not determine the address for this location. Please enter it manually.');
         }
@@ -321,6 +368,118 @@ function handleCurrentLocationClick(e) {
     } else {
         showLocationError('Geolocation is not supported by your browser. Please enter the location manually.');
     }
+}
+
+// Media Preview Handling
+document.addEventListener('DOMContentLoaded', function() {
+    const mediaInput = document.getElementById('media-files-input');
+    const previewContainer = document.getElementById('preview-container');
+    const maxFiles = 5;
+
+    mediaInput.addEventListener('change', function(e) {
+        const files = Array.from(e.target.files);
+        
+        // Check if total files exceed limit
+        if (files.length > maxFiles) {
+            showMediaError(`You can only upload up to ${maxFiles} files.`);
+            mediaInput.value = '';
+            return;
+        }
+
+        // Clear existing previews
+        previewContainer.innerHTML = '';
+
+        files.forEach((file, index) => {
+            if (!file.type.startsWith('image/') && !file.type.startsWith('video/')) {
+                showMediaError('Please upload only images or videos.');
+                return;
+            }
+
+            const col = document.createElement('div');
+            col.className = 'col-md-4 col-sm-6';
+            
+            const card = document.createElement('div');
+            card.className = 'card h-100';
+            
+            const cardBody = document.createElement('div');
+            cardBody.className = 'card-body p-2';
+            
+            const preview = document.createElement('div');
+            preview.className = 'position-relative';
+            
+            if (file.type.startsWith('image/')) {
+                const img = document.createElement('img');
+                img.className = 'img-fluid rounded';
+                img.style.height = '150px';
+                img.style.width = '100%';
+                img.style.objectFit = 'cover';
+                
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    img.src = e.target.result;
+                };
+                reader.readAsDataURL(file);
+                
+                preview.appendChild(img);
+            } else if (file.type.startsWith('video/')) {
+                const video = document.createElement('video');
+                video.className = 'img-fluid rounded';
+                video.style.height = '150px';
+                video.style.width = '100%';
+                video.style.objectFit = 'cover';
+                video.controls = true;
+                
+                const source = document.createElement('source');
+                source.src = URL.createObjectURL(file);
+                source.type = file.type;
+                
+                video.appendChild(source);
+                preview.appendChild(video);
+            }
+            
+            // Add remove button
+            const removeBtn = document.createElement('button');
+            removeBtn.className = 'btn btn-danger btn-sm position-absolute top-0 end-0 m-1';
+            removeBtn.innerHTML = '<i class="fas fa-times"></i>';
+            removeBtn.onclick = function() {
+                col.remove();
+                // Remove the file from the input
+                const dt = new DataTransfer();
+                const files = mediaInput.files;
+                for (let i = 0; i < files.length; i++) {
+                    if (i !== index) {
+                        dt.items.add(files[i]);
+                    }
+                }
+                mediaInput.files = dt.files;
+            };
+            preview.appendChild(removeBtn);
+            
+            // Add file name
+            const fileName = document.createElement('small');
+            fileName.className = 'd-block text-truncate mt-1';
+            fileName.textContent = file.name;
+            preview.appendChild(fileName);
+            
+            cardBody.appendChild(preview);
+            card.appendChild(cardBody);
+            col.appendChild(card);
+            previewContainer.appendChild(col);
+        });
+    });
+});
+
+function showMediaError(message) {
+    const errorDiv = document.createElement('div');
+    errorDiv.className = 'alert alert-danger alert-dismissible fade show mt-2';
+    errorDiv.innerHTML = `
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        <div class="d-flex align-items-center">
+            <i class="fas fa-exclamation-triangle me-2"></i>
+            <span>${message}</span>
+        </div>
+    `;
+    document.getElementById('media-preview').insertBefore(errorDiv, document.getElementById('preview-container'));
 }
 </script>
 {% endblock %} 
