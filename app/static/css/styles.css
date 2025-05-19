@@ -31,6 +31,8 @@ body {
     background-color: #f8fdff;
     color: var(--text-primary);
     overflow-x: hidden; /* Prevent horizontal scrolling on mobile */
+    width: 100%;
+    max-width: 100%;
 }
 
 main {
@@ -592,25 +594,6 @@ footer a:hover {
     background-color: rgba(255, 255, 255, 0.1);
 }
 
-@media (max-width: 768px) {
-    .hero-section {
-        padding: 4rem 0;
-    }
-    
-    .hero-section h1 {
-        font-size: 2.5rem;
-    }
-    
-    .hero-section p {
-        font-size: 1.2rem;
-    }
-    
-    .hero-section .btn {
-        padding: 0.75rem 1.5rem;
-        font-size: 1rem;
-    }
-}
-
 /* Maps */
 #complaint-map {
     height: 400px;
@@ -847,7 +830,50 @@ img:not([loading]) {
     }
 }
 
-/* Existing media queries update */
+/* End of stylesheet */
+
+/* Fix for mobile navbar */
+@media (max-width: 991.98px) {
+    .navbar-collapse {
+        background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
+        border-radius: 0 0 var(--border-radius) var(--border-radius);
+        padding: 1rem;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        max-height: 80vh;
+        overflow-y: auto;
+    }
+    
+    .navbar-nav .dropdown-menu {
+        position: static;
+        float: none;
+        width: auto;
+        margin-top: 0;
+        background-color: rgba(255, 255, 255, 0.1);
+        border: none;
+        box-shadow: none;
+        padding: 0.5rem;
+    }
+    
+    .dropdown-item {
+        color: white !important;
+        padding: 0.5rem 1rem;
+    }
+    
+    .navbar-nav .nav-link {
+        padding: 0.75rem 1rem !important;
+        margin: 0.25rem 0;
+    }
+    
+    .navbar-brand {
+        margin-left: 1rem;
+    }
+    
+    .navbar-toggler {
+        margin-right: 1rem;
+    }
+}
+
+/* Update the mobile media queries */
 @media (max-width: 768px) {
     .hero-section {
         padding: 3rem 0;
@@ -889,5 +915,169 @@ img:not([loading]) {
     
     footer {
         text-align: center;
+    }
+    
+    /* Fix footer columns on mobile */
+    footer .col-lg-4,
+    footer .col-md-6 {
+        margin-bottom: 2rem;
+    }
+}
+
+/* Fix small screens sizing and spacing */
+@media (max-width: 575.98px) {
+    .container {
+        padding-left: 15px;
+        padding-right: 15px;
+        width: 100%;
+        max-width: 100%;
+    }
+    
+    h1 {
+        font-size: 1.75rem;
+    }
+    
+    h2 {
+        font-size: 1.5rem;
+    }
+    
+    /* Adjust card padding for small screens */
+    .card-body {
+        padding: 1.25rem;
+    }
+    
+    /* Make table responsive on very small screens */
+    .table-responsive-sm {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        width: 100%;
+        display: block;
+    }
+    
+    /* Form adjustments for mobile */
+    .form-label {
+        margin-bottom: 0.5rem;
+        font-size: 0.9rem;
+    }
+    
+    .form-control, .form-select {
+        font-size: 1rem;
+        padding: 0.75rem 1rem;
+        height: auto;
+        width: 100%;
+    }
+    
+    /* Adjust button size for easier tapping */
+    .btn {
+        padding: 0.65rem 1.25rem;
+        font-size: 1rem;
+        width: auto;
+        display: inline-block;
+    }
+    
+    /* Dashboard stats for mobile */
+    .stats-card {
+        margin-bottom: 1rem;
+        width: 100%;
+    }
+    
+    .stats-card .display-4 {
+        font-size: 2rem;
+    }
+    
+    /* Fix chart containers on mobile */
+    .chart-container {
+        height: 250px !important;
+        width: 100% !important;
+    }
+    
+    /* Fix list group items */
+    .list-group-item {
+        padding: 0.75rem 1rem;
+        word-break: break-word;
+    }
+    
+    /* Improve form layout */
+    .row > [class^="col-"] {
+        padding-right: 15px;
+        padding-left: 15px;
+    }
+    
+    /* Fix spacing in modal dialogs */
+    .modal-dialog {
+        margin: 0.5rem;
+    }
+    
+    .modal-content {
+        border-radius: var(--border-radius-sm);
+    }
+    
+    .modal-body {
+        padding: 1rem;
+    }
+}
+
+/* Medium devices (tablets, less than 768px) */
+@media (max-width: 767.98px) {
+    /* Adjust spacing on mobile */
+    .row {
+        margin-left: -10px;
+        margin-right: -10px;
+    }
+    
+    .col, .col-1, .col-2, .col-3, .col-4, .col-5, .col-6, 
+    .col-7, .col-8, .col-9, .col-10, .col-11, .col-12, 
+    .col-sm, .col-sm-1, .col-sm-2, .col-sm-3, .col-sm-4, 
+    .col-sm-5, .col-sm-6, .col-sm-7, .col-sm-8, .col-sm-9, 
+    .col-sm-10, .col-sm-11, .col-sm-12, .col-md, .col-md-1, 
+    .col-md-2, .col-md-3, .col-md-4, .col-md-5, .col-md-6, 
+    .col-md-7, .col-md-8, .col-md-9, .col-md-10, .col-md-11, 
+    .col-md-12 {
+        padding-right: 10px;
+        padding-left: 10px;
+        width: 100%;
+        max-width: 100%;
+        flex: 0 0 100%;
+    }
+    
+    /* Reduce card shadow on mobile */
+    .card {
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        width: 100%;
+        margin-bottom: 1rem;
+    }
+    
+    /* Adjust navigation for mobile */
+    .navbar {
+        padding: 0.5rem 0;
+        width: 100%;
+    }
+
+    .navbar-brand {
+        font-size: 1.25rem;
+    }
+    
+    /* Hide transform animations on mobile for better performance */
+    .card:hover, .dashboard-card:hover {
+        transform: none;
+    }
+    
+    /* Maps container height adjustment */
+    #complaint-map, #complaintsMap {
+        height: 250px !important;
+        width: 100% !important;
+    }
+    
+    /* Make sure tables don't overflow */
+    table {
+        width: 100%;
+    }
+    
+    /* Fix badges and inline elements */
+    .badge {
+        display: inline-block;
+        white-space: normal;
+        text-align: center;
+        word-break: normal;
     }
 } 
