@@ -152,7 +152,7 @@
                     <ul class="pagination justify-content-center mt-4">
                         {% if users.has_prev %}
                             <li class="page-item">
-                                <a class="page-link" href="{{ url_for('admin.users', page=users.prev_num) }}" aria-label="Previous">
+                                <a class="page-link" href="{{ url_for('admin.users', page=users.prev_num, role=request.args.get('role')) }}" aria-label="Previous">
                                     <span aria-hidden="true">&laquo;</span>
                                 </a>
                             </li>
@@ -164,13 +164,12 @@
                             </li>
                         {% endif %}
                         
-                        {# Show up to 5 pages around the current page #}
                         {% set start_page = [1, users.page - 2]|max %}
                         {% set end_page = [users.pages, users.page + 2]|min %}
                         
                         {% if start_page > 1 %}
                             <li class="page-item">
-                                <a class="page-link" href="{{ url_for('admin.users', page=1) }}">1</a>
+                                <a class="page-link" href="{{ url_for('admin.users', page=1, role=request.args.get('role')) }}">1</a>
                             </li>
                             {% if start_page > 2 %}
                                 <li class="page-item disabled">
@@ -181,7 +180,7 @@
                         
                         {% for page in range(start_page, end_page + 1) %}
                             <li class="page-item {% if page == users.page %}active{% endif %}">
-                                <a class="page-link" href="{{ url_for('admin.users', page=page) }}">{{ page }}</a>
+                                <a class="page-link" href="{{ url_for('admin.users', page=page, role=request.args.get('role')) }}">{{ page }}</a>
                             </li>
                         {% endfor %}
                         
@@ -192,13 +191,13 @@
                                 </li>
                             {% endif %}
                             <li class="page-item">
-                                <a class="page-link" href="{{ url_for('admin.users', page=users.pages) }}">{{ users.pages }}</a>
+                                <a class="page-link" href="{{ url_for('admin.users', page=users.pages, role=request.args.get('role')) }}">{{ users.pages }}</a>
                             </li>
                         {% endif %}
                         
                         {% if users.has_next %}
                             <li class="page-item">
-                                <a class="page-link" href="{{ url_for('admin.users', page=users.next_num) }}" aria-label="Next">
+                                <a class="page-link" href="{{ url_for('admin.users', page=users.next_num, role=request.args.get('role')) }}" aria-label="Next">
                                     <span aria-hidden="true">&raquo;</span>
                                 </a>
                             </li>
@@ -216,7 +215,7 @@
     </div>
 </div>
 
-<!-- Modals - Moved outside of the table -->
+<!-- Modals -->
 {% if users.items %}
     {% for user in users.items %}
         <!-- Make Official Modal -->
@@ -302,12 +301,11 @@
 
 {% block scripts %}
 <script>
-// Handle the "Other" department option
 document.addEventListener('DOMContentLoaded', function() {
     {% for user in users.items %}
         {% if user.role == 'citizen' %}
-        const departmentSelect{{ user.id }} = document.getElementById('department{{ user.id }}');
-        const otherDeptDiv{{ user.id }} = document.getElementById('otherDeptDiv{{ user.id }}');
+        var departmentSelect{{ user.id }} = document.getElementById('department{{ user.id }}');
+        var otherDeptDiv{{ user.id }} = document.getElementById('otherDeptDiv{{ user.id }}');
         
         if (departmentSelect{{ user.id }}) {
             departmentSelect{{ user.id }}.addEventListener('change', function() {

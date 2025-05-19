@@ -15,55 +15,104 @@
                 </ol>
             </nav>
             
-            <div class="card shadow mb-4">
-                <div class="card-header bg-primary text-white">
-                    <h4 class="mb-0"><i class="fas fa-star me-2"></i>Provide Feedback</h4>
+            <div class="card shadow-lg border-0 mb-4">
+                <div class="card-header" style="background: linear-gradient(to right, #00bfff, #00ffff); color: white;">
+                    <h4 class="mb-0"><i class="fas fa-star me-2"></i>Your Feedback Matters</h4>
                 </div>
-                <div class="card-body">
-                    <div class="alert alert-info mb-4">
-                        <i class="fas fa-info-circle me-2"></i>
-                        Your feedback is valuable and helps us improve our services. Please rate your experience with the resolution of your complaint.
-                    </div>
-                    
-                    <div class="mb-4">
-                        <h5>Complaint: {{ complaint.title }}</h5>
+                <div class="card-body p-4">
+                    <div class="text-center mb-4">
+                        <div class="bg-light p-3 rounded-circle d-inline-block mb-3" style="width: 80px; height: 80px;">
+                            <i class="fas fa-clipboard-check text-primary" style="font-size: 2.5rem;"></i>
+                        </div>
+                        <h5 class="mb-1">Complaint: {{ complaint.title }}</h5>
                         <p class="text-muted">
                             <i class="fas fa-check-circle me-1 text-success"></i>
                             Resolved on {{ complaint.resolved_at.strftime('%d %B, %Y') }}
                         </p>
                     </div>
                     
+                    <div class="alert alert-info mb-4" style="border-left: 4px solid #00bfff; background-color: #e1f5fe;">
+                        <div class="d-flex">
+                            <div class="me-3">
+                                <i class="fas fa-lightbulb text-primary" style="font-size: 1.5rem;"></i>
+                            </div>
+                            <div>
+                                <strong>Why your feedback is important:</strong>
+                                <p class="mb-0">Your feedback helps us improve our services and better serve our community. It directly influences how we handle future complaints and allocate resources.</p>
+                            </div>
+                        </div>
+                    </div>
+                    
                     <form method="POST" action="{{ url_for('citizen.provide_feedback', complaint_id=complaint.id) }}">
                         {{ form.hidden_tag() }}
                         
                         <div class="mb-4">
-                            <label class="form-label fw-bold">{{ form.rating.label }}</label>
-                            <div class="mb-2">
-                                {% for option in form.rating %}
-                                <div class="form-check">
-                                    {{ option(class="form-check-input") }}
-                                    {{ option.label(class="form-check-label") }}
+                            <label class="form-label fw-bold fs-5">{{ form.rating.label }}</label>
+                            
+                            <!-- Star Rating Display (Simplified) -->
+                            <div class="mb-3 text-center">
+                                <div class="star-container d-flex justify-content-center mb-2">
+                                    <span class="star-rating-item mx-2" data-rating="1" style="cursor: pointer;">
+                                        <i class="far fa-star fs-1 text-warning"></i>
+                                        <div class="rating-text small">Poor</div>
+                                    </span>
+                                    <span class="star-rating-item mx-2" data-rating="2" style="cursor: pointer;">
+                                        <i class="far fa-star fs-1 text-warning"></i>
+                                        <div class="rating-text small">Fair</div>
+                                    </span>
+                                    <span class="star-rating-item mx-2" data-rating="3" style="cursor: pointer;">
+                                        <i class="far fa-star fs-1 text-warning"></i>
+                                        <div class="rating-text small">Good</div>
+                                    </span>
+                                    <span class="star-rating-item mx-2" data-rating="4" style="cursor: pointer;">
+                                        <i class="far fa-star fs-1 text-warning"></i>
+                                        <div class="rating-text small">Very Good</div>
+                                    </span>
+                                    <span class="star-rating-item mx-2" data-rating="5" style="cursor: pointer;">
+                                        <i class="far fa-star fs-1 text-warning"></i>
+                                        <div class="rating-text small">Excellent</div>
+                                    </span>
                                 </div>
-                                {% endfor %}
+                                <div id="selected-rating" class="text-center mb-2">
+                                    <span class="emoji-feedback">😐</span>
+                                    <p class="rating-description text-muted small">Please select a rating</p>
+                                </div>
                             </div>
+                            
+                            <!-- Hidden form field that will be updated via JS -->
+                            {{ form.rating(class="d-none", id="rating-value") }}
+                            
                             {% for error in form.rating.errors %}
-                                <div class="text-danger">{{ error }}</div>
+                                <div class="text-danger text-center">{{ error }}</div>
                             {% endfor %}
                         </div>
                         
                         <div class="mb-4">
-                            {{ form.comment.label(class="form-label fw-bold") }}
-                            {{ form.comment(class="form-control", rows=5, placeholder="Please share your experience with the resolution of your complaint...") }}
+                            <label class="form-label fw-bold fs-5">{{ form.comment.label }}</label>
+                            <div class="card border-light mb-2">
+                                <div class="card-body bg-light">
+                                    {{ form.comment(class="form-control border-0 bg-light", rows=5, placeholder="Please share your experience with how your complaint was handled...") }}
+                                </div>
+                            </div>
                             {% for error in form.comment.errors %}
                                 <div class="text-danger">{{ error }}</div>
                             {% endfor %}
-                            <div class="form-text">Optional: Let us know what we did well or how we could improve.</div>
+                            <div class="form-text">
+                                <i class="fas fa-info-circle me-1"></i>
+                                Your detailed feedback helps us understand what worked well and what needs improvement.
+                            </div>
                         </div>
                         
                         <div class="d-grid gap-2">
-                            {{ form.submit(class="btn btn-primary btn-lg") }}
+                            {{ form.submit(class="btn btn-primary btn-lg", style="background: linear-gradient(to right, #00bfff, #00ffff); border: none;") }}
                         </div>
                     </form>
+                </div>
+                <div class="card-footer bg-light text-center p-3">
+                    <p class="mb-0 text-muted small">
+                        <i class="fas fa-shield-alt me-1"></i>
+                        Your feedback is anonymous to the officials who handled your complaint
+                    </p>
                 </div>
             </div>
             
@@ -75,4 +124,105 @@
         </div>
     </div>
 </div>
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Get DOM elements
+    const ratingField = document.getElementById('rating-value');
+    const starItems = document.querySelectorAll('.star-rating-item');
+    const emojiFeedback = document.querySelector('.emoji-feedback');
+    const ratingDescription = document.querySelector('.rating-description');
+    
+    // Emoji and descriptions based on rating
+    const feedbackInfo = {
+        1: { emoji: '😞', desc: 'We\'re sorry you had a poor experience' },
+        2: { emoji: '😕', desc: 'Thank you for letting us know where we fell short' },
+        3: { emoji: '😊', desc: 'We\'re glad your experience was satisfactory' },
+        4: { emoji: '😃', desc: 'Great! We\'re happy you had a positive experience' },
+        5: { emoji: '🤩', desc: 'Excellent! We\'re thrilled you had an outstanding experience' }
+    };
+    
+    // Initialize with any previously selected value
+    if (ratingField.value) {
+        updateStarDisplay(parseInt(ratingField.value));
+    }
+    
+    // Add click event to each star
+    starItems.forEach(star => {
+        star.addEventListener('click', function() {
+            const rating = this.getAttribute('data-rating');
+            ratingField.value = rating;
+            updateStarDisplay(parseInt(rating));
+        });
+        
+        // Add hover effect
+        star.addEventListener('mouseenter', function() {
+            const rating = parseInt(this.getAttribute('data-rating'));
+            hoverStarDisplay(rating);
+        });
+    });
+    
+    // Handle mouseout from container
+    document.querySelector('.star-container').addEventListener('mouseleave', function() {
+        if (ratingField.value) {
+            updateStarDisplay(parseInt(ratingField.value));
+        } else {
+            resetStars();
+        }
+    });
+    
+    // Update stars based on selected rating
+    function updateStarDisplay(rating) {
+        // Update all stars
+        starItems.forEach(star => {
+            const starRating = parseInt(star.getAttribute('data-rating'));
+            const starIcon = star.querySelector('i');
+            
+            if (starRating <= rating) {
+                starIcon.classList.remove('far');
+                starIcon.classList.add('fas');
+            } else {
+                starIcon.classList.remove('fas');
+                starIcon.classList.add('far');
+            }
+        });
+        
+        // Update emoji and description
+        if (feedbackInfo[rating]) {
+            emojiFeedback.textContent = feedbackInfo[rating].emoji;
+            ratingDescription.textContent = feedbackInfo[rating].desc;
+        }
+    }
+    
+    // Show hover effect on stars
+    function hoverStarDisplay(rating) {
+        starItems.forEach(star => {
+            const starRating = parseInt(star.getAttribute('data-rating'));
+            const starIcon = star.querySelector('i');
+            
+            if (starRating <= rating) {
+                starIcon.classList.remove('far');
+                starIcon.classList.add('fas');
+            } else {
+                starIcon.classList.remove('fas');
+                starIcon.classList.add('far');
+            }
+        });
+    }
+    
+    // Reset all stars to unselected state
+    function resetStars() {
+        starItems.forEach(star => {
+            const starIcon = star.querySelector('i');
+            starIcon.classList.remove('fas');
+            starIcon.classList.add('far');
+        });
+        
+        emojiFeedback.textContent = '😐';
+        ratingDescription.textContent = 'Please select a rating';
+    }
+});
+</script>
+{% endblock %}
 {% endblock %} 

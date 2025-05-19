@@ -112,19 +112,36 @@ def send_otp_email(user, otp):
             
         current_app.logger.info(f"Sending OTP email to {user.email}")
         
-        # Create HTML email content using template string
-        html_content = render_template_string("""
+        # Create plain text version
+        text_content = f"""
+        CitySeva Email Verification
+
+        Hello {name},
+
+        Thank you for registering with CitySeva. To verify your email address and activate your account, please use the verification code below:
+
+        {otp}
+
+        This code will expire in 10 minutes. Enter it on the verification page to complete your registration.
+
+        If you didn't create an account with CitySeva, you can safely ignore this email.
+
+        Best regards,
+        The CitySeva Team
+        """
+        
+        # Create HTML version with the new approach
+        html_content = f"""
         <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
         <html xmlns="http://www.w3.org/1999/xhtml">
         <head>
-            <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-            <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+            <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
             <title>CitySeva Account Verification</title>
         </head>
         <body bgcolor="#f0f8ff">
-            <table width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#f0f8ff">
+            <table width="100%" bgcolor="#f0f8ff" cellpadding="0" cellspacing="0" border="0">
                 <tr>
-                    <td align="center" valign="top">
+                    <td align="center" valign="top" style="padding: 20px;">
                         <table width="600" cellpadding="0" cellspacing="0" border="0" bgcolor="#ffffff">
                             <!-- Logo Header -->
                             <tr>
@@ -144,12 +161,11 @@ def send_otp_email(user, otp):
                                     <font color="#ffffff" size="5" face="Arial, sans-serif"><b>CitySeva Email Verification</b></font>
                                 </td>
                             </tr>
-                            
                             <!-- Content -->
                             <tr>
-                                <td align="left" bgcolor="#ffffff" style="padding: 20px;">
+                                <td align="left" bgcolor="#ffffff" style="padding: 30px; border-left: 1px solid #e0f7fa; border-right: 1px solid #e0f7fa;">
                                     <font face="Arial, sans-serif" size="3" color="#333333">
-                                        Hello <font color="#0097a7"><b>{{ name }}</b></font>,<br /><br />
+                                        Hello <font color="#0097a7"><b>{name}</b></font>,<br /><br />
                                         
                                         Thank you for registering with <font color="#00bfff"><b>CitySeva</b></font>. To verify your email address and activate your account, please use the verification code below:<br /><br />
                                     </font>
@@ -161,7 +177,7 @@ def send_otp_email(user, otp):
                                                 <table cellpadding="0" cellspacing="0" border="0">
                                                     <tr>
                                                         <td align="center" bgcolor="#e0f7fa" style="padding: 15px 40px; border: 2px solid #00bfff;">
-                                                            <font color="#0097a7" size="6" face="Arial, sans-serif"><b>{{ otp }}</b></font>
+                                                            <font color="#0097a7" size="6" face="Arial, sans-serif"><b>{otp}</b></font>
                                                         </td>
                                                     </tr>
                                                 </table>
@@ -194,10 +210,9 @@ def send_otp_email(user, otp):
                                     </font>
                                 </td>
                             </tr>
-                            
                             <!-- Footer -->
                             <tr>
-                                <td align="center" bgcolor="#e0f7fa" style="border-top: 3px solid #00bfff; padding: 15px;">
+                                <td align="center" bgcolor="#e0f7fa" height="70" style="border-top: 3px solid #00bfff;">
                                     <font color="#0288d1" size="2" face="Arial, sans-serif">Powered by CitySeva - Connecting Citizens & Government</font><br />
                                     <font color="#607d8b" size="2" face="Arial, sans-serif">This is an automated message. Please do not reply to this email.</font>
                                 </td>
@@ -208,24 +223,6 @@ def send_otp_email(user, otp):
             </table>
         </body>
         </html>
-        """, name=name, otp=otp)
-        
-        # Create text version of the email
-        text_content = f"""
-        CitySeva Email Verification
-        
-        Hello {name},
-        
-        Thank you for registering with CitySeva. To verify your email address and activate your account, please use the verification code below:
-        
-        {otp}
-        
-        This code will expire in 10 minutes. Enter it on the verification page to complete your registration.
-        
-        If you didn't create an account with CitySeva, you can safely ignore this email.
-        
-        Best regards,
-        The CitySeva Team
         """
         
         return send_email(

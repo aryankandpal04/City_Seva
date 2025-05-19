@@ -592,12 +592,20 @@ def users():
     """List all users"""
     page = request.args.get('page', 1, type=int)
     per_page = 10
+    role = request.args.get('role')
     
-    # Get users from SQLite
-    users = User.query.order_by(User.created_at.desc()).paginate(
+    # Set up base query
+    query = User.query
+    
+    # Apply role filter if specified
+    if role in ['citizen', 'official', 'admin']:
+        query = query.filter_by(role=role)
+    
+    # Get users from SQLite with pagination
+    users = query.order_by(User.created_at.desc()).paginate(
         page=page, per_page=per_page, error_out=False
     )
-        
+    
     return render_template('admin/users.html', users=users)
 
 @admin.route('/user/<string:user_id>/toggle_active', methods=['POST'])

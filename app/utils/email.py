@@ -7,6 +7,7 @@ import traceback
 import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
+from datetime import datetime
 
 def send_async_email(app, msg):
     """Send email asynchronously"""
@@ -145,19 +146,37 @@ def send_password_reset_email(user):
     if callable(name):
         name = name()
     
-    # Create HTML email content using template string
-    html_content = render_template_string("""
+    # Create plain text version
+    text_content = f"""
+    CitySeva Password Reset
+
+    Hello {name},
+
+    You requested to reset your password for your CitySeva account. 
+    Please use the verification code below to complete the process:
+
+    {otp_code}
+
+    This code will expire in 10 minutes. Enter it on the password reset page to set a new password.
+
+    If you didn't request a password reset, please ignore this email or contact support.
+
+    Best regards,
+    The CitySeva Team
+    """
+    
+    # Create HTML version with the new approach
+    html_content = f"""
     <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
     <html xmlns="http://www.w3.org/1999/xhtml">
     <head>
-        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
         <title>CitySeva Password Reset</title>
     </head>
     <body bgcolor="#f0f8ff">
-        <table width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#f0f8ff">
+        <table width="100%" bgcolor="#f0f8ff" cellpadding="0" cellspacing="0" border="0">
             <tr>
-                <td align="center" valign="top">
+                <td align="center" valign="top" style="padding: 20px;">
                     <table width="600" cellpadding="0" cellspacing="0" border="0" bgcolor="#ffffff">
                         <!-- Logo Header -->
                         <tr>
@@ -177,12 +196,11 @@ def send_password_reset_email(user):
                                 <font color="#ffffff" size="5" face="Arial, sans-serif"><b>CitySeva Password Reset</b></font>
                             </td>
                         </tr>
-                        
                         <!-- Content -->
                         <tr>
-                            <td align="left" bgcolor="#ffffff" style="padding: 20px;">
+                            <td align="left" bgcolor="#ffffff" style="padding: 30px; border-left: 1px solid #e0f7fa; border-right: 1px solid #e0f7fa;">
                                 <font face="Arial, sans-serif" size="3" color="#333333">
-                                    Hello <font color="#0097a7"><b>{{ name }}</b></font>,<br /><br />
+                                    Hello <font color="#0097a7"><b>{name}</b></font>,<br /><br />
                                     
                                     You requested to reset your password for your <font color="#00bfff"><b>CitySeva</b></font> account. Please use the verification code below to complete the process:<br /><br />
                                 </font>
@@ -194,7 +212,7 @@ def send_password_reset_email(user):
                                             <table cellpadding="0" cellspacing="0" border="0">
                                                 <tr>
                                                     <td align="center" bgcolor="#e0f7fa" style="padding: 15px 40px; border: 2px solid #00bfff;">
-                                                        <font color="#0097a7" size="6" face="Arial, sans-serif"><b>{{ otp }}</b></font>
+                                                        <font color="#0097a7" size="6" face="Arial, sans-serif"><b>{otp_code}</b></font>
                                                     </td>
                                                 </tr>
                                             </table>
@@ -210,6 +228,7 @@ def send_password_reset_email(user):
                                     </tr>
                                 </table>
                                 <br />
+                                
                                 <font face="Arial, sans-serif" size="3" color="#333333">
                                     If you didn't request a password reset, please ignore this email or contact support if you have concerns about your account security.<br /><br />
                                 
@@ -226,10 +245,9 @@ def send_password_reset_email(user):
                                 </font>
                             </td>
                         </tr>
-                        
                         <!-- Footer -->
                         <tr>
-                            <td align="center" bgcolor="#e0f7fa" style="border-top: 3px solid #00bfff; padding: 15px;">
+                            <td align="center" bgcolor="#e0f7fa" height="70" style="border-top: 3px solid #00bfff;">
                                 <font color="#0288d1" size="2" face="Arial, sans-serif">Powered by CitySeva - Connecting Citizens & Government</font><br />
                                 <font color="#607d8b" size="2" face="Arial, sans-serif">This is an automated message. Please do not reply to this email.</font>
                             </td>
@@ -240,27 +258,10 @@ def send_password_reset_email(user):
         </table>
     </body>
     </html>
-    """, name=name, otp=otp_code)
-    
-    # Create text version of the email
-    text_content = f"""
-    CitySeva Password Reset
-    
-    Hello {name},
-    
-    You requested to reset your password for your CitySeva account. Please use the verification code below to complete the process:
-    
-    {otp_code}
-    
-    This code will expire in 10 minutes. Enter it on the password reset page to set a new password.
-    
-    If you didn't request a password reset, please ignore this email or contact support if you have concerns about your account security.
-    
-    Best regards,
-    The CitySeva Team
     """
     
-    send_email(
+    # Send email
+    result = send_email(
         subject='CitySeva Password Reset',
         recipients=[user.email],
         text_body=text_content,
@@ -276,19 +277,36 @@ def send_email_verification(user, verification_link):
     if callable(name):
         name = name()
     
-    # Create HTML email content using template string
-    html_content = render_template_string("""
+    # Create plain text version
+    text_content = f"""
+    CitySeva Email Verification
+
+    Hello {name},
+
+    Thank you for registering with CitySeva. To verify your email address and activate your account, please click the link below:
+
+    {verification_link}
+
+    This link will expire in 24 hours for security reasons.
+
+    If you didn't create an account with CitySeva, you can safely ignore this email.
+
+    Best regards,
+    The CitySeva Team
+    """
+    
+    # Create HTML version with the new approach
+    html_content = f"""
     <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
     <html xmlns="http://www.w3.org/1999/xhtml">
     <head>
-        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
         <title>CitySeva Email Verification</title>
     </head>
     <body bgcolor="#f0f8ff">
-        <table width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#f0f8ff">
+        <table width="100%" bgcolor="#f0f8ff" cellpadding="0" cellspacing="0" border="0">
             <tr>
-                <td align="center" valign="top">
+                <td align="center" valign="top" style="padding: 20px;">
                     <table width="600" cellpadding="0" cellspacing="0" border="0" bgcolor="#ffffff">
                         <!-- Logo Header -->
                         <tr>
@@ -308,12 +326,11 @@ def send_email_verification(user, verification_link):
                                 <font color="#ffffff" size="5" face="Arial, sans-serif"><b>CitySeva Email Verification</b></font>
                             </td>
                         </tr>
-                        
                         <!-- Content -->
                         <tr>
-                            <td align="left" bgcolor="#ffffff" style="padding: 20px;">
+                            <td align="left" bgcolor="#ffffff" style="padding: 30px; border-left: 1px solid #e0f7fa; border-right: 1px solid #e0f7fa;">
                                 <font face="Arial, sans-serif" size="3" color="#333333">
-                                    Hello <font color="#0097a7"><b>{{ name }}</b></font>,<br /><br />
+                                    Hello <font color="#0097a7"><b>{name}</b></font>,<br /><br />
                                     
                                     Thank you for registering with <font color="#00bfff"><b>CitySeva</b></font>. To verify your email address and activate your account, please click the button below:<br /><br />
                                 </font>
@@ -325,7 +342,7 @@ def send_email_verification(user, verification_link):
                                             <table cellpadding="0" cellspacing="0" border="0">
                                                 <tr>
                                                     <td align="center" bgcolor="#00bfff" style="padding: 10px 30px; border: 2px solid #0097a7;">
-                                                        <a href="{{ verification_link }}" style="text-decoration: none;">
+                                                        <a href="{verification_link}" style="text-decoration: none;">
                                                             <font color="#ffffff" size="3" face="Arial, sans-serif"><b>Verify Email Address</b></font>
                                                         </a>
                                                     </td>
@@ -340,7 +357,7 @@ def send_email_verification(user, verification_link):
                                     <tr>
                                         <td align="center" bgcolor="#e1f5fe" style="border-left: 4px solid #00bfff;">
                                             <font color="#0288d1" size="2" face="Arial, sans-serif">If the button doesn't work, copy and paste this link into your browser:</font><br />
-                                            <font color="#607d8b" size="2" face="Arial, sans-serif">{{ verification_link }}</font>
+                                            <font color="#607d8b" size="2" face="Arial, sans-serif">{verification_link}</font>
                                         </td>
                                     </tr>
                                 </table>
@@ -371,10 +388,9 @@ def send_email_verification(user, verification_link):
                                 </font>
                             </td>
                         </tr>
-                        
                         <!-- Footer -->
                         <tr>
-                            <td align="center" bgcolor="#e0f7fa" style="border-top: 3px solid #00bfff; padding: 15px;">
+                            <td align="center" bgcolor="#e0f7fa" height="70" style="border-top: 3px solid #00bfff;">
                                 <font color="#0288d1" size="2" face="Arial, sans-serif">Powered by CitySeva - Connecting Citizens & Government</font><br />
                                 <font color="#607d8b" size="2" face="Arial, sans-serif">This is an automated message. Please do not reply to this email.</font>
                             </td>
@@ -385,26 +401,9 @@ def send_email_verification(user, verification_link):
         </table>
     </body>
     </html>
-    """, name=name, verification_link=verification_link)
-    
-    # Create text version of the email
-    text_content = f"""
-    CitySeva Email Verification
-    
-    Hello {name},
-    
-    Thank you for registering with CitySeva. To verify your email address and activate your account, please click the link below:
-    
-    {verification_link}
-    
-    This link will expire in 24 hours for security reasons.
-    
-    If you didn't create an account with CitySeva, you can safely ignore this email.
-    
-    Best regards,
-    The CitySeva Team
     """
     
+    # Send email
     return send_email(
         subject='CitySeva Email Verification',
         recipients=[user.email],
@@ -418,7 +417,7 @@ def send_complaint_notification(complaint, category=None):
     
     try:
         # Skip if no department or category to determine recipients
-        if not category and (not hasattr(complaint, 'category') or not complaint.category):
+        if not hasattr(complaint, 'category') or not complaint.category:
             current_app.logger.error("Cannot send notification: No category provided or associated with complaint")
             return False
         
@@ -446,8 +445,13 @@ def send_complaint_notification(complaint, category=None):
             current_app.logger.error(f"No officials or admins found for department: {dept}")
             return False
         
-        # Get complaint subject
+        # Get complaint subject and details
         subject = getattr(complaint, 'subject', None) or getattr(complaint, 'title', 'New Complaint')
+        complaint_id = getattr(complaint, 'id', 'Unknown')
+        complaint_desc = getattr(complaint, 'description', 'No description provided')
+        complaint_location = getattr(complaint, 'location', 'Location not specified')
+        complaint_status = getattr(complaint, 'status', 'New')
+        complaint_date = getattr(complaint, 'created_at', datetime.utcnow()).strftime('%Y-%m-%d %H:%M:%S')
         
         # Send to each recipient
         sent_to_at_least_one = False
@@ -461,13 +465,173 @@ def send_complaint_notification(complaint, category=None):
             if callable(recipient_name):
                 recipient_name = recipient_name()
             
+            # Create plain text version
+            text_content = f"""
+            CitySeva New Complaint Notification
+
+            Hello {recipient_name},
+
+            A new complaint has been submitted that requires your attention.
+
+            Complaint ID: {complaint_id}
+            Subject: {subject}
+            Description: {complaint_desc}
+            Location: {complaint_location}
+            Status: {complaint_status}
+            Submitted: {complaint_date}
+
+            Please log in to the CitySeva portal to review and take appropriate action.
+
+            Best regards,
+            The CitySeva Team
+            """
+            
+            # Create HTML version with the new approach
+            html_content = f"""
+            <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+            <html xmlns="http://www.w3.org/1999/xhtml">
+            <head>
+                <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+                <title>CitySeva New Complaint Notification</title>
+            </head>
+            <body bgcolor="#f0f8ff">
+                <table width="100%" bgcolor="#f0f8ff" cellpadding="0" cellspacing="0" border="0">
+                    <tr>
+                        <td align="center" valign="top" style="padding: 20px;">
+                            <table width="600" cellpadding="0" cellspacing="0" border="0" bgcolor="#ffffff">
+                                <!-- Logo Header -->
+                                <tr>
+                                    <td align="center" bgcolor="#f0f8ff" height="80">
+                                        <table cellpadding="0" cellspacing="0" border="0">
+                                            <tr>
+                                                <td align="center" valign="middle" bgcolor="#00bfff" width="60" height="60" style="border: 2px solid #0097a7;">
+                                                    <font color="#ffffff" size="5" face="Arial, sans-serif"><b>CS</b></font>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+                                <!-- Header -->
+                                <tr>
+                                    <td align="center" bgcolor="#00bfff" height="80">
+                                        <font color="#ffffff" size="5" face="Arial, sans-serif"><b>New Complaint Notification</b></font>
+                                    </td>
+                                </tr>
+                                <!-- Content -->
+                                <tr>
+                                    <td align="left" bgcolor="#ffffff" style="padding: 30px; border-left: 1px solid #e0f7fa; border-right: 1px solid #e0f7fa;">
+                                        <font face="Arial, sans-serif" size="3" color="#333333">
+                                            Hello <font color="#0097a7"><b>{recipient_name}</b></font>,<br /><br />
+                                            
+                                            A new complaint has been submitted that requires your attention.<br /><br />
+                                        </font>
+                                        
+                                        <!-- Complaint Details Table -->
+                                        <table width="100%" cellpadding="10" cellspacing="0" border="0" style="border: 1px solid #e0f7fa;">
+                                            <tr bgcolor="#e1f5fe">
+                                                <td width="30%" bgcolor="#e1f5fe" style="border-bottom: 1px solid #b3e5fc;">
+                                                    <font color="#0288d1" size="3" face="Arial, sans-serif"><b>Complaint ID:</b></font>
+                                                </td>
+                                                <td bgcolor="#f5f5f5" style="border-bottom: 1px solid #b3e5fc;">
+                                                    <font color="#333333" size="3" face="Arial, sans-serif">{complaint_id}</font>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td width="30%" bgcolor="#e1f5fe" style="border-bottom: 1px solid #b3e5fc;">
+                                                    <font color="#0288d1" size="3" face="Arial, sans-serif"><b>Subject:</b></font>
+                                                </td>
+                                                <td bgcolor="#f5f5f5" style="border-bottom: 1px solid #b3e5fc;">
+                                                    <font color="#333333" size="3" face="Arial, sans-serif">{subject}</font>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td width="30%" bgcolor="#e1f5fe" style="border-bottom: 1px solid #b3e5fc;">
+                                                    <font color="#0288d1" size="3" face="Arial, sans-serif"><b>Description:</b></font>
+                                                </td>
+                                                <td bgcolor="#f5f5f5" style="border-bottom: 1px solid #b3e5fc;">
+                                                    <font color="#333333" size="3" face="Arial, sans-serif">{complaint_desc}</font>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td width="30%" bgcolor="#e1f5fe" style="border-bottom: 1px solid #b3e5fc;">
+                                                    <font color="#0288d1" size="3" face="Arial, sans-serif"><b>Location:</b></font>
+                                                </td>
+                                                <td bgcolor="#f5f5f5" style="border-bottom: 1px solid #b3e5fc;">
+                                                    <font color="#333333" size="3" face="Arial, sans-serif">{complaint_location}</font>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td width="30%" bgcolor="#e1f5fe" style="border-bottom: 1px solid #b3e5fc;">
+                                                    <font color="#0288d1" size="3" face="Arial, sans-serif"><b>Status:</b></font>
+                                                </td>
+                                                <td bgcolor="#f5f5f5" style="border-bottom: 1px solid #b3e5fc;">
+                                                    <font color="#333333" size="3" face="Arial, sans-serif">{complaint_status}</font>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td width="30%" bgcolor="#e1f5fe">
+                                                    <font color="#0288d1" size="3" face="Arial, sans-serif"><b>Submitted:</b></font>
+                                                </td>
+                                                <td bgcolor="#f5f5f5">
+                                                    <font color="#333333" size="3" face="Arial, sans-serif">{complaint_date}</font>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                        <br />
+                                        
+                                        <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                                            <tr>
+                                                <td align="center" height="60">
+                                                    <table cellpadding="0" cellspacing="0" border="0">
+                                                        <tr>
+                                                            <td align="center" bgcolor="#00bfff" style="padding: 10px 30px; border: 2px solid #0097a7;">
+                                                                <a href="{current_app.config.get('APPLICATION_URL', '')}/admin/complaints/{complaint_id}" style="text-decoration: none;">
+                                                                    <font color="#ffffff" size="3" face="Arial, sans-serif"><b>Review Complaint</b></font>
+                                                                </a>
+                                                            </td>
+                                                        </tr>
+                                                    </table>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                        <br />
+                                        
+                                        <font face="Arial, sans-serif" size="3" color="#333333">
+                                            Please log in to the CitySeva portal to review and take appropriate action.<br /><br />
+                                        
+                                            <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                                                <tr>
+                                                    <td style="border-top: 1px solid #e0f7fa; padding-top: 15px;">
+                                                        <font color="#607d8b" size="3" face="Arial, sans-serif">
+                                                            Best regards,<br />
+                                                            <font color="#0097a7"><b>The CitySeva Team</b></font>
+                                                        </font>
+                                                    </td>
+                                                </tr>
+                                            </table>
+                                        </font>
+                                    </td>
+                                </tr>
+                                <!-- Footer -->
+                                <tr>
+                                    <td align="center" bgcolor="#e0f7fa" height="70" style="border-top: 3px solid #00bfff;">
+                                        <font color="#0288d1" size="2" face="Arial, sans-serif">Powered by CitySeva - Connecting Citizens & Government</font><br />
+                                        <font color="#607d8b" size="2" face="Arial, sans-serif">This is an automated message. Please do not reply to this email.</font>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                </table>
+            </body>
+            </html>
+            """
+            
             success = send_email(
                 subject=f'New Complaint: {subject}',
                 recipients=[recipient.email],
-                text_body=render_template('email/complaint_notification.txt', 
-                                         complaint=complaint, recipient_name=recipient_name),
-                html_body=render_template('email/complaint_notification.html', 
-                                         complaint=complaint, recipient_name=recipient_name)
+                text_body=text_content,
+                html_body=html_content
             )
             if success:
                 sent_to_at_least_one = True
@@ -481,19 +645,153 @@ def send_complaint_notification(complaint, category=None):
 def send_contact_email(name, email, subject, message):
     """Send contact form submission email to admin."""
     try:
+        # Create plain text version
+        text_content = f"""
+        CitySeva Contact Form Submission
+
+        Name: {name}
+        Email: {email}
+        Subject: {subject}
+
+        Message:
+        {message}
+        """
+        
+        # Create HTML version with the new approach
+        html_content = f"""
+        <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+        <html xmlns="http://www.w3.org/1999/xhtml">
+        <head>
+            <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+            <title>CitySeva Contact Form Submission</title>
+        </head>
+        <body bgcolor="#f0f8ff">
+            <table width="100%" bgcolor="#f0f8ff" cellpadding="0" cellspacing="0" border="0">
+                <tr>
+                    <td align="center" valign="top" style="padding: 20px;">
+                        <table width="600" cellpadding="0" cellspacing="0" border="0" bgcolor="#ffffff">
+                            <!-- Logo Header -->
+                            <tr>
+                                <td align="center" bgcolor="#f0f8ff" height="80">
+                                    <table cellpadding="0" cellspacing="0" border="0">
+                                        <tr>
+                                            <td align="center" valign="middle" bgcolor="#00bfff" width="60" height="60" style="border: 2px solid #0097a7;">
+                                                <font color="#ffffff" size="5" face="Arial, sans-serif"><b>CS</b></font>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </td>
+                            </tr>
+                            <!-- Header -->
+                            <tr>
+                                <td align="center" bgcolor="#00bfff" height="80">
+                                    <font color="#ffffff" size="5" face="Arial, sans-serif"><b>Contact Form Submission</b></font>
+                                </td>
+                            </tr>
+                            <!-- Content -->
+                            <tr>
+                                <td align="left" bgcolor="#ffffff" style="padding: 30px; border-left: 1px solid #e0f7fa; border-right: 1px solid #e0f7fa;">
+                                    <font face="Arial, sans-serif" size="3" color="#333333">
+                                        A new message has been submitted through the contact form:<br /><br />
+                                    </font>
+                                    
+                                    <!-- Contact Details Table -->
+                                    <table width="100%" cellpadding="10" cellspacing="0" border="0" style="border: 1px solid #e0f7fa;">
+                                        <tr>
+                                            <td width="25%" bgcolor="#e1f5fe" style="border-bottom: 1px solid #b3e5fc;">
+                                                <font color="#0288d1" size="3" face="Arial, sans-serif"><b>Name:</b></font>
+                                            </td>
+                                            <td bgcolor="#f5f5f5" style="border-bottom: 1px solid #b3e5fc;">
+                                                <font color="#333333" size="3" face="Arial, sans-serif">{name}</font>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td bgcolor="#e1f5fe" style="border-bottom: 1px solid #b3e5fc;">
+                                                <font color="#0288d1" size="3" face="Arial, sans-serif"><b>Email:</b></font>
+                                            </td>
+                                            <td bgcolor="#f5f5f5" style="border-bottom: 1px solid #b3e5fc;">
+                                                <font color="#333333" size="3" face="Arial, sans-serif">
+                                                    <a href="mailto:{email}" style="color: #0097a7; text-decoration: none;">{email}</a>
+                                                </font>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td bgcolor="#e1f5fe" style="border-bottom: 1px solid #b3e5fc;">
+                                                <font color="#0288d1" size="3" face="Arial, sans-serif"><b>Subject:</b></font>
+                                            </td>
+                                            <td bgcolor="#f5f5f5" style="border-bottom: 1px solid #b3e5fc;">
+                                                <font color="#333333" size="3" face="Arial, sans-serif">{subject}</font>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                    <br />
+                                    
+                                    <!-- Message Section -->
+                                    <table width="100%" cellpadding="15" cellspacing="0" border="0" style="border: 1px solid #e0f7fa;">
+                                        <tr>
+                                            <td bgcolor="#e1f5fe">
+                                                <font color="#0288d1" size="3" face="Arial, sans-serif"><b>Message:</b></font>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td bgcolor="#f5f5f5" style="border-top: 1px solid #b3e5fc;">
+                                                <font color="#333333" size="3" face="Arial, sans-serif" style="white-space: pre-line;">{message}</font>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                    <br />
+                                    
+                                    <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                                        <tr>
+                                            <td align="center" height="60">
+                                                <table cellpadding="0" cellspacing="0" border="0">
+                                                    <tr>
+                                                        <td align="center" bgcolor="#00bfff" style="padding: 10px 30px; border: 2px solid #0097a7;">
+                                                            <a href="mailto:{email}" style="text-decoration: none;">
+                                                                <font color="#ffffff" size="3" face="Arial, sans-serif"><b>Reply to Sender</b></font>
+                                                            </a>
+                                                        </td>
+                                                    </tr>
+                                                </table>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                    <br />
+                                    
+                                    <font face="Arial, sans-serif" size="3" color="#333333">
+                                        <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                                            <tr>
+                                                <td style="border-top: 1px solid #e0f7fa; padding-top: 15px;">
+                                                    <font color="#607d8b" size="3" face="Arial, sans-serif">
+                                                        Best regards,<br />
+                                                        <font color="#0097a7"><b>The CitySeva Team</b></font>
+                                                    </font>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </font>
+                                </td>
+                            </tr>
+                            <!-- Footer -->
+                            <tr>
+                                <td align="center" bgcolor="#e0f7fa" height="70" style="border-top: 3px solid #00bfff;">
+                                    <font color="#0288d1" size="2" face="Arial, sans-serif">Powered by CitySeva - Connecting Citizens & Government</font><br />
+                                    <font color="#607d8b" size="2" face="Arial, sans-serif">This is an automated message. Please do not reply to this email.</font>
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+            </table>
+        </body>
+        </html>
+        """
+        
         return send_email(
             subject=f'New Contact Form Submission: {subject}',
             recipients=[current_app.config['ADMIN_EMAIL']],
-            text_body=render_template('email/contact_email.txt',
-                                     name=name,
-                                     email=email,
-                                     subject=subject,
-                                     message=message),
-            html_body=render_template('email/contact_email.html',
-                                     name=name,
-                                     email=email,
-                                     subject=subject,
-                                     message=message)
+            text_body=text_content,
+            html_body=html_content
         )
     except Exception as e:
         current_app.logger.error(f"Error sending contact email: {str(e)}")
