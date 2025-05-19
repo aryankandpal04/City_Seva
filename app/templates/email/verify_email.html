@@ -9,18 +9,18 @@
 </head>
 <body bgcolor="#f0f8ff" style="margin: 0; padding: 0; font-family: Arial, Helvetica, sans-serif; font-size: 16px; line-height: 1.6; color: #333333; background-color: #f0f8ff !important;">
     <!-- Main Table -->
-    <table width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#f0f8ff">
+    <table width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#f0f8ff" style="background-color: #f0f8ff;">
         <tr>
             <td align="center" valign="top" style="padding: 20px 0;">
                 <!-- Content Table -->
-                <table width="600" cellpadding="0" cellspacing="0" border="0" style="max-width: 600px; width: 100%; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+                <table width="600" cellpadding="0" cellspacing="0" border="0" style="max-width: 600px; width: 100%;" bgcolor="#ffffff">
                     <!-- Logo Header -->
                     <tr>
-                        <td align="center" valign="top" bgcolor="#f0f8ff" style="padding: 20px 0; background-color: #f0f8ff !important;">
+                        <td align="center" valign="top" bgcolor="#f0f8ff" style="padding: 20px 0; background-color: #f0f8ff;">
                             <table cellpadding="0" cellspacing="0" border="0">
                                 <tr>
-                                    <td align="center" valign="middle" bgcolor="#00bfff" style="width: 60px; height: 60px; background-color: #00bfff !important; border-radius: 50%; box-shadow: 0 4px 10px rgba(0,0,0,0.2);">
-                                        <span style="color: white !important; font-size: 28px; font-weight: bold;">CS</span>
+                                    <td align="center" valign="middle" bgcolor="#00bfff" style="width: 60px; height: 60px; background-color: #00bfff; border: 2px solid #0097a7;" width="60" height="60">
+                                        <font color="#ffffff" style="color: #ffffff; font-size: 28px; font-weight: bold;">CS</font>
                                     </td>
                                 </tr>
                             </table>
@@ -28,16 +28,20 @@
                     </tr>
                     <!-- Header -->
                     <tr>
-                        <td align="center" valign="top" bgcolor="#00bfff" style="padding: 30px 20px; background-color: #00bfff !important; border-radius: 8px 8px 0 0;">
+                        <td align="center" valign="top" bgcolor="#00bfff" style="padding: 30px 20px; background-color: #00bfff;">
                             <table width="100%" cellpadding="0" cellspacing="0" border="0">
                                 <tr>
                                     <td align="center">
-                                        <h1 style="margin: 0; font-size: 28px; font-weight: bold; color: #ffffff !important; text-shadow: 0 1px 2px rgba(0,0,0,0.1);">CitySeva Email Verification</h1>
+                                        <font color="#ffffff" style="font-size: 28px; font-weight: bold; color: #ffffff;"><b>CitySeva Email Verification</b></font>
                                     </td>
                                 </tr>
                                 <tr>
                                     <td align="center" style="padding-top: 10px;">
-                                        <div style="width: 50px; height: 3px; background-color: rgba(255,255,255,0.5);"></div>
+                                        <table width="50" cellpadding="0" cellspacing="0" border="0">
+                                            <tr>
+                                                <td height="3" bgcolor="#ffffff" style="background-color: #ffffff;"></td>
+                                            </tr>
+                                        </table>
                                     </td>
                                 </tr>
                             </table>
@@ -46,10 +50,10 @@
                     
                     <!-- Content -->
                     <tr>
-                        <td align="left" valign="top" bgcolor="#ffffff" style="padding: 30px; background-color: #ffffff !important; border-left: 1px solid #e0f7fa; border-right: 1px solid #e0f7fa;">
-                            <p style="margin: 0 0 20px 0; font-size: 18px;">Hello <strong style="color: #0097a7 !important;">{{ name }}</strong>,</p>
+                        <td align="left" valign="top" bgcolor="#ffffff" style="padding: 30px; background-color: #ffffff; border-left: 1px solid #e0f7fa; border-right: 1px solid #e0f7fa;">
+                            <p style="margin: 0 0 20px 0; font-size: 18px;">Hello <b><font color="#0097a7" style="color: #0097a7;">{{ name }}</font></b>,</p>
                             
-                            <p style="margin: 0 0 20px 0;">Thank you for registering with <span style="color: #00bfff !important; font-weight: bold;">CitySeva</span>. To verify your email address and activate your account, please click the button below:</p>
+                            <p style="margin: 0 0 20px 0;">Thank you for registering with <b><font color="#00bfff" style="color: #00bfff;">CitySeva</font></b>. To verify your email address and activate your account, please click the button below:</p>
                             
                             <!-- Verification Button -->
                             <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin: 25px 0;">
@@ -57,8 +61,8 @@
                                     <td align="center">
                                         <table cellpadding="0" cellspacing="0" border="0">
                                             <tr>
-                                                <td align="center" bgcolor="#00bfff" style="padding: 12px 30px; background-color: #00bfff !important; border-radius: 30px; border: 0;">
-                                                    <a href="{{ verification_link }}" style="color: #ffffff !important; text-decoration: none; display: inline-block; font-weight: bold; font-size: 16px; letter-spacing: 0.5px;">Verify Email Address</a>
+                                                <td align="center" bgcolor="#00bfff" style="padding: 12px 30px; background-color: #00bfff; border: 2px solid #0097a7;">
+                                                    <a href="{{ verification_link }}" style="color: #ffffff; text-decoration: none; display: inline-block; font-weight: bold; font-size: 16px; letter-spacing: 0.5px;"><font color="#ffffff">Verify Email Address</font></a>
                                                 </td>
                                             </tr>
                                         </table>
@@ -66,19 +70,20 @@
                                 </tr>
                             </table>
                             
-                            <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom: 20px;">
+                            <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom: 20px;" bgcolor="#e1f5fe">
                                 <tr>
-                                    <td align="center" bgcolor="#e1f5fe" style="padding: 15px; background-color: #e1f5fe !important; border-left: 4px solid #00bfff; border-radius: 4px;">
-                                        <p style="margin: 0; color: #0288d1 !important; font-size: 14px;">If the button doesn't work, copy and paste this link into your browser:</p>
-                                        <p style="margin: 5px 0 0 0; font-size: 12px; word-break: break-all; color: #607d8b !important;">{{ verification_link }}</p>
+                                    <td align="center" bgcolor="#e1f5fe" style="padding: 15px; background-color: #e1f5fe; border-left: 4px solid #00bfff;">
+                                        <font color="#0288d1" style="margin: 0; color: #0288d1; font-size: 14px;">If the button doesn't work, copy and paste this link into your browser:</font>
+                                        <br>
+                                        <font color="#607d8b" style="margin: 5px 0 0 0; font-size: 12px; word-break: break-all; color: #607d8b;">{{ verification_link }}</font>
                                     </td>
                                 </tr>
                             </table>
                             
-                            <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom: 20px;">
+                            <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom: 20px;" bgcolor="#e3f2fd">
                                 <tr>
-                                    <td bgcolor="#e3f2fd" style="padding: 15px; background-color: #e3f2fd !important; border-left: 4px solid #2196f3; border-radius: 4px;">
-                                        <p style="margin: 0; color: #1565c0 !important; font-size: 14px;"><strong>Note:</strong> This link will expire in 24 hours for security reasons.</p>
+                                    <td bgcolor="#e3f2fd" style="padding: 15px; background-color: #e3f2fd; border-left: 4px solid #2196f3;">
+                                        <font color="#1565c0" style="margin: 0; color: #1565c0; font-size: 14px;"><b>Note:</b> This link will expire in 24 hours for security reasons.</font>
                                     </td>
                                 </tr>
                             </table>
@@ -88,7 +93,7 @@
                             <table width="100%" cellpadding="0" cellspacing="0" border="0">
                                 <tr>
                                     <td style="padding-top: 30px; border-top: 1px solid #e0f7fa;">
-                                        <p style="margin: 0; color: #607d8b !important;">Best regards,<br><strong style="color: #0097a7 !important;">The CitySeva Team</strong></p>
+                                        <font color="#607d8b" style="margin: 0; color: #607d8b;">Best regards,<br><b><font color="#0097a7" style="color: #0097a7;">The CitySeva Team</font></b></font>
                                     </td>
                                 </tr>
                             </table>
@@ -97,9 +102,9 @@
                     
                     <!-- Footer -->
                     <tr>
-                        <td align="center" valign="top" bgcolor="#e0f7fa" style="padding: 20px; background-color: #e0f7fa !important; border-radius: 0 0 8px 8px; border-top: 3px solid #00bfff;">
-                            <p style="margin: 0 0 10px 0; font-size: 12px; color: #0288d1 !important;">Powered by CitySeva - Connecting Citizens & Government</p>
-                            <p style="margin: 0; font-size: 12px; color: #607d8b !important;">This is an automated message. Please do not reply to this email.</p>
+                        <td align="center" valign="top" bgcolor="#e0f7fa" style="padding: 20px; background-color: #e0f7fa; border-top: 3px solid #00bfff;">
+                            <font color="#0288d1" style="margin: 0 0 10px 0; font-size: 12px; color: #0288d1;">Powered by CitySeva - Connecting Citizens & Government</font><br>
+                            <font color="#607d8b" style="margin: 0; font-size: 12px; color: #607d8b;">This is an automated message. Please do not reply to this email.</font>
                         </td>
                     </tr>
                 </table>
