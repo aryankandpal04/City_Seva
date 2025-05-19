@@ -4,11 +4,14 @@
 
 {% block styles %}
 <style>
-    .stats-card {
-        transition: transform 0.3s;
-    }
-    .stats-card:hover {
-        transform: translateY(-5px);
+    .icon-circle {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.25rem;
     }
     .chart-container {
         position: relative;
@@ -19,12 +22,20 @@
 
 {% block content %}
 <div class="container-fluid py-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1><i class="fas fa-chart-bar me-2"></i>Reports & Analytics</h1>
-        <div>
-            <a href="{{ url_for('government_officials.dashboard') }}" class="btn btn-outline-primary">
-                <i class="fas fa-tachometer-alt me-2"></i>Dashboard
-            </a>
+    <!-- Welcome Section -->
+    <div class="card mb-4">
+        <div class="card-body d-flex align-items-center">
+            <div>
+                <h4 class="mb-1">Reports & Analytics</h4>
+                <p class="text-secondary mb-0">
+                    Department: {{ current_user.department }} | Performance Insights and Statistics
+                </p>
+            </div>
+            <div class="ms-auto">
+                <a href="{{ url_for('government_officials.dashboard') }}" class="btn btn-outline-primary">
+                    <i class="fas fa-tachometer-alt me-2"></i>Dashboard
+                </a>
+            </div>
         </div>
     </div>
 
@@ -69,13 +80,18 @@
     </div>
 
     <!-- Performance Metrics -->
-    <div class="row mb-4">
-        <div class="col-md-3 mb-3">
-            <div class="card bg-primary text-white stats-card h-100">
+    <div class="row g-4 mb-4">
+        <div class="col-md-3">
+            <div class="card h-100">
                 <div class="card-body">
-                    <h6 class="card-title">Complaints Resolved</h6>
-                    <h2 class="display-4 fw-bold mb-0">{{ resolved_count }}</h2>
-                    <p class="mb-0 mt-2">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="icon-circle bg-primary bg-opacity-10 text-primary">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                        <h6 class="card-title mb-0 ms-3">Complaints Resolved</h6>
+                    </div>
+                    <h3 class="mb-0 text-primary">{{ resolved_count }}</h3>
+                    <p class="text-muted small mt-2">
                         <i class="fas fa-arrow-up me-1"></i>
                         {{ resolution_rate }}% Resolution Rate
                     </p>
@@ -83,32 +99,47 @@
             </div>
         </div>
         
-        <div class="col-md-3 mb-3">
-            <div class="card bg-success text-white stats-card h-100">
+        <div class="col-md-3">
+            <div class="card h-100">
                 <div class="card-body">
-                    <h6 class="card-title">Avg. Resolution Time</h6>
-                    <h2 class="display-4 fw-bold mb-0">{{ avg_resolution_time }}</h2>
-                    <p class="mb-0 mt-2">Days to resolve complaints</p>
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="icon-circle bg-success bg-opacity-10 text-success">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                        <h6 class="card-title mb-0 ms-3">Avg. Resolution Time</h6>
+                    </div>
+                    <h3 class="mb-0 text-success">{{ avg_resolution_time }}</h3>
+                    <p class="text-muted small mt-2">Days to resolve complaints</p>
                 </div>
             </div>
         </div>
         
-        <div class="col-md-3 mb-3">
-            <div class="card bg-warning text-dark stats-card h-100">
+        <div class="col-md-3">
+            <div class="card h-100">
                 <div class="card-body">
-                    <h6 class="card-title">Citizen Satisfaction</h6>
-                    <h2 class="display-4 fw-bold mb-0">{{ avg_rating }}</h2>
-                    <p class="mb-0 mt-2">Average rating (out of 5)</p>
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="icon-circle bg-warning bg-opacity-10 text-warning">
+                            <i class="fas fa-star"></i>
+                        </div>
+                        <h6 class="card-title mb-0 ms-3">Citizen Satisfaction</h6>
+                    </div>
+                    <h3 class="mb-0 text-warning">{{ avg_rating }}</h3>
+                    <p class="text-muted small mt-2">Average rating (out of 5)</p>
                 </div>
             </div>
         </div>
         
-        <div class="col-md-3 mb-3">
-            <div class="card bg-info text-white stats-card h-100">
+        <div class="col-md-3">
+            <div class="card h-100">
                 <div class="card-body">
-                    <h6 class="card-title">Response Time</h6>
-                    <h2 class="display-4 fw-bold mb-0">{{ avg_first_response }}</h2>
-                    <p class="mb-0 mt-2">Hours to first response</p>
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="icon-circle bg-info bg-opacity-10 text-info">
+                            <i class="fas fa-bolt"></i>
+                        </div>
+                        <h6 class="card-title mb-0 ms-3">Response Time</h6>
+                    </div>
+                    <h3 class="mb-0 text-info">{{ avg_first_response }}</h3>
+                    <p class="text-muted small mt-2">Hours to first response</p>
                 </div>
             </div>
         </div>

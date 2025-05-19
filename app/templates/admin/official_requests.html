@@ -47,36 +47,6 @@
                                         </button>
                                     </td>
                                 </tr>
-                                
-                                <!-- Delete Request Modal -->
-                                <div class="modal fade" id="deleteRequestModal{{ request.id }}" tabindex="-1" 
-                                     aria-labelledby="deleteRequestModalLabel{{ request.id }}" aria-hidden="true">
-                                    <div class="modal-dialog">
-                                        <div class="modal-content">
-                                            <div class="modal-header bg-danger text-white">
-                                                <h5 class="modal-title" id="deleteRequestModalLabel{{ request.id }}">
-                                                    Delete Official Account Request
-                                                </h5>
-                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                            </div>
-                                            <div class="modal-body">
-                                                <p>Are you sure you want to delete this request?</p>
-                                                <p><strong>User:</strong> {{ request.user.full_name() }}</p>
-                                                <p><strong>Department:</strong> {{ request.department }}</p>
-                                                <div class="alert alert-warning">
-                                                    <i class="fas fa-exclamation-triangle me-2"></i>
-                                                    This action cannot be undone.
-                                                </div>
-                                            </div>
-                                            <div class="modal-footer">
-                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                                                <form method="POST" action="{{ url_for('admin.delete_request', request_id=request.id) }}">
-                                                    <button type="submit" class="btn btn-danger">Delete Request</button>
-                                                </form>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
                             {% endfor %}
                         {% else %}
                             <tr>
@@ -136,4 +106,39 @@
         </div>
     </div>
 </div>
+
+<!-- Modal Dialogs - Moved outside of table structure -->
+{% if pending_requests %}
+    {% for request in pending_requests %}
+        <!-- Delete Request Modal -->
+        <div class="modal fade" id="deleteRequestModal{{ request.id }}" tabindex="-1" 
+             aria-labelledby="deleteRequestModalLabel{{ request.id }}" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header bg-danger text-white">
+                        <h5 class="modal-title" id="deleteRequestModalLabel{{ request.id }}">
+                            Delete Official Account Request
+                        </h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p>Are you sure you want to delete this request?</p>
+                        <p><strong>User:</strong> {{ request.user.full_name() }}</p>
+                        <p><strong>Department:</strong> {{ request.department }}</p>
+                        <div class="alert alert-warning">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            This action cannot be undone.
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <form method="POST" action="{{ url_for('admin.delete_request', request_id=request.id) }}">
+                            <button type="submit" class="btn btn-danger">Delete Request</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endfor %}
+{% endif %}
 {% endblock %} 

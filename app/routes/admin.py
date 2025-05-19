@@ -398,27 +398,25 @@ def complaint_detail(complaint_id):
                     try:
                         from app.utils.email import send_email
                         
-                        # Format for email
-                        email_text = f"""
-                        Dear {citizen.full_name()},
+                        # Get complaint URL for the email
+                        complaint_url = url_for('citizen.complaint_detail', complaint_id=complaint.id, _external=True)
                         
-                        {notification.message}
-                        
-                        You can view the full complaint details and updates at:
-                        {url_for('citizen.complaint_detail', complaint_id=complaint.id, _external=True)}
-                        
-                        Thank you for using CitySeva.
-                        
-                        Regards,
-                        CitySeva Team
-                        """
-                        
-                        # Send the email asynchronously 
+                        # Send the email using templates
                         send_email(
                             subject=notification.title,
                             recipients=[citizen.email],
-                            text_body=email_text,
-                            html_body=email_text.replace('\n', '<br>')
+                            text_body=render_template('email/complaint_status_update.txt', 
+                                                    name=citizen.full_name(),
+                                                    complaint=complaint,
+                                                    message=notification.message,
+                                                    comment=form.comment.data,
+                                                    complaint_url=complaint_url),
+                            html_body=render_template('email/complaint_status_update.html',
+                                                    name=citizen.full_name(),
+                                                    complaint=complaint,
+                                                    message=notification.message,
+                                                    comment=form.comment.data,
+                                                    complaint_url=complaint_url)
                         )
                         current_app.logger.info(f"Sent email notification to {citizen.email} about complaint {complaint.id}")
                     except Exception as e:

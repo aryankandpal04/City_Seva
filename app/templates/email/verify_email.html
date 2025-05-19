@@ -1,71 +1,110 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <meta charset="utf-8">
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            line-height: 1.6;
-            color: #333;
-            max-width: 600px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-        .header {
-            background-color: #3c78d8;
-            color: white;
-            padding: 20px;
-            text-align: center;
-            border-radius: 5px 5px 0 0;
-        }
-        .content {
-            padding: 20px;
-            border: 1px solid #ddd;
-            border-top: none;
-            border-radius: 0 0 5px 5px;
-        }
-        .button {
-            display: inline-block;
-            background-color: #3c78d8;
-            color: white;
-            text-decoration: none;
-            padding: 10px 20px;
-            border-radius: 5px;
-            margin: 20px 0;
-        }
-        .footer {
-            margin-top: 20px;
-            font-size: 0.8em;
-            color: #666;
-            text-align: center;
-        }
-    </style>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#00bfff">
+    <meta name="color-scheme" content="light">
+    <title>CitySeva Email Verification</title>
 </head>
-<body>
-    <div class="header">
-        <h1>CitySeva Email Verification</h1>
-    </div>
-    <div class="content">
-        <p>Hello {{ name }},</p>
-        
-        <p>Thank you for registering with CitySeva. To verify your email address and activate your account, please click the button below:</p>
-        
-        <div style="text-align: center;">
-            <a href="{{ verification_link }}" class="button">Verify Email Address</a>
-        </div>
-        
-        <p>If the button doesn't work, you can also copy and paste this link into your browser:</p>
-        
-        <p style="word-break: break-all;">{{ verification_link }}</p>
-        
-        <p>This link will expire in 24 hours.</p>
-        
-        <p>If you didn't create an account with CitySeva, you can safely ignore this email.</p>
-        
-        <p>Best regards,<br>The CitySeva Team</p>
-    </div>
-    <div class="footer">
-        <p>This is an automated message. Please do not reply to this email.</p>
-    </div>
+<body bgcolor="#f0f8ff" style="margin: 0; padding: 0; font-family: Arial, Helvetica, sans-serif; font-size: 16px; line-height: 1.6; color: #333333; background-color: #f0f8ff !important;">
+    <!-- Main Table -->
+    <table width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#f0f8ff">
+        <tr>
+            <td align="center" valign="top" style="padding: 20px 0;">
+                <!-- Content Table -->
+                <table width="600" cellpadding="0" cellspacing="0" border="0" style="max-width: 600px; width: 100%; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+                    <!-- Logo Header -->
+                    <tr>
+                        <td align="center" valign="top" bgcolor="#f0f8ff" style="padding: 20px 0; background-color: #f0f8ff !important;">
+                            <table cellpadding="0" cellspacing="0" border="0">
+                                <tr>
+                                    <td align="center" valign="middle" bgcolor="#00bfff" style="width: 60px; height: 60px; background-color: #00bfff !important; border-radius: 50%; box-shadow: 0 4px 10px rgba(0,0,0,0.2);">
+                                        <span style="color: white !important; font-size: 28px; font-weight: bold;">CS</span>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                    <!-- Header -->
+                    <tr>
+                        <td align="center" valign="top" bgcolor="#00bfff" style="padding: 30px 20px; background-color: #00bfff !important; border-radius: 8px 8px 0 0;">
+                            <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                                <tr>
+                                    <td align="center">
+                                        <h1 style="margin: 0; font-size: 28px; font-weight: bold; color: #ffffff !important; text-shadow: 0 1px 2px rgba(0,0,0,0.1);">CitySeva Email Verification</h1>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td align="center" style="padding-top: 10px;">
+                                        <div style="width: 50px; height: 3px; background-color: rgba(255,255,255,0.5);"></div>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                    
+                    <!-- Content -->
+                    <tr>
+                        <td align="left" valign="top" bgcolor="#ffffff" style="padding: 30px; background-color: #ffffff !important; border-left: 1px solid #e0f7fa; border-right: 1px solid #e0f7fa;">
+                            <p style="margin: 0 0 20px 0; font-size: 18px;">Hello <strong style="color: #0097a7 !important;">{{ name }}</strong>,</p>
+                            
+                            <p style="margin: 0 0 20px 0;">Thank you for registering with <span style="color: #00bfff !important; font-weight: bold;">CitySeva</span>. To verify your email address and activate your account, please click the button below:</p>
+                            
+                            <!-- Verification Button -->
+                            <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin: 25px 0;">
+                                <tr>
+                                    <td align="center">
+                                        <table cellpadding="0" cellspacing="0" border="0">
+                                            <tr>
+                                                <td align="center" bgcolor="#00bfff" style="padding: 12px 30px; background-color: #00bfff !important; border-radius: 30px; border: 0;">
+                                                    <a href="{{ verification_link }}" style="color: #ffffff !important; text-decoration: none; display: inline-block; font-weight: bold; font-size: 16px; letter-spacing: 0.5px;">Verify Email Address</a>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+                            </table>
+                            
+                            <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom: 20px;">
+                                <tr>
+                                    <td align="center" bgcolor="#e1f5fe" style="padding: 15px; background-color: #e1f5fe !important; border-left: 4px solid #00bfff; border-radius: 4px;">
+                                        <p style="margin: 0; color: #0288d1 !important; font-size: 14px;">If the button doesn't work, copy and paste this link into your browser:</p>
+                                        <p style="margin: 5px 0 0 0; font-size: 12px; word-break: break-all; color: #607d8b !important;">{{ verification_link }}</p>
+                                    </td>
+                                </tr>
+                            </table>
+                            
+                            <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom: 20px;">
+                                <tr>
+                                    <td bgcolor="#e3f2fd" style="padding: 15px; background-color: #e3f2fd !important; border-left: 4px solid #2196f3; border-radius: 4px;">
+                                        <p style="margin: 0; color: #1565c0 !important; font-size: 14px;"><strong>Note:</strong> This link will expire in 24 hours for security reasons.</p>
+                                    </td>
+                                </tr>
+                            </table>
+                            
+                            <p style="margin: 0 0 20px 0;">If you didn't create an account with CitySeva, you can safely ignore this email.</p>
+                            
+                            <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                                <tr>
+                                    <td style="padding-top: 30px; border-top: 1px solid #e0f7fa;">
+                                        <p style="margin: 0; color: #607d8b !important;">Best regards,<br><strong style="color: #0097a7 !important;">The CitySeva Team</strong></p>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                    
+                    <!-- Footer -->
+                    <tr>
+                        <td align="center" valign="top" bgcolor="#e0f7fa" style="padding: 20px; background-color: #e0f7fa !important; border-radius: 0 0 8px 8px; border-top: 3px solid #00bfff;">
+                            <p style="margin: 0 0 10px 0; font-size: 12px; color: #0288d1 !important;">Powered by CitySeva - Connecting Citizens & Government</p>
+                            <p style="margin: 0; font-size: 12px; color: #607d8b !important;">This is an automated message. Please do not reply to this email.</p>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
 </body>
 </html> 

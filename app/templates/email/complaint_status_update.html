@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Complaint Status Update: #{{ complaint.id }}</title>
+</head>
+<body bgcolor="#f0f8ff" style="margin: 0; padding: 0; font-family: Arial, Helvetica, sans-serif; font-size: 16px; line-height: 1.6; color: #333333; background-color: #f0f8ff;">
+    <!-- Main Table -->
+    <table width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#f0f8ff">
+        <tr>
+            <td align="center" valign="top" style="padding: 20px 0;">
+                <!-- Content Table -->
+                <table width="600" cellpadding="0" cellspacing="0" border="0" style="max-width: 600px; width: 100%;">
+                    <!-- Header -->
+                    <tr>
+                        <td align="center" valign="top" bgcolor="#00bfff" background="linear-gradient(to right, #00bfff, #00ffff)" style="padding: 30px 20px; background: #00bfff; background: linear-gradient(to right, #00bfff, #00ffff); border-radius: 5px 5px 0 0;">
+                            <h1 style="margin: 0; font-size: 28px; font-weight: bold; color: #ffffff;">Complaint Status Update</h1>
+                        </td>
+                    </tr>
+                    
+                    <!-- Content -->
+                    <tr>
+                        <td align="left" valign="top" bgcolor="#ffffff" style="padding: 30px; background-color: #ffffff; border-left: 1px solid #e0f7fa; border-right: 1px solid #e0f7fa; border-bottom: 1px solid #e0f7fa;">
+                            <p style="margin: 0 0 20px 0;">Hello {{ name }},</p>
+                            
+                            <p style="margin: 0 0 20px 0;">There has been an update to your complaint in CitySeva.</p>
+                            
+                            <!-- Complaint Details Box -->
+                            <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin: 0 0 25px 0; border-collapse: collapse;">
+                                <tr>
+                                    <td style="padding: 15px; background-color: #e0f7fa; border-left: 4px solid #00bfff; border-radius: 5px;">
+                                        <h3 style="margin: 0 0 15px 0; color: #333333;">Complaint #{{ complaint.id }}</h3>
+                                        <p style="margin: 0 0 10px 0;"><strong>Title:</strong> {{ complaint.title }}</p>
+                                        <p style="margin: 0;"><strong>Status:</strong> 
+                                            <span style="display: inline-block; padding: 5px 10px; border-radius: 15px; font-weight: bold; text-transform: uppercase; font-size: 12px; color: #ffffff; background-color: 
+                                            {% if complaint.status == 'pending' %}#f0ad4e
+                                            {% elif complaint.status == 'in_progress' %}#00bfff
+                                            {% elif complaint.status == 'resolved' %}#5cb85c
+                                            {% elif complaint.status == 'rejected' %}#d9534f
+                                            {% else %}#777777{% endif %};">
+                                                {{ complaint.status.replace('_', ' ').title() }}
+                                            </span>
+                                        </p>
+                                    </td>
+                                </tr>
+                            </table>
+                            
+                            <!-- Update Details Box -->
+                            <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin: 0 0 25px 0; border-collapse: collapse;">
+                                <tr>
+                                    <td style="padding: 15px; background-color: #e0f7fa; border-left: 4px solid #00bfff; border-radius: 5px;">
+                                        <h4 style="margin: 0 0 15px 0; color: #333333;">Update Details:</h4>
+                                        <p style="margin: 0 0 10px 0;">{{ message }}</p>
+                                        {% if comment %}
+                                        <p style="margin: 0;"><strong>Comment:</strong> {{ comment }}</p>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            </table>
+                            
+                            <!-- Button -->
+                            <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin: 25px 0;">
+                                <tr>
+                                    <td align="center">
+                                        <table cellpadding="0" cellspacing="0" border="0" style="display: inline-block;">
+                                            <tr>
+                                                <td align="center" bgcolor="#00bfff" style="background: linear-gradient(to right, #00bfff, #00ffff); border-radius: 5px; padding: 0;">
+                                                    <a href="{{ complaint_url }}" target="_blank" style="display: inline-block; padding: 12px 24px; font-size: 16px; color: #ffffff; font-weight: bold; text-decoration: none;">View Complaint Details</a>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+                            </table>
+                            
+                            <p style="margin: 0 0 20px 0;">Thank you for using CitySeva.</p>
+                            
+                            <p style="margin: 0;">Best regards,<br>The CitySeva Team</p>
+                        </td>
+                    </tr>
+                    
+                    <!-- Footer -->
+                    <tr>
+                        <td align="center" valign="top" bgcolor="#e0f7fa" style="padding: 20px; background-color: #e0f7fa; border-radius: 0 0 5px 5px;">
+                            <p style="margin: 0 0 10px 0; font-size: 12px; color: #666666;">© CitySeva. All rights reserved.</p>
+                            <p style="margin: 0; font-size: 12px; color: #666666;">This is an automated message, please do not reply to this email.</p>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+</body>
+</html> 

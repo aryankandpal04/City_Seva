@@ -4,15 +4,14 @@
 
 {% block styles %}
 <style>
-    .stats-card {
-        transition: transform 0.3s;
-    }
-    .stats-card:hover {
-        transform: translateY(-5px);
-    }
-    .stats-icon {
-        font-size: 2.5rem;
-        opacity: 0.8;
+    .icon-circle {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.25rem;
     }
     .chart-container {
         height: 300px;
@@ -23,78 +22,81 @@
 
 {% block content %}
 <div class="container-fluid py-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1><i class="fas fa-tachometer-alt me-2"></i>Department Dashboard</h1>
-        <div>
-            <span class="badge bg-info me-2">{{ current_user.role|title }}</span>
-            {% if current_user.department %}
-                <span class="badge bg-primary">{{ current_user.department }}</span>
-            {% endif %}
+    <!-- Welcome Section -->
+    <div class="card mb-4">
+        <div class="card-body d-flex align-items-center">
+            <div>
+                <h4 class="mb-1">Welcome, {{ current_user.full_name() }}!</h4>
+                <p class="text-secondary mb-0">
+                    {% if current_user.department %}
+                        Department: {{ current_user.department }} | Role: {{ current_user.role|title }}
+                    {% else %}
+                        Role: {{ current_user.role|title }}
+                    {% endif %}
+                </p>
+            </div>
+            <div class="ms-auto">
+                <a href="{{ url_for('government_officials.assigned_complaints') }}" class="btn btn-primary">
+                    <i class="fas fa-clipboard-list me-2"></i>Manage Assigned Complaints
+                </a>
+            </div>
         </div>
     </div>
 
     <!-- Statistics Cards -->
-    <div class="row mb-4">
-        <div class="col-md-3 mb-3">
-            <div class="card bg-primary text-white stats-card h-100">
+    <div class="row g-4 mb-4">
+        <div class="col-md-3">
+            <div class="card h-100">
                 <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <h6 class="card-title">Total Assigned</h6>
-                            <h2 class="display-4 fw-bold mb-0">{{ total_complaints }}</h2>
-                        </div>
-                        <div class="stats-icon">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="icon-circle bg-primary bg-opacity-10 text-primary">
                             <i class="fas fa-clipboard-list"></i>
                         </div>
+                        <h6 class="card-title mb-0 ms-3">Total Assigned</h6>
                     </div>
+                    <h3 class="mb-0 text-primary">{{ total_complaints }}</h3>
                 </div>
             </div>
         </div>
         
-        <div class="col-md-3 mb-3">
-            <div class="card bg-warning text-dark stats-card h-100">
+        <div class="col-md-3">
+            <div class="card h-100">
                 <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <h6 class="card-title">Pending</h6>
-                            <h2 class="display-4 fw-bold mb-0">{{ pending_count }}</h2>
-                        </div>
-                        <div class="stats-icon">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="icon-circle bg-warning bg-opacity-10 text-warning">
                             <i class="fas fa-clock"></i>
                         </div>
+                        <h6 class="card-title mb-0 ms-3">Pending</h6>
                     </div>
+                    <h3 class="mb-0 text-warning">{{ pending_count }}</h3>
                 </div>
             </div>
         </div>
         
-        <div class="col-md-3 mb-3">
-            <div class="card bg-info text-dark stats-card h-100">
+        <div class="col-md-3">
+            <div class="card h-100">
                 <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <h6 class="card-title">In Progress</h6>
-                            <h2 class="display-4 fw-bold mb-0">{{ in_progress_count }}</h2>
-                        </div>
-                        <div class="stats-icon">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="icon-circle bg-info bg-opacity-10 text-info">
                             <i class="fas fa-tools"></i>
                         </div>
+                        <h6 class="card-title mb-0 ms-3">In Progress</h6>
                     </div>
+                    <h3 class="mb-0 text-info">{{ in_progress_count }}</h3>
                 </div>
             </div>
         </div>
         
-        <div class="col-md-3 mb-3">
-            <div class="card bg-success text-white stats-card h-100">
+        <div class="col-md-3">
+            <div class="card h-100">
                 <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <h6 class="card-title">Resolved</h6>
-                            <h2 class="display-4 fw-bold mb-0">{{ resolved_count }}</h2>
-                        </div>
-                        <div class="stats-icon">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="icon-circle bg-success bg-opacity-10 text-success">
                             <i class="fas fa-check-circle"></i>
                         </div>
+                        <h6 class="card-title mb-0 ms-3">Resolved</h6>
                     </div>
+                    <h3 class="mb-0 text-success">{{ resolved_count }}</h3>
                 </div>
             </div>
         </div>

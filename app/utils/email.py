@@ -66,6 +66,15 @@ def send_email(subject, recipients, text_body, html_body, sender=None):
         msg.body = text_body
         msg.html = html_body
         
+        # Set content type for HTML explicitly
+        msg.content_subtype = "html"
+        
+        # Set MIME headers to ensure HTML is prioritized
+        msg.extra_headers = {
+            'MIME-Version': '1.0',
+            'Content-Type': 'text/html; charset=UTF-8'
+        }
+        
         # Threading variables to pass to child thread
         result = {"success": False}
         
@@ -202,20 +211,21 @@ def send_complaint_notification(complaint, category=None):
 
 def send_contact_email(name, email, subject, message):
     """Send contact form submission email to admin."""
-    msg = Message(
-        subject=f'New Contact Form Submission: {subject}',
-        sender=current_app.config['MAIL_DEFAULT_SENDER'],
-        recipients=[current_app.config['ADMIN_EMAIL']]
-    )
-    
-    msg.body = f"""
-    New contact form submission from CitySeva website:
-    
-    From: {name} <{email}>
-    Subject: {subject}
-    
-    Message:
-    {message}
-    """
-    
-    mail.send(msg) 
+    try:
+        return send_email(
+            subject=f'New Contact Form Submission: {subject}',
+            recipients=[current_app.config['ADMIN_EMAIL']],
+            text_body=render_template('email/contact_email.txt',
+                                     name=name,
+                                     email=email,
+                                     subject=subject,
+                                     message=message),
+            html_body=render_template('email/contact_email.html',
+                                     name=name,
+                                     email=email,
+                                     subject=subject,
+                                     message=message)
+        )
+    except Exception as e:
+        current_app.logger.error(f"Error sending contact email: {str(e)}")
+        return False 
