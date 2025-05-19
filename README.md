@@ -123,35 +123,68 @@ The sample data includes the following users that you can use to test the applic
 ```
 CitySeva_WebApp/
 ├── app/
+│   ├── __init__.py
+│   ├── forms/
+│   │   ├── __init__.py
+│   │   ├── admin.py
+│   │   ├── auth.py
+│   │   ├── citizen.py
+│   │   └── contact.py
+│   ├── forms.py
+│   ├── models.py
+│   ├── routes/
+│   │   ├── admin.py
+│   │   ├── api.py
+│   │   ├── api_v1.py
+│   │   ├── auth.py
+│   │   ├── citizen.py
+│   │   ├── government_officials.py
+│   │   └── main.py
 │   ├── static/
 │   │   ├── css/
-│   │   ├── js/
 │   │   ├── img/
-│   │   └── uploads/
+│   │   ├── js/
+│   │   ├── uploads/
+│   │   ├── manifest.json
+│   │   └── offline.html
 │   ├── templates/
 │   │   ├── admin/
 │   │   ├── auth/
 │   │   ├── citizen/
 │   │   ├── email/
-│   │   └── errors/
-│   ├── models.py
-│   ├── forms.py
-│   ├── routes/
-│   │   ├── auth.py
-│   │   ├── citizen.py
-│   │   ├── admin.py
-│   │   └── api.py
-│   ├── utils/
-│   │   ├── email.py
-│   │   ├── decorators.py
-│   │   └── context_processors.py
-│   └── __init__.py
+│   │   ├── errors/
+│   │   ├── government_officials/
+│   │   ├── shared/
+│   │   ├── about.html
+│   │   ├── api_docs.html
+│   │   ├── base.html
+│   │   ├── contact.html
+│   │   └── index.html
+│   └── utils/
+│       ├── constants.py
+│       ├── context_processors.py
+│       ├── decorators.py
+│       ├── email.py
+│       ├── fallback_email.py
+│       ├── notifications.py
+│       ├── otp.py
+│       └── smtp_patch.py
+├── instance/
+├── migrations/
+├── .gitignore
+├── DEVELOPMENT_STATUS.md
+├── GOOGLE_MAPS_API_SETUP.md
+├── README.md
+├── app.yaml
+├── cityseva.env
 ├── config.py
+├── init_db.py
 ├── requirements.txt
-├── init_sqlite_db.py
 ├── run.bat
+├── run.py
 ├── run.sh
-└── run.py
+├── test_email.py
+└── update_db.py
 ```
 
 ## Development
