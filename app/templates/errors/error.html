@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8 text-center" data-aos="fade-up">
+            <div class="error-page">
+                <h1 class="display-1 fw-bold text-primary mb-4">{{ error_code }}</h1>
+                <h2 class="h3 mb-4">{{ error_title }}</h2>
+                <p class="lead text-muted mb-5">{{ error_message }}</p>
+                
+                <div class="error-actions">
+                    <a href="{{ url_for('citizen.index') }}" class="btn btn-primary btn-lg me-3">
+                        <i class="fas fa-home me-2"></i>Go Home
+                    </a>
+                    <button onclick="history.back()" class="btn btn-outline-primary btn-lg">
+                        <i class="fas fa-arrow-left me-2"></i>Go Back
+                    </button>
+                </div>
+                
+                {% if error_details %}
+                <div class="error-details mt-5">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">Error Details</h5>
+                            <pre class="bg-light p-3 rounded"><code>{{ error_details }}</code></pre>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.error-page {
+    padding: 3rem 0;
+}
+
+.error-page .display-1 {
+    font-size: 8rem;
+    background: linear-gradient(135deg, var(--primary-color), #1d4ed8);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.error-actions {
+    margin-top: 2rem;
+}
+
+.error-details {
+    margin-top: 3rem;
+    text-align: left;
+}
+
+.error-details pre {
+    margin: 0;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+}
+
+@media (max-width: 768px) {
+    .error-page .display-1 {
+        font-size: 6rem;
+    }
+    
+    .error-actions .btn {
+        display: block;
+        width: 100%;
+        margin: 1rem 0;
+    }
+}
+</style>
+{% endblock %} 

@@ -1,5 +1,5 @@
 from flask_wtf import FlaskForm
-from flask_wtf.file import FileField, FileAllowed
+from flask_wtf.file import FileField, FileAllowed, MultipleFileField
 from wtforms import StringField, TextAreaField, SelectField, SubmitField, FloatField
 from wtforms.validators import DataRequired, Length, Optional, NumberRange
 
@@ -15,6 +15,11 @@ class ComplaintForm(FlaskForm):
     ])
     
     category = SelectField('Category', validators=[DataRequired()])
+    
+    custom_category = StringField('Custom Category', validators=[
+        Optional(),
+        Length(max=100, message='Custom category must be less than 100 characters')
+    ])
     
     location = StringField('Location', validators=[
         DataRequired(),
@@ -38,12 +43,25 @@ class ComplaintForm(FlaskForm):
         ('urgent', 'Urgent')
     ], validators=[DataRequired()])
     
-    media_files = FileField('Media Files', validators=[
+    media_files = MultipleFileField('Media Files', validators=[
         Optional(),
         FileAllowed(['jpg', 'jpeg', 'png', 'mp4', 'mov'], 'Only image and video files are allowed!')
     ])
     
     submit = SubmitField('Submit Complaint')
+
+    def validate(self, extra_validators=None):
+        """Custom validation for category selection"""
+        initial_validation = super().validate(extra_validators=extra_validators)
+        if not initial_validation:
+            return False
+            
+        # Check if "Other" is selected and custom category is empty
+        if self.category.data == 'other' and not self.custom_category.data:
+            self.custom_category.errors = ['Please specify a custom category']
+            return False
+            
+        return True
 
 class FeedbackForm(FlaskForm):
     rating = SelectField('Rating', choices=[

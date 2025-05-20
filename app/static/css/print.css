@@ -1,0 +1,83 @@
+/* Print Styles */
+
+@media print {
+    /* Hide Elements */
+    .no-print {
+        display: none !important;
+    }
+
+    .navbar,
+    .sidebar,
+    .footer {
+        display: none !important;
+    }
+
+    /* Reset Background and Colors */
+    body {
+        background-color: white;
+        color: black;
+    }
+
+    /* Container */
+    .container {
+        width: 100%;
+        max-width: none;
+    }
+
+    /* Cards */
+    .card {
+        box-shadow: none;
+        border: 1px solid #ddd;
+    }
+
+    /* Main Content */
+    main {
+        margin: 0;
+        padding: 0;
+    }
+
+    /* Links */
+    a {
+        text-decoration: underline;
+        color: #000 !important;
+    }
+
+    /* Images */
+    img {
+        max-width: 100% !important;
+        page-break-inside: avoid;
+    }
+
+    /* Tables */
+    table {
+        border-collapse: collapse !important;
+    }
+
+    table td,
+    table th {
+        background-color: #fff !important;
+    }
+
+    /* Page Breaks */
+    h1, h2, h3, h4, h5, h6 {
+        page-break-after: avoid;
+        page-break-inside: avoid;
+    }
+
+    p, blockquote, ul, ol, dl {
+        page-break-inside: avoid;
+    }
+
+    /* Margins */
+    @page {
+        margin: 2cm;
+    }
+
+    /* Remove backgrounds and shadows */
+    * {
+        background: transparent !important;
+        color: #000 !important;
+        box-shadow: none !important;
+        text-shadow: none !important;
+    }
+} 

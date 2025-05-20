@@ -134,11 +134,26 @@ def new_complaint():
     
     if form.validate_on_submit():
         try:
+            # Check if this is a custom category
+            selected_category = Category.query.get(form.category.data)
+            if selected_category and selected_category.name.lower() == 'others' and form.custom_category.data:
+                # Create new category for the custom category
+                custom_category = Category(
+                    name=form.custom_category.data,
+                    department='Other',  # Default department for custom categories
+                    description=f'Custom category created by {current_user.full_name()}'
+                )
+                db.session.add(custom_category)
+                db.session.flush()  # Get the ID without committing
+                category_id = custom_category.id
+            else:
+                category_id = form.category.data
+            
             # Create complaint in SQLite
             complaint = Complaint(
                 title=form.title.data,
                 description=form.description.data,
-                category_id=form.category.data,
+                category_id=category_id,
                 location=form.location.data,
                 latitude=float(form.latitude.data),
                 longitude=float(form.longitude.data),
@@ -209,7 +224,7 @@ def new_complaint():
             db.session.commit()
                 
             # Send notification to officials
-            category = Category.query.get(form.category.data)
+            category = Category.query.get(category_id)
             if category:
                 # Send email notification
                 email_success = False

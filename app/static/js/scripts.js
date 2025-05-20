@@ -1,3 +1,158 @@
+// Main JavaScript for CitySeva Web Application
+
+// Initialize when DOM is loaded
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize components
+    initializeNavbar();
+    initializeToast();
+    initializeLazyLoading();
+    initializeInfiniteScroll();
+});
+
+// Lazy Loading Images
+function initializeLazyLoading() {
+    const lazyImages = document.querySelectorAll('img[loading="lazy"]');
+    
+    if ('loading' in HTMLImageElement.prototype) {
+        // Browser supports native lazy loading
+        lazyImages.forEach(img => {
+            img.src = img.dataset.src;
+        });
+    } else {
+        // Fallback for browsers that don't support lazy loading
+        const lazyLoadObserver = new IntersectionObserver((entries, observer) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const img = entry.target;
+                    img.src = img.dataset.src;
+                    observer.unobserve(img);
+                }
+            });
+        });
+
+        lazyImages.forEach(img => {
+            lazyLoadObserver.observe(img);
+        });
+    }
+}
+
+// Infinite Scroll
+function initializeInfiniteScroll() {
+    const options = {
+        root: null,
+        rootMargin: '0px',
+        threshold: 0.1
+    };
+
+    const observer = new IntersectionObserver((entries, observer) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                const loadMoreButton = entry.target;
+                if (loadMoreButton.dataset.page) {
+                    loadMoreContent(loadMoreButton.dataset.page);
+                }
+            }
+        });
+    }, options);
+
+    const loadMoreTriggers = document.querySelectorAll('.load-more-trigger');
+    loadMoreTriggers.forEach(trigger => observer.observe(trigger));
+}
+
+// Load More Content
+async function loadMoreContent(page) {
+    try {
+        const response = await fetch(`/api/load-more?page=${page}`);
+        const data = await response.json();
+        
+        if (data.content) {
+            const container = document.querySelector('.content-container');
+            container.insertAdjacentHTML('beforeend', data.content);
+            
+            // Update page number for next load
+            const loadMoreTrigger = document.querySelector('.load-more-trigger');
+            if (loadMoreTrigger) {
+                loadMoreTrigger.dataset.page = parseInt(page) + 1;
+            }
+        }
+    } catch (error) {
+        console.error('Error loading more content:', error);
+        showToast('Error loading more content', 'error');
+    }
+}
+
+// Form Validation
+function validateForm(form) {
+    const inputs = form.querySelectorAll('input[required], select[required], textarea[required]');
+    let isValid = true;
+
+    inputs.forEach(input => {
+        if (!input.value.trim()) {
+            isValid = false;
+            input.classList.add('is-invalid');
+        } else {
+            input.classList.remove('is-invalid');
+        }
+    });
+
+    return isValid;
+}
+
+// Handle Form Submission
+function handleFormSubmit(event) {
+    event.preventDefault();
+    
+    const form = event.target;
+    if (!validateForm(form)) {
+        showToast('Please fill in all required fields', 'error');
+        return;
+    }
+
+    const formData = new FormData(form);
+    const submitButton = form.querySelector('button[type="submit"]');
+    
+    if (submitButton) {
+        submitButton.disabled = true;
+        submitButton.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Loading...';
+    }
+
+    // Submit form data
+    fetch(form.action, {
+        method: form.method,
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showToast(data.message || 'Form submitted successfully', 'success');
+            form.reset();
+        } else {
+            showToast(data.message || 'Error submitting form', 'error');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showToast('An error occurred while submitting the form', 'error');
+    })
+    .finally(() => {
+        if (submitButton) {
+            submitButton.disabled = false;
+            submitButton.innerHTML = submitButton.dataset.originalText || 'Submit';
+        }
+    });
+}
+
+// Initialize Form Handlers
+document.querySelectorAll('form').forEach(form => {
+    form.addEventListener('submit', handleFormSubmit);
+    
+    // Store original button text
+    const submitButton = form.querySelector('button[type="submit"]');
+    if (submitButton) {
+        submitButton.dataset.originalText = submitButton.innerHTML;
+    }
+});
+
 // Custom JavaScript for CitySeva Web Application
 
 // Function to initialize the toast messages

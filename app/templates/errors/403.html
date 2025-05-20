@@ -1,0 +1,8 @@
+{% extends "errors/error.html" %}
+
+{% block content %}
+{% set error_code = "403" %}
+{% set error_title = "Access Forbidden" %}
+{% set error_message = "You don't have permission to access this resource." %}
+{{ super() }}
+{% endblock %} 

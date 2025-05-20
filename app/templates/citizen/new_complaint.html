@@ -40,9 +40,24 @@
                                     {% endfor %}
                                 </div>
                             {% else %}
-                                {{ form.category(class="form-select") }}
+                                {{ form.category(class="form-select", id="category-select") }}
                             {% endif %}
                             <div class="form-text">Select the most appropriate category for your complaint</div>
+                            
+                            <!-- Custom Category Field (initially hidden) -->
+                            <div id="custom-category-container" class="mt-3" style="display: none;">
+                                {{ form.custom_category.label(class="form-label") }}
+                                {% if form.custom_category.errors %}
+                                    {{ form.custom_category(class="form-control is-invalid") }}
+                                    <div class="invalid-feedback">
+                                        {% for error in form.custom_category.errors %}
+                                            {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                {% else %}
+                                    {{ form.custom_category(class="form-control", placeholder="Enter custom category") }}
+                                {% endif %}
+                            </div>
                         </div>
 
                         <!-- Description -->
@@ -126,7 +141,42 @@
 {% endblock %}
 
 {% block scripts %}
+<!-- Google Maps API -->
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD8atpL2upxvA99KrVaZFlv8XxgrqbGZGE&libraries=places&callback=initMap" async defer></script>
+
 <script>
+// Category selection handling
+document.addEventListener('DOMContentLoaded', function() {
+    const categorySelect = document.getElementById('category-select');
+    const customCategoryContainer = document.getElementById('custom-category-container');
+    
+    console.log('Category select element:', categorySelect);
+    console.log('Custom category container:', customCategoryContainer);
+    
+    function toggleCustomCategory() {
+        console.log('Category value:', categorySelect.value);
+        // Get the selected option's text
+        const selectedOption = categorySelect.options[categorySelect.selectedIndex];
+        console.log('Selected option text:', selectedOption.text);
+        
+        if (selectedOption.text.toLowerCase() === 'others') {
+            console.log('Showing custom category field');
+            customCategoryContainer.style.display = 'block';
+            customCategoryContainer.querySelector('input').required = true;
+        } else {
+            console.log('Hiding custom category field');
+            customCategoryContainer.style.display = 'none';
+            customCategoryContainer.querySelector('input').required = false;
+        }
+    }
+    
+    // Initial check
+    toggleCustomCategory();
+    
+    // Listen for changes
+    categorySelect.addEventListener('change', toggleCustomCategory);
+});
+
 // Global variables for map and marker
 let map, marker;
 const defaultLocation = { lat: 20.5937, lng: 78.9629 }; // Default to India's center
