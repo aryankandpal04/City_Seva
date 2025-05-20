@@ -38,46 +38,35 @@
 
     /* Links */
     a {
-        text-decoration: underline;
-        color: #000 !important;
+        text-decoration: none;
+        color: black;
     }
 
     /* Images */
     img {
         max-width: 100% !important;
-        page-break-inside: avoid;
     }
 
     /* Tables */
     table {
-        border-collapse: collapse !important;
+        border-collapse: collapse;
     }
 
-    table td,
-    table th {
-        background-color: #fff !important;
+    th, td {
+        border: 1px solid #ddd;
     }
 
     /* Page Breaks */
-    h1, h2, h3, h4, h5, h6 {
+    h1, h2, h3 {
         page-break-after: avoid;
-        page-break-inside: avoid;
     }
 
-    p, blockquote, ul, ol, dl {
+    img {
         page-break-inside: avoid;
     }
 
     /* Margins */
     @page {
         margin: 2cm;
-    }
-
-    /* Remove backgrounds and shadows */
-    * {
-        background: transparent !important;
-        color: #000 !important;
-        box-shadow: none !important;
-        text-shadow: none !important;
     }
 } 

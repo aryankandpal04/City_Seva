@@ -1,11 +1,6 @@
 /* Utility Classes */
 
-/* Text Alignment */
-.text-center { text-align: center !important; }
-.text-left { text-align: left !important; }
-.text-right { text-align: right !important; }
-
-/* Flexbox */
+/* Display */
 .d-flex { display: flex !important; }
 .flex-column { flex-direction: column !important; }
 .flex-row { flex-direction: row !important; }
@@ -96,52 +91,30 @@
 .overflow-auto { overflow: auto !important; }
 .overflow-scroll { overflow: scroll !important; }
 
-/* Border Radius */
+/* Border */
 .rounded { border-radius: var(--radius) !important; }
 .rounded-lg { border-radius: var(--radius-lg) !important; }
 .rounded-full { border-radius: var(--radius-full) !important; }
 
-/* Shadows */
+/* Shadow */
 .shadow-sm { box-shadow: var(--shadow-sm) !important; }
 .shadow { box-shadow: var(--shadow) !important; }
 .shadow-lg { box-shadow: var(--shadow-lg) !important; }
 
-/* Borders */
+/* Border */
 .border { border: 1px solid var(--border-color) !important; }
 .border-top { border-top: 1px solid var(--border-color) !important; }
 .border-bottom { border-bottom: 1px solid var(--border-color) !important; }
 .border-left { border-left: 1px solid var(--border-color) !important; }
 .border-right { border-right: 1px solid var(--border-color) !important; }
 
-/* Display */
-.d-none { display: none !important; }
-.d-block { display: block !important; }
-.d-inline { display: inline !important; }
-.d-inline-block { display: inline-block !important; }
-
-/* Visibility */
-.visible { visibility: visible !important; }
-.invisible { visibility: hidden !important; }
-
-/* Text Colors */
-.text-primary { color: var(--primary-color) !important; }
-.text-secondary { color: var(--text-color) !important; }
-.text-muted { color: var(--text-color); opacity: 0.7; }
-
-/* Background Colors */
-.bg-primary { background-color: var(--primary-color) !important; }
-.bg-secondary { background-color: var(--content-bg) !important; }
-.bg-light { background-color: var(--body-color) !important; }
-.bg-dark { background-color: var(--dark-body-color) !important; }
-
-/* Dark Mode Utilities */
-body.dark .text-secondary { color: var(--dark-text-color) !important; }
-body.dark .text-muted { color: var(--dark-text-color); opacity: 0.7; }
 body.dark .border,
 body.dark .border-top,
 body.dark .border-bottom,
 body.dark .border-left,
-body.dark .border-right { border-color: var(--dark-border-color) !important; }
+body.dark .border-right {
+    border-color: var(--dark-border-color) !important;
+}
 
 /* Responsive Utilities */
 @media (max-width: 1000px) {

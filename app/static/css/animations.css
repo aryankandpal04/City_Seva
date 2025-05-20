@@ -27,15 +27,6 @@
     100% { box-shadow: 0 0 5px rgba(0, 188, 212, 0.4); }
 }
 
-@keyframes titleGlow {
-    0%, 100% {
-        text-shadow: 0 0 20px rgba(0, 229, 255, 0.5);
-    }
-    50% {
-        text-shadow: 0 0 30px rgba(24, 255, 255, 0.8);
-    }
-}
-
 /* Animation Classes */
 .fade-in { animation: fadeIn var(--animation-speed) ease-out; }
 .slide-in { animation: slideIn var(--animation-speed) ease-out; }

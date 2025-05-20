@@ -2,8 +2,8 @@
 
 /* Cards */
 .card {
-    background: linear-gradient(135deg, var(--content-bg), #f8fafc);
-    border: 1px solid var(--border-color);
+    background-color: var(--content-bg);
+    border: none;
     border-radius: var(--radius-lg);
     box-shadow: var(--shadow);
     transition: transform var(--transition-speed), box-shadow var(--transition-speed);
@@ -11,8 +11,7 @@
 }
 
 body.dark .card {
-    background: linear-gradient(135deg, var(--dark-content-bg), #0a1929);
-    border-color: var(--dark-border-color);
+    background-color: var(--dark-content-bg);
     box-shadow: var(--dark-content-shadow);
 }
 
@@ -49,7 +48,6 @@ body.dark .card {
 }
 
 .btn-primary:hover {
-    background: linear-gradient(45deg, var(--accent-color), var(--primary-color));
     transform: translateY(-2px);
     box-shadow: var(--neon-shadow);
 }
@@ -57,13 +55,12 @@ body.dark .card {
 .btn-outline-primary {
     border: 2px solid var(--primary-color);
     color: var(--primary-color);
-    background: transparent;
 }
 
 .btn-outline-primary:hover {
-    background: linear-gradient(45deg, var(--primary-color), var(--accent-color));
+    background: var(--primary-color);
     color: white;
-    border-color: transparent;
+    transform: translateY(-2px);
 }
 
 /* Form Elements */
@@ -79,7 +76,7 @@ body.dark .card {
 
 body.dark .form-control,
 body.dark .form-select {
-    background: linear-gradient(135deg, var(--dark-content-bg), #0a1929);
+    background-color: var(--dark-content-bg);
     border-color: var(--dark-border-color);
     color: var(--dark-text-color);
 }
@@ -107,10 +104,6 @@ body.dark .form-label {
     font-weight: 500;
 }
 
-.badge-primary {
-    background: linear-gradient(45deg, var(--primary-color), var(--accent-color));
-}
-
 /* Status Badges */
 .status-badge {
     font-size: 0.85rem;
@@ -121,22 +114,22 @@ body.dark .form-label {
 }
 
 .status-pending {
-    background: linear-gradient(45deg, var(--warning-color), #ffecb3);
-    color: #1a3c40;
+    background-color: var(--warning-color);
+    color: #000000;
 }
 
 .status-in-progress {
-    background: linear-gradient(45deg, var(--info-color), var(--accent-color));
+    background-color: var(--info-color);
     color: white;
 }
 
 .status-resolved {
-    background: linear-gradient(45deg, var(--success-color), var(--accent-color));
+    background-color: var(--success-color);
     color: white;
 }
 
 .status-rejected {
-    background: linear-gradient(45deg, var(--danger-color), #ff80ab);
+    background-color: var(--danger-color);
     color: white;
 }
 
@@ -170,7 +163,7 @@ body.dark .form-label {
     top: 0;
     width: 2px;
     height: 100%;
-    background: linear-gradient(to bottom, var(--primary-color), var(--accent-color));
+    background-color: var(--primary-color);
 }
 
 .timeline-item {
@@ -186,7 +179,7 @@ body.dark .form-label {
     width: 10px;
     height: 10px;
     border-radius: 50%;
-    background: linear-gradient(45deg, var(--primary-color), var(--accent-color));
+    background-color: var(--primary-color);
     border: 2px solid white;
 }
 
@@ -197,8 +190,8 @@ body.dark .form-label {
 }
 
 .table th {
-    background: linear-gradient(135deg, var(--primary-color-light), #ffffff);
-    color: var(--text-color);
+    background-color: var(--light-color);
+    color: var(--text-primary);
     font-weight: 600;
     border: none;
 }
@@ -209,7 +202,7 @@ body.dark .form-label {
 }
 
 .table-hover tbody tr:hover {
-    background: linear-gradient(135deg, rgba(0, 188, 212, 0.05), rgba(0, 229, 255, 0.05));
+    background-color: rgba(0, 188, 212, 0.05);
 }
 
 /* Alerts */
@@ -218,12 +211,6 @@ body.dark .form-label {
     border-radius: var(--radius);
     padding: 1rem 1.5rem;
     box-shadow: var(--shadow-sm);
-}
-
-.alert-primary {
-    background: linear-gradient(135deg, var(--primary-color-light), #ffffff);
-    border-color: var(--primary-color);
-    color: var(--text-color);
 }
 
 /* Toast Notifications */
