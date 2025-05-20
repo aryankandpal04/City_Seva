@@ -10,11 +10,19 @@ body {
     width: 100%;
     max-width: 100%;
     transition: background-color var(--transition-speed), color var(--transition-speed);
+    background-image:
+        radial-gradient(circle at 100% 50%, rgba(0, 188, 212, 0.05) 20%, transparent 20.5%),
+        radial-gradient(circle at 0% 80%, rgba(0, 188, 212, 0.08) 20%, transparent 20.5%);
+    background-size: 60px 60px;
+    background-attachment: fixed;
 }
 
 body.dark {
     background: linear-gradient(135deg, var(--dark-body-color), #0d2538);
     color: var(--dark-text-color);
+    background-image:
+        radial-gradient(circle at 100% 50%, rgba(0, 229, 255, 0.03) 20%, transparent 20.5%),
+        radial-gradient(circle at 0% 80%, rgba(0, 229, 255, 0.04) 20%, transparent 20.5%);
 }
 
 /* Typography */
@@ -90,5 +98,5 @@ main {
 }
 
 ::-webkit-scrollbar-thumb:hover {
-    background: linear-gradient(45deg, var(--accent-color), var(--primary-color));
+    background: #64748b;
 } 

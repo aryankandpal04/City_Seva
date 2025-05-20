@@ -2,8 +2,8 @@
 
 /* Cards */
 .card {
-    background-color: var(--content-bg);
-    border: none;
+    background: linear-gradient(135deg, var(--content-bg), #f8fafc);
+    border: 1px solid var(--border-color);
     border-radius: var(--radius-lg);
     box-shadow: var(--shadow);
     transition: transform var(--transition-speed), box-shadow var(--transition-speed);
@@ -11,7 +11,8 @@
 }
 
 body.dark .card {
-    background-color: var(--dark-content-bg);
+    background: linear-gradient(135deg, var(--dark-content-bg), #0a1929);
+    border-color: var(--dark-border-color);
     box-shadow: var(--dark-content-shadow);
 }
 
@@ -48,6 +49,7 @@ body.dark .card {
 }
 
 .btn-primary:hover {
+    background: linear-gradient(45deg, var(--accent-color), var(--primary-color));
     transform: translateY(-2px);
     box-shadow: var(--neon-shadow);
 }
@@ -55,12 +57,13 @@ body.dark .card {
 .btn-outline-primary {
     border: 2px solid var(--primary-color);
     color: var(--primary-color);
+    background: transparent;
 }
 
 .btn-outline-primary:hover {
-    background: var(--primary-color);
+    background: linear-gradient(45deg, var(--primary-color), var(--accent-color));
     color: white;
-    transform: translateY(-2px);
+    border-color: transparent;
 }
 
 /* Form Elements */
@@ -76,7 +79,7 @@ body.dark .card {
 
 body.dark .form-control,
 body.dark .form-select {
-    background-color: var(--dark-content-bg);
+    background: linear-gradient(135deg, var(--dark-content-bg), #0a1929);
     border-color: var(--dark-border-color);
     color: var(--dark-text-color);
 }
@@ -104,6 +107,10 @@ body.dark .form-label {
     font-weight: 500;
 }
 
+.badge-primary {
+    background: linear-gradient(45deg, var(--primary-color), var(--accent-color));
+}
+
 /* Status Badges */
 .status-badge {
     font-size: 0.85rem;
@@ -114,22 +121,22 @@ body.dark .form-label {
 }
 
 .status-pending {
-    background-color: var(--warning-color);
-    color: #000000;
+    background: linear-gradient(45deg, var(--warning-color), #ffecb3);
+    color: #1a3c40;
 }
 
 .status-in-progress {
-    background-color: var(--info-color);
+    background: linear-gradient(45deg, var(--info-color), var(--accent-color));
     color: white;
 }
 
 .status-resolved {
-    background-color: var(--success-color);
+    background: linear-gradient(45deg, var(--success-color), var(--accent-color));
     color: white;
 }
 
 .status-rejected {
-    background-color: var(--danger-color);
+    background: linear-gradient(45deg, var(--danger-color), #ff80ab);
     color: white;
 }
 
@@ -163,7 +170,7 @@ body.dark .form-label {
     top: 0;
     width: 2px;
     height: 100%;
-    background-color: var(--primary-color);
+    background: linear-gradient(to bottom, var(--primary-color), var(--accent-color));
 }
 
 .timeline-item {
@@ -179,7 +186,7 @@ body.dark .form-label {
     width: 10px;
     height: 10px;
     border-radius: 50%;
-    background-color: var(--primary-color);
+    background: linear-gradient(45deg, var(--primary-color), var(--accent-color));
     border: 2px solid white;
 }
 
@@ -190,8 +197,8 @@ body.dark .form-label {
 }
 
 .table th {
-    background-color: var(--light-color);
-    color: var(--text-primary);
+    background: linear-gradient(135deg, var(--primary-color-light), #ffffff);
+    color: var(--text-color);
     font-weight: 600;
     border: none;
 }
@@ -202,7 +209,7 @@ body.dark .form-label {
 }
 
 .table-hover tbody tr:hover {
-    background-color: rgba(0, 188, 212, 0.05);
+    background: linear-gradient(135deg, rgba(0, 188, 212, 0.05), rgba(0, 229, 255, 0.05));
 }
 
 /* Alerts */
@@ -211,6 +218,12 @@ body.dark .form-label {
     border-radius: var(--radius);
     padding: 1rem 1.5rem;
     box-shadow: var(--shadow-sm);
+}
+
+.alert-primary {
+    background: linear-gradient(135deg, var(--primary-color-light), #ffffff);
+    border-color: var(--primary-color);
+    color: var(--text-color);
 }
 
 /* Toast Notifications */

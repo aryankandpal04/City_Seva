@@ -1,7 +1,18 @@
 /* Utility Classes */
 
+/* Text Alignment */
+.text-center { text-align: center !important; }
+.text-left { text-align: left !important; }
+.text-right { text-align: right !important; }
+
 /* Display */
 .d-flex { display: flex !important; }
+.d-none { display: none !important; }
+.d-block { display: block !important; }
+.d-inline { display: inline !important; }
+.d-inline-block { display: inline-block !important; }
+
+/* Flex */
 .flex-column { flex-direction: column !important; }
 .flex-row { flex-direction: row !important; }
 .flex-wrap { flex-wrap: wrap !important; }

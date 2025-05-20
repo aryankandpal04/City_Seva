@@ -1,38 +1,93 @@
-/* Animations and Effects */
+/* Animation Styles */
 
-/* Keyframe Animations */
+/* Hero Title Animation */
+@keyframes titleGlow {
+    0%, 100% {
+        text-shadow: 0 0 20px rgba(0, 229, 255, 0.5);
+    }
+    50% {
+        text-shadow: 0 0 30px rgba(24, 255, 255, 0.8);
+    }
+}
+
+/* Global Animations */
 @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(20px); }
-    to { opacity: 1; transform: translateY(0); }
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 @keyframes slideIn {
-    from { transform: translateX(-100%); }
-    to { transform: translateX(0); }
+    from {
+        transform: translateX(-100%);
+    }
+    to {
+        transform: translateX(0);
+    }
 }
 
 @keyframes scaleIn {
-    from { transform: scale(0.95); opacity: 0; }
-    to { transform: scale(1); opacity: 1; }
+    from {
+        transform: scale(0.95);
+        opacity: 0;
+    }
+    to {
+        transform: scale(1);
+        opacity: 1;
+    }
 }
 
 @keyframes shimmer {
-    0% { background-position: -1000px 0; }
-    100% { background-position: 1000px 0; }
+    0% {
+        background-position: -1000px 0;
+    }
+    100% {
+        background-position: 1000px 0;
+    }
 }
 
 @keyframes neonPulse {
-    0% { box-shadow: 0 0 5px rgba(0, 188, 212, 0.4); }
-    50% { box-shadow: 0 0 20px rgba(0, 188, 212, 0.6); }
-    100% { box-shadow: 0 0 5px rgba(0, 188, 212, 0.4); }
+    0% {
+        box-shadow: 0 0 5px rgba(0, 188, 212, 0.4);
+    }
+    50% {
+        box-shadow: 0 0 20px rgba(0, 188, 212, 0.6);
+    }
+    100% {
+        box-shadow: 0 0 5px rgba(0, 188, 212, 0.4);
+    }
 }
 
 /* Animation Classes */
-.fade-in { animation: fadeIn var(--animation-speed) ease-out; }
-.slide-in { animation: slideIn var(--animation-speed) ease-out; }
-.scale-in { animation: scaleIn var(--animation-speed) ease-out; }
-.shimmer { animation: shimmer 2s infinite linear; }
-.neon-pulse { animation: neonPulse 2s infinite; }
+.fade-in {
+    animation: fadeIn var(--animation-speed) ease-out;
+}
+
+.slide-in {
+    animation: slideIn var(--animation-speed) ease-out;
+}
+
+.scale-in {
+    animation: scaleIn var(--animation-speed) ease-out;
+}
+
+.shimmer {
+    background: linear-gradient(90deg,
+            transparent,
+            rgba(255, 255, 255, 0.2),
+            transparent);
+    background-size: 1000px 100%;
+    animation: shimmer 2s infinite linear;
+}
+
+.neon-pulse {
+    animation: neonPulse 2s infinite;
+}
 
 /* Hover Effects */
 .hover-scale {

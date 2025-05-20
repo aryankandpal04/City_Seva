@@ -1,0 +1,14 @@
+/* Responsive Layout */
+@media (max-width: 1000px) {
+    .container {
+        padding-left: 1rem;
+        padding-right: 1rem;
+    }
+}
+
+@media (max-width: 520px) {
+    .container {
+        padding-left: 0.75rem;
+        padding-right: 0.75rem;
+    }
+} 
