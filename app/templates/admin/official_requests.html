@@ -3,7 +3,20 @@
 {% block title %}Official Account Requests - CitySeva{% endblock %}
 
 {% block content %}
-<div class="container">
+<div class="container py-4">
+    <!-- Welcome Section -->
+    <div class="card mb-4">
+        <div class="card-body d-flex align-items-center">
+            <div>
+                <h4 class="mb-1">Official Account Requests</h4>
+                <p class="text-secondary mb-0">Review and manage official account requests</p>
+            </div>
+            <div class="ms-auto">
+                <img src="{{ url_for('static', filename='images/admin-official-requests.svg') }}" alt="Official Requests" class="img-fluid" style="max-height: 200px;">
+            </div>
+        </div>
+    </div>
+    
     <h1 class="mb-4">Official Account Requests</h1>
     
     <!-- Official Requests List -->

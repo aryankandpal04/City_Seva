@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="800" height="400" viewBox="0 0 800 400" xmlns="http://www.w3.org/2000/svg">
+    <!-- Background -->
+    <rect width="800" height="400" fill="#f8fafc"/>
+    
+    <!-- Warning Triangle -->
+    <g transform="translate(350, 100)">
+        <path d="M0,-100 L86.6,50 L-86.6,50 Z" fill="#00bcd4" opacity="0.8"/>
+        <path d="M0,-70 L60,35 L-60,35 Z" fill="white" opacity="0.6"/>
+        <text x="0" y="0" text-anchor="middle" fill="#1a3c40" font-size="40" font-weight="bold">!</text>
+    </g>
+    
+    <!-- Broken Connection Lines -->
+    <g transform="translate(200, 250)">
+        <!-- Line 1 -->
+        <path d="M0,0 L100,0" stroke="#00e5ff" stroke-width="4" stroke-dasharray="10,5"/>
+        <circle cx="0" cy="0" r="8" fill="#00bcd4"/>
+        <circle cx="100" cy="0" r="8" fill="#00bcd4"/>
+        
+        <!-- Line 2 -->
+        <path d="M150,0 L250,0" stroke="#00e5ff" stroke-width="4" stroke-dasharray="10,5"/>
+        <circle cx="150" cy="0" r="8" fill="#00bcd4"/>
+        <circle cx="250" cy="0" r="8" fill="#00bcd4"/>
+        
+        <!-- Broken Connection -->
+        <path d="M300,0 L350,0" stroke="#00e5ff" stroke-width="4"/>
+        <circle cx="300" cy="0" r="8" fill="#00bcd4"/>
+        <circle cx="350" cy="0" r="8" fill="#00bcd4"/>
+        <path d="M325,-20 L325,20" stroke="#00e5ff" stroke-width="4"/>
+    </g>
+    
+    <!-- Decorative Elements -->
+    <circle cx="100" cy="100" r="30" fill="#00e5ff" opacity="0.2"/>
+    <circle cx="700" cy="150" r="40" fill="#00bcd4" opacity="0.2"/>
+    <circle cx="400" cy="80" r="25" fill="#00e5ff" opacity="0.2"/>
+</svg> 

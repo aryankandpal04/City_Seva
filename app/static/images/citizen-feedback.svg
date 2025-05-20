@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="800" height="400" viewBox="0 0 800 400" xmlns="http://www.w3.org/2000/svg">
+    <!-- Background -->
+    <rect width="800" height="400" fill="#f8fafc"/>
+    
+    <!-- Feedback Form -->
+    <g transform="translate(400, 200)">
+        <!-- Form Container -->
+        <rect x="-200" y="-150" width="400" height="300" rx="15" fill="#00bcd4" opacity="0.8"/>
+        
+        <!-- Rating Stars -->
+        <g transform="translate(-150, -100)">
+            <text x="0" y="0" fill="white" font-size="16">Rate your experience:</text>
+            <g transform="translate(0, 30)">
+                <!-- Star 1 -->
+                <path d="M0,0 L10,30 L40,30 L15,45 L25,75 L0,55 L-25,75 L-15,45 L-40,30 L-10,30 Z" 
+                      fill="#00e5ff" transform="translate(0,0)"/>
+                <!-- Star 2 -->
+                <path d="M0,0 L10,30 L40,30 L15,45 L25,75 L0,55 L-25,75 L-15,45 L-40,30 L-10,30 Z" 
+                      fill="#00e5ff" transform="translate(50,0)"/>
+                <!-- Star 3 -->
+                <path d="M0,0 L10,30 L40,30 L15,45 L25,75 L0,55 L-25,75 L-15,45 L-40,30 L-10,30 Z" 
+                      fill="#00e5ff" transform="translate(100,0)"/>
+                <!-- Star 4 -->
+                <path d="M0,0 L10,30 L40,30 L15,45 L25,75 L0,55 L-25,75 L-15,45 L-40,30 L-10,30 Z" 
+                      fill="#00e5ff" transform="translate(150,0)"/>
+                <!-- Star 5 -->
+                <path d="M0,0 L10,30 L40,30 L15,45 L25,75 L0,55 L-25,75 L-15,45 L-40,30 L-10,30 Z" 
+                      fill="#00e5ff" transform="translate(200,0)"/>
+            </g>
+        </g>
+        
+        <!-- Feedback Text -->
+        <g transform="translate(-150, -20)">
+            <rect x="0" y="0" width="300" height="120" rx="10" fill="white" opacity="0.6"/>
+            <rect x="20" y="20" width="260" height="15" rx="2" fill="#00bcd4"/>
+            <rect x="20" y="45" width="260" height="15" rx="2" fill="#00bcd4"/>
+            <rect x="20" y="70" width="200" height="15" rx="2" fill="#00bcd4"/>
+        </g>
+        
+        <!-- Submit Button -->
+        <g transform="translate(-80, 120)">
+            <rect x="0" y="0" width="160" height="50" rx="25" fill="#00e5ff"/>
+            <text x="80" y="30" text-anchor="middle" fill="white" font-size="16" font-weight="bold">Submit Feedback</text>
+        </g>
+    </g>
+    
+    <!-- Decorative Elements -->
+    <circle cx="100" cy="100" r="30" fill="#00e5ff" opacity="0.2"/>
+    <circle cx="700" cy="150" r="40" fill="#00bcd4" opacity="0.2"/>
+    <circle cx="400" cy="80" r="25" fill="#00e5ff" opacity="0.2"/>
+    
+    <!-- Feedback Icons -->
+    <g transform="translate(150, 200)">
+        <!-- Smile Icon -->
+        <circle cx="0" cy="0" r="30" fill="#00bcd4" opacity="0.8"/>
+        <path d="M-15,0 Q0,20 15,0" stroke="white" stroke-width="3" fill="none"/>
+        <circle cx="-10" cy="-10" r="5" fill="white"/>
+        <circle cx="10" cy="-10" r="5" fill="white"/>
+    </g>
+    
+    <g transform="translate(650, 200)">
+        <!-- Thumbs Up Icon -->
+        <circle cx="0" cy="0" r="30" fill="#00bcd4" opacity="0.8"/>
+        <path d="M0,-20 L0,20 M-10,0 L10,0" stroke="white" stroke-width="3"/>
+        <path d="M-15,-20 L15,-20 L10,-40 L-10,-40 Z" fill="white"/>
+    </g>
+</svg> 

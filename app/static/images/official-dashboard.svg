@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="800" height="400" viewBox="0 0 800 400" xmlns="http://www.w3.org/2000/svg">
+    <!-- Background -->
+    <rect width="800" height="400" fill="#f8fafc"/>
+    
+    <!-- Government Building -->
+    <g transform="translate(200, 200)">
+        <!-- Main Structure -->
+        <rect x="-60" y="-100" width="120" height="100" fill="#00bcd4" opacity="0.8"/>
+        <rect x="-40" y="-80" width="30" height="30" fill="white" opacity="0.6"/>
+        <rect x="10" y="-80" width="30" height="30" fill="white" opacity="0.6"/>
+        <rect x="-40" y="-40" width="30" height="30" fill="white" opacity="0.6"/>
+        <rect x="10" y="-40" width="30" height="30" fill="white" opacity="0.6"/>
+        
+        <!-- Dome -->
+        <path d="M-40,-100 L40,-100 L0,-140 Z" fill="#00e5ff"/>
+        <circle cx="0" cy="-120" r="10" fill="white" opacity="0.6"/>
+    </g>
+    
+    <!-- Dashboard Elements -->
+    <g transform="translate(400, 200)">
+        <!-- Statistics Chart -->
+        <g transform="translate(-100, -80)">
+            <rect x="0" y="0" width="200" height="120" rx="10" fill="#00bcd4" opacity="0.8"/>
+            <!-- Bar Chart -->
+            <rect x="20" y="80" width="20" height="-40" fill="white" opacity="0.6"/>
+            <rect x="50" y="80" width="20" height="-60" fill="white" opacity="0.6"/>
+            <rect x="80" y="80" width="20" height="-80" fill="white" opacity="0.6"/>
+            <rect x="110" y="80" width="20" height="-50" fill="white" opacity="0.6"/>
+            <rect x="140" y="80" width="20" height="-70" fill="white" opacity="0.6"/>
+        </g>
+        
+        <!-- Department Icons -->
+        <g transform="translate(-80, 60)">
+            <!-- Water Department -->
+            <g transform="translate(0, 0)">
+                <circle cx="0" cy="0" r="20" fill="#00e5ff"/>
+                <path d="M0,-10 L0,10 M-10,0 L10,0" stroke="white" stroke-width="2"/>
+            </g>
+            
+            <!-- Roads Department -->
+            <g transform="translate(50, 0)">
+                <circle cx="0" cy="0" r="20" fill="#00bcd4"/>
+                <path d="M-10,0 L10,0" stroke="white" stroke-width="2"/>
+            </g>
+            
+            <!-- Sanitation Department -->
+            <g transform="translate(100, 0)">
+                <circle cx="0" cy="0" r="20" fill="#00e5ff"/>
+                <path d="M-5,-5 L5,5 M-5,5 L5,-5" stroke="white" stroke-width="2"/>
+            </g>
+        </g>
+    </g>
+    
+    <!-- Decorative Elements -->
+    <circle cx="100" cy="100" r="30" fill="#00e5ff" opacity="0.2"/>
+    <circle cx="700" cy="150" r="40" fill="#00bcd4" opacity="0.2"/>
+    <circle cx="400" cy="80" r="25" fill="#00e5ff" opacity="0.2"/>
+</svg> 

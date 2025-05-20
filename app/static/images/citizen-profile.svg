@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="800" height="400" viewBox="0 0 800 400" xmlns="http://www.w3.org/2000/svg">
+    <!-- Background -->
+    <rect width="800" height="400" fill="#f8fafc"/>
+    
+    <!-- Profile Container -->
+    <g transform="translate(400, 200)">
+        <!-- Main Container -->
+        <rect x="-300" y="-150" width="600" height="300" rx="15" fill="#00bcd4" opacity="0.8"/>
+        
+        <!-- Profile Header -->
+        <g transform="translate(0, -120)">
+            <text x="0" y="0" text-anchor="middle" fill="white" font-size="24" font-weight="bold">Profile Information</text>
+            <text x="0" y="30" text-anchor="middle" fill="white" font-size="14">Update your personal details</text>
+        </g>
+        
+        <!-- Profile Form -->
+        <g transform="translate(-250, -60)">
+            <!-- First Name -->
+            <g transform="translate(0, 0)">
+                <text x="0" y="0" fill="white" font-size="14">First Name</text>
+                <rect x="0" y="10" width="200" height="40" rx="5" fill="white" opacity="0.6"/>
+                <text x="10" y="35" fill="#00bcd4" font-size="14">John</text>
+            </g>
+            
+            <!-- Last Name -->
+            <g transform="translate(220, 0)">
+                <text x="0" y="0" fill="white" font-size="14">Last Name</text>
+                <rect x="0" y="10" width="200" height="40" rx="5" fill="white" opacity="0.6"/>
+                <text x="10" y="35" fill="#00bcd4" font-size="14">Doe</text>
+            </g>
+            
+            <!-- Phone -->
+            <g transform="translate(0, 70)">
+                <text x="0" y="0" fill="white" font-size="14">Phone Number</text>
+                <rect x="0" y="10" width="200" height="40" rx="5" fill="white" opacity="0.6"/>
+                <text x="10" y="35" fill="#00bcd4" font-size="14">+91 9876543210</text>
+            </g>
+            
+            <!-- Address -->
+            <g transform="translate(220, 70)">
+                <text x="0" y="0" fill="white" font-size="14">Address</text>
+                <rect x="0" y="10" width="200" height="40" rx="5" fill="white" opacity="0.6"/>
+                <text x="10" y="35" fill="#00bcd4" font-size="14">123 Main Street</text>
+            </g>
+        </g>
+        
+        <!-- Save Button -->
+        <g transform="translate(-100, 100)">
+            <rect x="0" y="0" width="200" height="50" rx="25" fill="#00e5ff"/>
+            <text x="100" y="30" text-anchor="middle" fill="white" font-size="16" font-weight="bold">Save Changes</text>
+        </g>
+    </g>
+    
+    <!-- Decorative Elements -->
+    <circle cx="100" cy="100" r="30" fill="#00e5ff" opacity="0.2"/>
+    <circle cx="700" cy="150" r="40" fill="#00bcd4" opacity="0.2"/>
+    <circle cx="400" cy="80" r="25" fill="#00e5ff" opacity="0.2"/>
+    
+    <!-- Profile Icons -->
+    <g transform="translate(150, 200)">
+        <!-- User Icon -->
+        <circle cx="0" cy="0" r="30" fill="#00bcd4" opacity="0.8"/>
+        <circle cx="0" cy="-10" r="10" fill="white"/>
+        <path d="M-15,20 A15,15 0 0,0 15,20" stroke="white" stroke-width="3" fill="none"/>
+    </g>
+    
+    <g transform="translate(650, 200)">
+        <!-- Edit Icon -->
+        <circle cx="0" cy="0" r="30" fill="#00bcd4" opacity="0.8"/>
+        <path d="M-10,-10 L10,10 M-10,10 L10,-10" stroke="white" stroke-width="3"/>
+    </g>
+</svg> 

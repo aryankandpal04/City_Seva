@@ -3,8 +3,19 @@
 {% block title %}User Management - CitySeva{% endblock %}
 
 {% block content %}
-<div class="container">
-    <h1 class="mb-4">User Management</h1>
+<div class="container py-4">
+    <!-- Welcome Section -->
+    <div class="card mb-4">
+        <div class="card-body d-flex align-items-center">
+            <div>
+                <h4 class="mb-1">User Management</h4>
+                <p class="text-secondary mb-0">Manage system users and roles</p>
+            </div>
+            <div class="ms-auto">
+                <img src="{{ url_for('static', filename='images/admin-users.svg') }}" alt="User Management" class="img-fluid" style="max-height: 200px;">
+            </div>
+        </div>
+    </div>
     
     <!-- Filters -->
     <div class="card mb-4 shadow">
