@@ -934,29 +934,24 @@ img:not([loading]) {
 /* Dark mode support (based on device preferences) */
 @media (prefers-color-scheme: dark) {
     body.enable-dark-mode {
-        background-color: #121212;
-        color: #f0f0f0;
+        /* Dark mode styles removed */
     }
 
     body.enable-dark-mode .card {
-        background-color: #1e1e1e;
-        color: #f0f0f0;
+        /* Dark mode card styles removed */
     }
 
     body.enable-dark-mode .card-header {
-        background: linear-gradient(135deg, #007c91, #0085a1);
+        /* Dark mode card header styles removed */
     }
 
     body.enable-dark-mode .table th {
-        background-color: #2d2d2d;
-        color: #f0f0f0;
+        /* Dark mode table styles removed */
     }
 
     body.enable-dark-mode .form-control,
     body.enable-dark-mode .form-select {
-        background-color: #2d2d2d;
-        color: #f0f0f0;
-        border-color: #444;
+        /* Dark mode form styles removed */
     }
 }
 

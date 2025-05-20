@@ -5,10 +5,10 @@ const STATIC_ASSETS = [
     '/',
     '/static/css/styles.css',
     '/static/js/scripts.js',
-    '/static/img/favicon.svg',
-    '/static/img/favicon.ico',
-    '/static/img/icon-192.png',
-    '/static/img/icon-512.png',
+    '/static/images/favicon.svg',
+    '/static/images/favicon.ico',
+    '/static/images/icon-192.png',
+    '/static/images/icon-512.png',
     '/citizen/dashboard',
     '/citizen/complaints',
     '/citizen/notifications',
@@ -118,8 +118,8 @@ self.addEventListener('push', (event) => {
     
     const options = {
         body: data.body || '',
-        icon: '/static/img/icon-192.png',
-        badge: '/static/img/notification-badge.png',
+        icon: '/static/images/icon-192.png',
+        badge: '/static/images/notification-badge.png',
         vibrate: [100, 50, 100],
         data: {
             url: data.url || '/'

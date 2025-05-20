@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="800" height="400" viewBox="0 0 800 400" xmlns="http://www.w3.org/2000/svg">
+    <!-- Background -->
+    <rect width="800" height="400" fill="#f8fafc"/>
+    
+    <!-- Code Window -->
+    <g transform="translate(200, 100)">
+        <!-- Window Frame -->
+        <rect x="0" y="0" width="400" height="250" rx="10" fill="#00bcd4" opacity="0.8"/>
+        <rect x="10" y="10" width="380" height="230" rx="5" fill="#1a3c40"/>
+        
+        <!-- Window Controls -->
+        <circle cx="25" cy="25" r="8" fill="#ff5f56"/>
+        <circle cx="50" cy="25" r="8" fill="#ffbd2e"/>
+        <circle cx="75" cy="25" r="8" fill="#27c93f"/>
+        
+        <!-- Code Lines -->
+        <g fill="white" font-family="monospace" font-size="14">
+            <text x="30" y="60">GET /api/v1/complaints</text>
+            <text x="30" y="90">POST /api/v1/complaints</text>
+            <text x="30" y="120">PUT /api/v1/complaints/:id</text>
+            <text x="30" y="150">DELETE /api/v1/complaints/:id</text>
+            <text x="30" y="180">GET /api/v1/categories</text>
+            <text x="30" y="210">GET /api/v1/statistics</text>
+        </g>
+    </g>
+    
+    <!-- Decorative Elements -->
+    <circle cx="100" cy="100" r="30" fill="#00e5ff" opacity="0.2"/>
+    <circle cx="700" cy="150" r="40" fill="#00bcd4" opacity="0.2"/>
+    <circle cx="400" cy="80" r="25" fill="#00e5ff" opacity="0.2"/>
+    
+    <!-- Code Brackets -->
+    <g transform="translate(100, 200)" fill="#00bcd4">
+        <path d="M0,0 L20,0 L20,60 L0,60 L0,50 L10,50 L10,10 L0,10 Z"/>
+        <path d="M40,0 L60,0 L60,60 L40,60 L40,50 L50,50 L50,10 L40,10 Z"/>
+    </g>
+</svg> 
