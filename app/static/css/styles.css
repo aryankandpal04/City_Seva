@@ -1,6 +1,6 @@
 /* Main Styles File - Imports all other CSS files */
 
-@import 'variables.css';
+/* @import 'variables.css';
 @import 'base.css';
 @import 'components.css';
 @import 'layout.css';
@@ -13,7 +13,7 @@
 @import 'touch-friendly.css';
 @import 'accessibility.css';
 @import 'pwa.css';
-@import 'hero.css';
+@import 'hero.css'; */
 
 /* Custom CSS for CitySeva Web Application */
 
@@ -21,52 +21,55 @@
 :root {
     /* Colors */
     --primary-color: #00bcd4;
-    --primary-color-light: #e0f7fa;
+    --primary-color-light: #80deea;
     --primary-color-dark: #0097a7;
     --accent-color: #00e5ff;
-    --accent-color-light: #18ffff;
+    --accent-color-light: #84ffff;
     --accent-color-dark: #00b8d4;
 
     /* Light Theme Colors */
-    --body-color: #f0f9fa;
+    --body-color: #f5f5f5;
     --text-color: #1a3c40;
-    --border-color: #b2ebf2;
+    --text-color-light: #4a6366;
+    --border-color: #e0e0e0;
     --content-bg: #ffffff;
     --content-shadow: rgba(0, 188, 212, 0.1);
 
     /* Dark Theme Colors */
-    --dark-body-color: #0a1929;
+    --dark-primary-color: #00bcd4;
+    --dark-accent-color: #00e5ff;
     --dark-text-color: #e0f7fa;
+    --dark-text-color-light: #b2ebf2;
     --dark-border-color: #1a3c40;
-    --dark-content-bg: #0d2538;
-    --dark-content-shadow: rgba(0, 188, 212, 0.15);
+    --dark-content-bg: #0a1929;
+    --dark-body-color: #0d2538;
 
     /* Status Colors */
-    --success-color: #00bcd4;
-    --danger-color: #ff4081;
-    --warning-color: #ffd600;
-    --info-color: #00e5ff;
+    --success-color: #4caf50;
+    --warning-color: #ff9800;
+    --danger-color: #f44336;
+    --info-color: #2196f3;
 
     /* Shadows */
-    --shadow-sm: 0 1px 2px 0 rgba(0, 188, 212, 0.1);
-    --shadow: 0 1px 3px 0 rgba(0, 188, 212, 0.15), 0 1px 2px -1px rgba(0, 188, 212, 0.1);
-    --shadow-md: 0 4px 6px -1px rgba(0, 188, 212, 0.15), 0 2px 4px -2px rgba(0, 188, 212, 0.1);
-    --shadow-lg: 0 10px 15px -3px rgba(0, 188, 212, 0.15), 0 4px 6px -4px rgba(0, 188, 212, 0.1);
-    --neon-shadow: 0 0 10px rgba(0, 229, 255, 0.4);
+    --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.1);
+    --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
+    --neon-shadow: 0 0 10px rgba(0, 229, 255, 0.5);
+    --dark-content-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
 
     /* Border Radius */
-    --radius-sm: 0.375rem;
-    --radius: 0.5rem;
-    --radius-lg: 0.75rem;
+    --radius: 8px;
+    --radius-lg: 16px;
     --radius-full: 9999px;
+
+    /* Layout */
+    --header-height: 70px;
+    --content-padding: 2rem;
+    --container-max-width: 1200px;
 
     /* Transitions */
     --transition-speed: 0.3s;
     --animation-speed: 0.5s;
-
-    /* Layout */
-    --header-height: 64px;
-    --content-padding: 2rem;
 }
 
 /* Hero Section */
@@ -138,7 +141,6 @@
 }
 
 @keyframes titleGlow {
-
     0%,
     100% {
         text-shadow: 0 0 20px rgba(0, 229, 255, 0.5);
@@ -257,10 +259,6 @@ body {
     width: 100%;
     max-width: 100%;
     transition: background-color var(--transition-speed), color var(--transition-speed);
-}
-
-/* Background Patterns */
-body {
     background-image:
         radial-gradient(circle at 100% 50%, rgba(0, 188, 212, 0.05) 20%, transparent 20.5%),
         radial-gradient(circle at 0% 80%, rgba(0, 188, 212, 0.08) 20%, transparent 20.5%);
