@@ -62,48 +62,17 @@
 {% endblock %}
 
 {% block content %}
-<div class="container mx-auto px-4 py-8">
-    <!-- Welcome Section -->
-    <div class="bg-white rounded-lg shadow-md p-6 mb-8">
-        <div class="flex items-center justify-between">
-            <div>
-                <h1 class="text-3xl font-bold text-gray-800 mb-2">Complaint Details</h1>
-                <p class="text-gray-600">View and manage complaint information</p>
-            </div>
-            <img src="{{ url_for('static', filename='images/admin-complaints.svg') }}" alt="Complaint Details" class="h-48">
+<div class="container py-5">
+    <div class="row align-items-center mb-5">
+        <div class="col-md-6">
+            <h1 class="display-4 mb-4">Complaint Details</h1>
+            <p class="lead">View and manage complaint information</p>
+        </div>
+        <div class="col-md-6">
+            <img src="{{ url_for('static', filename='images/admin-complaints.svg') }}" alt="Complaint Details" class="img-fluid">
         </div>
     </div>
-    
-    <div class="container">
-        <nav aria-label="breadcrumb" class="mb-4">
-            <ol class="breadcrumb">
-                <li class="breadcrumb-item"><a href="{{ url_for('admin.dashboard') }}">Dashboard</a></li>
-                <li class="breadcrumb-item"><a href="{{ url_for('admin.complaints') }}">Complaints</a></li>
-                <li class="breadcrumb-item active">Complaint #{{ complaint.id }}</li>
-            </ol>
-        </nav>
 
-        <div class="row">
-            <div class="col-md-8">
-                <!-- Complaint Details -->
-                <div class="card shadow mb-4">
-                    <div class="card-header bg-light">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <h5 class="mb-0">Complaint #{{ complaint.id }}</h5>
-                            <div>
-                                {% if current_user.role == 'admin' %}
-                                    <button type="button" class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#deleteComplaintModal">
-                                        <i class="fas fa-trash me-1"></i> Delete
-                                    </button>
-                                {% endif %}
-                                {% if complaint.status == 'pending' %}
-                                    <span class="badge bg-warning">Pending</span>
-                                {% elif complaint.status == 'in_progress' %}
-                                    <span class="badge bg-info">In Progress</span>
-                                {% elif complaint.status == 'resolved' %}
-                                    <span class="badge bg-success">Resolved</span>
-                                {% else %}
-<div class="container">
     <nav aria-label="breadcrumb" class="mb-4">
         <ol class="breadcrumb">
             <li class="breadcrumb-item"><a href="{{ url_for('admin.dashboard') }}">Dashboard</a></li>
@@ -520,39 +489,26 @@
 {% if complaint.latitude and complaint.longitude %}
 <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD8atpL2upxvA99KrVaZFlv8XxgrqbGZGE&libraries=places"></script>
 <script>
-    // Wait for the document to be ready
-    document.addEventListener('DOMContentLoaded', function() {
-        // Get map container element
-        var mapElement = document.getElementById('complaint-map');
+    function initMap() {
+        const mapElement = document.getElementById('complaint-map');
+        const lat = parseFloat(mapElement.dataset.lat);
+        const lng = parseFloat(mapElement.dataset.lng);
+        const title = mapElement.dataset.title;
         
-        // Get data from HTML attributes
-        var lat = parseFloat(mapElement.getAttribute('data-lat'));
-        var lng = parseFloat(mapElement.getAttribute('data-lng'));
-        var title = mapElement.getAttribute('data-title');
-        
-        // Create map
-        var map = new google.maps.Map(mapElement, {
-            center: {lat: lat, lng: lng},
+        const map = new google.maps.Map(mapElement, {
+            center: { lat, lng },
             zoom: 15
         });
         
-        // Create marker
-        var marker = new google.maps.Marker({
-            position: {lat: lat, lng: lng},
+        new google.maps.Marker({
+            position: { lat, lng },
             map: map,
             title: title
         });
-        
-        // Create and open info window
-        var infoWindow = new google.maps.InfoWindow({
-            content: title
-        });
-        
-        // Add click event to marker
-        marker.addListener('click', function() {
-            infoWindow.open(map, marker);
-        });
-    });
+    }
+    
+    // Initialize map when the page loads
+    window.onload = initMap;
 </script>
 {% endif %}
 {% endblock %} 

@@ -1,9 +1,19 @@
 {% extends 'base.html' %}
 
-{% block title %}My Complaints | CitySeva{% endblock %}
+{% block title %}My Complaints - CitySeva{% endblock %}
 
 {% block content %}
-<div class="container py-4">
+<div class="container py-5">
+    <div class="row align-items-center mb-5">
+        <div class="col-md-6">
+            <h1 class="display-4 mb-4">My Complaints</h1>
+            <p class="lead">View and manage your submitted complaints.</p>
+        </div>
+        <div class="col-md-6">
+            <img src="{{ url_for('static', filename='images/citizen-complaints.svg') }}" alt="My Complaints" class="img-fluid">
+        </div>
+    </div>
+
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h1>My Complaints</h1>
         <a href="{{ url_for('citizen.new_complaint') }}" class="btn btn-primary">

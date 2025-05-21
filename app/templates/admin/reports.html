@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}Reports - CitySeva{% endblock %}
+{% block title %}Reports & Analytics - CitySeva{% endblock %}
 
 {% block styles %}
 <style>
@@ -20,18 +20,17 @@
 {% endblock %}
 
 {% block content %}
-<div class="container mx-auto px-4 py-8">
-    <!-- Welcome Section -->
-    <div class="bg-white rounded-lg shadow-md p-6 mb-8">
-        <div class="flex items-center justify-between">
-            <div>
-                <h1 class="text-3xl font-bold text-gray-800 mb-2">Reports & Analytics</h1>
-                <p class="text-gray-600">View detailed reports and analytics about complaint resolution performance</p>
-            </div>
-            <img src="{{ url_for('static', filename='images/admin-reports-new.svg') }}" alt="Reports" class="h-48">
+<div class="container py-5">
+    <div class="row align-items-center mb-5">
+        <div class="col-md-6">
+            <h1 class="display-4 mb-4">Reports & Analytics</h1>
+            <p class="lead">Comprehensive insights and statistics for better decision making.</p>
+        </div>
+        <div class="col-md-6">
+            <img src="{{ url_for('static', filename='images/admin-reports.svg') }}" alt="Reports & Analytics" class="img-fluid">
         </div>
     </div>
-    
+
     <!-- Resolution Time -->
     <div class="card shadow mb-4">
         <div class="card-header d-flex align-items-center">

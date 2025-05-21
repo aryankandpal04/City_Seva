@@ -3,7 +3,18 @@
 {% block title %}Provide Feedback | CitySeva{% endblock %}
 
 {% block content %}
-<div class="container py-4">
+<div class="container py-5">
+    <!-- Welcome Section -->
+    <div class="row align-items-center mb-5">
+        <div class="col-lg-6">
+            <h1 class="display-4 mb-4">Your Feedback Matters</h1>
+            <p class="lead text-muted mb-4">Help us improve our services by sharing your experience with how your complaint was handled. Your feedback directly influences how we serve our community.</p>
+        </div>
+        <div class="col-lg-6 text-center">
+            <img src="{{ url_for('static', filename='images/citizen-feedback.svg') }}" alt="Feedback Illustration" class="img-fluid" style="max-width: 400px;">
+        </div>
+    </div>
+
     <div class="row justify-content-center">
         <div class="col-md-8">
             <nav aria-label="Breadcrumb" class="mb-4">
@@ -17,7 +28,7 @@
             
             <div class="card shadow-lg border-0 mb-4">
                 <div class="card-header" style="background: linear-gradient(to right, #00bfff, #00ffff); color: white;">
-                    <h4 class="mb-0"><i class="fas fa-star me-2"></i>Your Feedback Matters</h4>
+                    <h4 class="mb-0"><i class="fas fa-star me-2"></i>Rate Your Experience</h4>
                 </div>
                 <div class="card-body p-4">
                     <div class="text-center mb-4">

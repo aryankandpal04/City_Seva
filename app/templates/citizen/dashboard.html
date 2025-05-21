@@ -1,21 +1,16 @@
 {% extends "base.html" %}
 
-{% block title %}Dashboard - CitySeva{% endblock %}
+{% block title %}Citizen Dashboard - CitySeva{% endblock %}
 
 {% block content %}
-<div class="container py-4">
-    <!-- Welcome Section -->
-    <div class="card mb-4">
-        <div class="card-body d-flex align-items-center">
-            <div>
-                <h4 class="mb-1">Welcome back, {{ current_user.username }}!</h4>
-                <p class="text-secondary mb-0">Here's an overview of your civic engagement</p>
-            </div>
-            <div class="ms-auto">
-                <a href="{{ url_for('citizen.new_complaint') }}" class="btn btn-primary">
-                    <i class="fas fa-plus-circle me-2"></i>New Complaint
-                </a>
-            </div>
+<div class="container py-5">
+    <div class="row align-items-center mb-5">
+        <div class="col-md-6">
+            <h1 class="display-4 mb-4">Citizen Dashboard</h1>
+            <p class="lead">Track your complaints and stay updated on their status</p>
+        </div>
+        <div class="col-md-6">
+            <img src="{{ url_for('static', filename='images/citizen-dashboard.svg') }}" alt="Citizen Dashboard" class="img-fluid">
         </div>
     </div>
 

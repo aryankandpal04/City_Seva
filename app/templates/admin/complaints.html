@@ -3,18 +3,17 @@
 {% block title %}Manage Complaints - CitySeva{% endblock %}
 
 {% block content %}
-<div class="container mx-auto px-4 py-8">
-    <!-- Welcome Section -->
-    <div class="bg-white rounded-lg shadow-md p-6 mb-8">
-        <div class="flex items-center justify-between">
-            <div>
-                <h1 class="text-3xl font-bold text-gray-800 mb-2">Complaints Management</h1>
-                <p class="text-gray-600">Manage and track all citizen complaints</p>
-            </div>
-            <img src="{{ url_for('static', filename='images/admin-complaints.svg') }}" alt="Complaints Management" class="h-48">
+<div class="container py-5">
+    <div class="row align-items-center mb-5">
+        <div class="col-md-6">
+            <h1 class="display-4 mb-4">Complaints Management</h1>
+            <p class="lead">Manage and track all citizen complaints efficiently.</p>
+        </div>
+        <div class="col-md-6">
+            <img src="{{ url_for('static', filename='images/admin-complaints.svg') }}" alt="Complaints Management" class="img-fluid">
         </div>
     </div>
-    
+
     <div class="container">
         <h1 class="mb-4">Manage Complaints</h1>
         

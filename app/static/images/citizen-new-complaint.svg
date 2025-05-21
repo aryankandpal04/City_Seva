@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="800px" height="600px" viewBox="0 0 800 600" version="1.1" xmlns="http://www.w3.org/2000/svg">
+    <!-- Background Elements -->
+    <defs>
+        <linearGradient id="gradient1" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" style="stop-color:#00bfff;stop-opacity:0.1"/>
+            <stop offset="100%" style="stop-color:#00ffff;stop-opacity:0.1"/>
+        </linearGradient>
+        <linearGradient id="gradient2" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" style="stop-color:#00bfff"/>
+            <stop offset="100%" style="stop-color:#00ffff"/>
+        </linearGradient>
+    </defs>
+
+    <!-- Background Circle -->
+    <circle cx="400" cy="300" r="250" fill="url(#gradient1)"/>
+
+    <!-- Main Form Illustration -->
+    <g transform="translate(250, 150)">
+        <!-- Form Background -->
+        <rect x="0" y="0" width="300" height="350" rx="20" ry="20" fill="white" stroke="url(#gradient2)" stroke-width="2"/>
+        
+        <!-- Form Header -->
+        <rect x="0" y="0" width="300" height="60" rx="20" ry="20" fill="url(#gradient2)"/>
+        <text x="150" y="38" font-family="Arial" font-size="20" fill="white" text-anchor="middle">New Complaint</text>
+        
+        <!-- Form Fields -->
+        <rect x="30" y="90" width="240" height="40" rx="5" ry="5" fill="#f8f9fa" stroke="#dee2e6"/>
+        <rect x="30" y="150" width="240" height="40" rx="5" ry="5" fill="#f8f9fa" stroke="#dee2e6"/>
+        <rect x="30" y="210" width="240" height="80" rx="5" ry="5" fill="#f8f9fa" stroke="#dee2e6"/>
+        
+        <!-- Submit Button -->
+        <rect x="75" y="320" width="150" height="40" rx="20" ry="20" fill="url(#gradient2)"/>
+        <text x="150" y="345" font-family="Arial" font-size="16" fill="white" text-anchor="middle">Submit</text>
+    </g>
+
+    <!-- Decorative Elements -->
+    <g transform="translate(100, 100)">
+        <!-- Location Pin -->
+        <circle cx="50" cy="50" r="30" fill="url(#gradient2)" opacity="0.8"/>
+        <path d="M50,20 L50,80 L30,60 L70,60 Z" fill="white"/>
+        
+        <!-- Camera Icon -->
+        <circle cx="150" cy="50" r="30" fill="url(#gradient2)" opacity="0.8"/>
+        <rect x="130" y="40" width="40" height="30" rx="5" ry="5" fill="white"/>
+        <circle cx="150" cy="55" r="10" fill="white"/>
+    </g>
+
+    <!-- Floating Elements -->
+    <g transform="translate(600, 400)">
+        <!-- Checkmark -->
+        <circle cx="0" cy="0" r="25" fill="url(#gradient2)" opacity="0.8"/>
+        <path d="M-10,0 L-5,5 L10,-10" stroke="white" stroke-width="3" fill="none"/>
+        
+        <!-- Star -->
+        <circle cx="50" cy="-50" r="25" fill="url(#gradient2)" opacity="0.8"/>
+        <path d="M50,-65 L55,-50 L70,-50 L60,-40 L65,-25 L50,-35 L35,-25 L40,-40 L30,-50 L45,-50 Z" fill="white"/>
+    </g>
+</svg> 
