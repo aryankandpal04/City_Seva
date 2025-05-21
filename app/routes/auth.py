@@ -159,7 +159,7 @@ def login():
             next_page = url_for('admin.dashboard')
         elif user.role == 'official' and form.department.data:
             session['department'] = form.department.data
-            next_page = url_for('admin.dashboard')
+            next_page = url_for('government_officials.dashboard')
         
         return redirect(next_page)
     
@@ -350,7 +350,7 @@ def verify_otp():
                 if user.role == 'admin':
                     return redirect(url_for('admin.dashboard'))
                 elif user.role == 'official':
-                    return redirect(url_for('admin.dashboard'))
+                    return redirect(url_for('government_officials.dashboard'))
                 else:
                     return redirect(url_for('citizen.dashboard'))
             else:

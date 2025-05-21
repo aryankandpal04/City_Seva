@@ -147,6 +147,32 @@ def dashboard():
                     current_date = current_date.replace(year=current_date.year + 1, month=1)
                 else:
                     current_date = current_date.replace(month=current_date.month + 1)
+
+            # Get complaints for the map
+            map_complaints = Complaint.query.filter(
+                Complaint.category_id.in_(category_ids),
+                Complaint.latitude.isnot(None),
+                Complaint.longitude.isnot(None)
+            ).all()
+
+            # Format complaints for GeoJSON
+            complaints_geojson = {
+                'type': 'FeatureCollection',
+                'features': [{
+                    'type': 'Feature',
+                    'geometry': {
+                        'type': 'Point',
+                        'coordinates': [complaint.longitude, complaint.latitude]
+                    },
+                    'properties': {
+                        'id': complaint.id,
+                        'title': complaint.title,
+                        'location': complaint.location,
+                        'status': complaint.status,
+                        'priority': complaint.priority
+                    }
+                } for complaint in map_complaints]
+            }
             
         else:
             # No categories for this department
@@ -163,6 +189,7 @@ def dashboard():
             trend_dates = []
             trend_counts = []
             resolution_counts = []
+            complaints_geojson = {'type': 'FeatureCollection', 'features': []}
         
         # Get feedback stats for this official
         avg_rating = db.session.query(
@@ -189,7 +216,8 @@ def dashboard():
                               avg_rating=avg_rating,
                               trend_dates=trend_dates,
                               trend_counts=trend_counts,
-                              resolution_counts=resolution_counts)
+                              resolution_counts=resolution_counts,
+                              complaints=complaints_geojson)
     
     except Exception as e:
         current_app.logger.error(f"Error generating dashboard: {e}")

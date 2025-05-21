@@ -17,21 +17,48 @@
         height: 300px;
         position: relative;
     }
+    .badge {
+        font-size: 0.85rem;
+        padding: 0.5em 0.8em;
+        font-weight: 500;
+    }
+    .badge.bg-warning {
+        background-color: #ffc107 !important;
+        color: #000;
+    }
+    .badge.bg-info {
+        background-color: #0dcaf0 !important;
+        color: #000;
+    }
+    .badge.bg-success {
+        background-color: #198754 !important;
+        color: #fff;
+    }
+    .badge.bg-danger {
+        background-color: #dc3545 !important;
+        color: #fff;
+    }
+    .badge.bg-secondary {
+        background-color: #6c757d !important;
+        color: #fff;
+    }
+    .badge.bg-primary {
+        background-color: #0d6efd !important;
+        color: #fff;
+    }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="container mx-auto px-4 py-8">
+<div class="container py-5">
     <!-- Welcome Section -->
-    <div class="bg-white rounded-lg shadow-md p-6 mb-8">
-        <div class="flex items-center">
-            <div class="flex-1">
-                <h1 class="text-3xl font-bold text-gray-800 mb-2">Official Dashboard</h1>
-                <p class="text-gray-600">Manage and track assigned complaints</p>
-            </div>
-            <div class="ml-8">
-                <img src="{{ url_for('static', filename='images/official-dashboard.svg') }}" alt="Official Dashboard" class="h-48">
-            </div>
+    <div class="row align-items-center mb-5">
+        <div class="col-lg-6">
+            <h1 class="display-4 mb-4">Official Dashboard</h1>
+            <p class="lead text-muted mb-4">Manage and track assigned complaints to ensure timely resolution and maintain citizen satisfaction.</p>
+        </div>
+        <div class="col-lg-6 text-center">
+            <img src="{{ url_for('static', filename='images/official-dashboard.svg') }}" alt="Official Dashboard" class="img-fluid" style="max-width: 400px;">
         </div>
     </div>
 
@@ -177,34 +204,40 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                {% for complaint in assigned_complaints %}
-                                <tr>
-                                    <td>{{ complaint.id }}</td>
-                                    <td>{{ complaint.title }}</td>
-                                    <td>{{ complaint.location }}</td>
-                                    <td>
-                                        <span class="badge bg-{{ complaint.status|replace('pending', 'warning')|replace('in_progress', 'info')|replace('resolved', 'success')|replace('rejected', 'danger') }}">
-                                            {{ complaint.status|replace('_', ' ')|title }}
-                                        </span>
-                                    </td>
-                                    <td>{{ complaint.created_at.strftime('%Y-%m-%d') }}</td>
-                                    <td>
-                                        <span class="badge bg-{{ complaint.priority|replace('low', 'secondary')|replace('medium', 'primary')|replace('high', 'warning')|replace('urgent', 'danger') }}">
-                                            {{ complaint.priority|title }}
-                                        </span>
-                                    </td>
-                                    <td>
-                                        <a href="{{ url_for('government_officials.complaint_detail', complaint_id=complaint.id) }}" class="btn btn-sm btn-primary">
-                                            <i class="fas fa-eye"></i>
-                                        </a>
-                                    </td>
-                                </tr>
-                                {% endfor %}
-                                
-                                {% if not assigned_complaints %}
-                                <tr>
-                                    <td colspan="7" class="text-center py-3">No complaints assigned to your department.</td>
-                                </tr>
+                                {% if assigned_complaints %}
+                                    {% for complaint in assigned_complaints %}
+                                        <tr>
+                                            <td>{{ complaint.id }}</td>
+                                            <td>{{ complaint.title }}</td>
+                                            <td>{{ complaint.location }}</td>
+                                            <td>
+                                                <span class="badge bg-{{ complaint.status|replace('pending', 'warning')|replace('in_progress', 'info')|replace('resolved', 'success')|replace('rejected', 'danger') }}">
+                                                    {{ complaint.status|replace('_', ' ')|title }}
+                                                </span>
+                                            </td>
+                                            <td>{{ complaint.created_at.strftime('%Y-%m-%d') }}</td>
+                                            <td>
+                                                <span class="badge bg-{{ complaint.priority|replace('low', 'secondary')|replace('medium', 'primary')|replace('high', 'warning')|replace('urgent', 'danger') }}">
+                                                    {{ complaint.priority|title }}
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <a href="{{ url_for('government_officials.complaint_detail', complaint_id=complaint.id) }}" 
+                                                   class="btn btn-sm btn-outline-primary">
+                                                    <i class="fas fa-eye"></i>
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                {% else %}
+                                    <tr>
+                                        <td colspan="7" class="text-center py-4">
+                                            <div class="text-muted">
+                                                <i class="fas fa-clipboard-list fa-2x mb-2"></i>
+                                                <p>No complaints assigned yet.</p>
+                                            </div>
+                                        </td>
+                                    </tr>
                                 {% endif %}
                             </tbody>
                         </table>
@@ -213,56 +246,37 @@
             </div>
         </div>
         
-        <!-- Quick Links and Priority Cases Section -->
+        <!-- Priority Complaints -->
         <div class="col-lg-4 mb-4">
-            <div class="card shadow mb-4">
-                <div class="card-header bg-white">
-                    <h5 class="mb-0"><i class="fas fa-link me-2"></i>Quick Links</h5>
-                </div>
-                <div class="card-body">
-                    <div class="d-grid gap-2">
-                        <a href="{{ url_for('government_officials.assigned_complaints') }}" class="btn btn-primary">
-                            <i class="fas fa-clipboard-list me-2"></i>Manage Assigned Complaints
-                        </a>
-                        <a href="{{ url_for('government_officials.profile') }}" class="btn btn-info">
-                            <i class="fas fa-user-circle me-2"></i>My Profile
-                        </a>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Priority Cases -->
             <div class="card shadow">
-                <div class="card-header bg-warning text-dark">
+                <div class="card-header bg-white">
                     <h5 class="mb-0"><i class="fas fa-exclamation-triangle me-2"></i>Priority Cases</h5>
                 </div>
-                <div class="card-body p-0">
-                    <div class="list-group list-group-flush">
-                        {% for complaint in priority_complaints %}
-                        <a href="{{ url_for('government_officials.complaint_detail', complaint_id=complaint.id) }}" class="list-group-item list-group-item-action">
-                            <div class="d-flex w-100 justify-content-between">
-                                <h6 class="mb-1">{{ complaint.title }}</h6>
-                                <small class="text-muted">{{ complaint.created_at.strftime('%Y-%m-%d') }}</small>
-                            </div>
-                            <p class="mb-1">{{ complaint.location }}</p>
-                            <div>
-                                <span class="badge bg-{{ complaint.status|replace('pending', 'warning')|replace('in_progress', 'info')|replace('resolved', 'success')|replace('rejected', 'danger') }}">
-                                    {{ complaint.status|replace('_', ' ')|title }}
-                                </span>
-                                <span class="badge bg-{{ complaint.priority|replace('low', 'secondary')|replace('medium', 'primary')|replace('high', 'warning')|replace('urgent', 'danger') }}">
-                                    {{ complaint.priority|title }}
-                                </span>
-                            </div>
-                        </a>
-                        {% endfor %}
-                        
-                        {% if not priority_complaints %}
+                <div class="card-body">
+                    {% if priority_complaints %}
+                        <div class="list-group list-group-flush">
+                            {% for complaint in priority_complaints %}
+                                <a href="{{ url_for('government_officials.complaint_detail', complaint_id=complaint.id) }}" 
+                                   class="list-group-item list-group-item-action">
+                                    <div class="d-flex w-100 justify-content-between">
+                                        <h6 class="mb-1">{{ complaint.title }}</h6>
+                                        <small class="badge bg-{{ complaint.priority|replace('low', 'secondary')|replace('medium', 'primary')|replace('high', 'warning')|replace('urgent', 'danger') }}">
+                                            {{ complaint.priority|title }}
+                                        </small>
+                                    </div>
+                                    <p class="mb-1 text-muted small">{{ complaint.location }}</p>
+                                    <small class="text-muted">
+                                        Created: {{ complaint.created_at.strftime('%Y-%m-%d') }}
+                                    </small>
+                                </a>
+                            {% endfor %}
+                        </div>
+                    {% else %}
                         <div class="text-center text-muted py-4">
                             <i class="fas fa-check-circle fa-2x mb-2"></i>
                             <p>No priority cases at the moment.</p>
                         </div>
-                        {% endif %}
-                    </div>
+                    {% endif %}
                 </div>
             </div>
         </div>
@@ -379,131 +393,90 @@
             });
     });
 
-    // Initialize the complaints map
+    // Initialize complaints map
     function initComplaintsMap() {
-        const mapElement = document.getElementById('complaintsMap');
-        if (!mapElement) return;
-        
-        // Initialize the map with Google Maps
-        const map = new google.maps.Map(mapElement, {
-            center: { lat: 20.5937, lng: 78.9629 }, // Default center on India
-            zoom: 5,
+        const map = new google.maps.Map(document.getElementById('complaintsMap'), {
+            zoom: 12,
+            center: { lat: 20.5937, lng: 78.9629 }, // Center of India
             styles: [
+                {
+                    "featureType": "all",
+                    "elementType": "geometry",
+                    "stylers": [{"color": "#f5f5f5"}]
+                },
                 {
                     "featureType": "water",
                     "elementType": "geometry",
                     "stylers": [{"color": "#e9e9e9"}, {"lightness": 17}]
-                },
-                {
-                    "featureType": "landscape",
-                    "elementType": "geometry",
-                    "stylers": [{"color": "#f5f5f5"}, {"lightness": 20}]
-                },
-                {
-                    "featureType": "road.highway",
-                    "elementType": "geometry.fill",
-                    "stylers": [{"color": "#ffffff"}, {"lightness": 17}]
-                },
-                {
-                    "featureType": "administrative",
-                    "elementType": "geometry.stroke",
-                    "stylers": [{"color": "#0d6efd"}, {"lightness": 20}, {"weight": 1.2}]
                 }
             ]
         });
-        
-        // Fetch department-specific complaint data for the map
-        fetch('/api/map/department_complaints')
-            .then(response => response.json())
-            .then(data => {
-                if (!data.features || data.features.length === 0) {
-                    console.log('No complaint data with location information');
-                    return;
+
+        // Add markers for each complaint
+        const complaints = {{ complaints|tojson }};
+        complaints.forEach(feature => {
+            const position = {
+                lat: feature.geometry.coordinates[1],
+                lng: feature.geometry.coordinates[0]
+            };
+            
+            // Set marker color based on status
+            let markerColor;
+            switch(feature.properties.status) {
+                case 'pending':
+                    markerColor = '#f0ad4e';
+                    break;
+                case 'in_progress':
+                    markerColor = '#5bc0de';
+                    break;
+                case 'resolved':
+                    markerColor = '#5cb85c';
+                    break;
+                case 'rejected':
+                    markerColor = '#d9534f';
+                    break;
+                default:
+                    markerColor = '#858796';
+            }
+            
+            const marker = new google.maps.Marker({
+                position: position,
+                map: map,
+                title: feature.properties.title,
+                icon: {
+                    path: google.maps.SymbolPath.CIRCLE,
+                    fillColor: markerColor,
+                    fillOpacity: 0.8,
+                    strokeWeight: 1,
+                    strokeColor: '#FFFFFF',
+                    scale: 10
                 }
-                
-                // Create bounds to fit all markers
-                const bounds = new google.maps.LatLngBounds();
-                
-                // Create markers for each complaint
-                data.features.forEach(feature => {
-                    // Skip if coordinates are missing
-                    if (!feature.geometry || !feature.geometry.coordinates) return;
-                    
-                    // Get coordinates
-                    const lng = feature.geometry.coordinates[0];
-                    const lat = feature.geometry.coordinates[1];
-                    
-                    // Skip invalid coordinates
-                    if (!lat || !lng) return;
-                    
-                    const position = new google.maps.LatLng(lat, lng);
-                    
-                    // Choose marker color based on status
-                    let markerColor = '#f0ad4e'; // Default/pending - yellow
-                    if (feature.properties.status === 'in_progress') {
-                        markerColor = '#5bc0de'; // Blue
-                    } else if (feature.properties.status === 'resolved') {
-                        markerColor = '#5cb85c'; // Green
-                    } else if (feature.properties.status === 'rejected') {
-                        markerColor = '#d9534f'; // Red
-                    }
-                    
-                    // Create marker
-                    const marker = new google.maps.Marker({
-                        position: position,
-                        map: map,
-                        title: feature.properties.title,
-                        icon: {
-                            path: google.maps.SymbolPath.CIRCLE,
-                            fillColor: markerColor,
-                            fillOpacity: 0.8,
-                            strokeWeight: 1,
-                            strokeColor: '#FFFFFF',
-                            scale: 10
-                        }
-                    });
-                    
-                    // Create info window with complaint details
-                    const infoWindow = new google.maps.InfoWindow({
-                        content: `
-                            <div style="max-width: 200px;">
-                                <h6 style="margin: 0 0 5px 0;">${feature.properties.title}</h6>
-                                <p style="margin: 0 0 5px 0;"><small>${feature.properties.location}</small></p>
-                                <p style="margin: 0;">
-                                    <span style="display: inline-block; padding: 2px 8px; border-radius: 10px; background-color: ${markerColor}; color: white; font-size: 10px; text-transform: uppercase;">
-                                        ${feature.properties.status.replace('_', ' ')}
-                                    </span>
-                                </p>
-                                <p style="margin: 5px 0 0 0;">
-                                    <a href="/government_officials/complaint/${feature.properties.id}" style="color: #0d6efd; text-decoration: none; font-size: 12px;">
-                                        View Details
-                                    </a>
-                                </p>
-                            </div>
-                        `
-                    });
-                    
-                    // Add click event to show info window
-                    marker.addListener('click', () => {
-                        infoWindow.open(map, marker);
-                    });
-                    
-                    // Extend bounds to include this marker
-                    bounds.extend(position);
-                });
-                
-                // Fit map to bounds if we have valid complaints with coordinates
-                if (!bounds.isEmpty()) {
-                    map.fitBounds(bounds);
-                    
-                    // Limit the zoom level
-                    const listener = google.maps.event.addListener(map, 'idle', function() {
-                        if (map.getZoom() > 13) map.setZoom(13);
-                        google.maps.event.removeListener(listener);
-                    });
-                }
-            })
-            .catch(error => console.error('Error loading complaint map data:', error));
+            });
+            
+            // Create info window with complaint details
+            const infoWindow = new google.maps.InfoWindow({
+                content: `
+                    <div style="max-width: 200px;">
+                        <h6 style="margin: 0 0 5px 0;">${feature.properties.title}</h6>
+                        <p style="margin: 0 0 5px 0;"><small>${feature.properties.location}</small></p>
+                        <p style="margin: 0;">
+                            <span style="display: inline-block; padding: 2px 8px; border-radius: 10px; background-color: ${markerColor}; color: white; font-size: 10px; text-transform: uppercase;">
+                                ${feature.properties.status.replace('_', ' ')}
+                            </span>
+                        </p>
+                        <p style="margin: 5px 0 0 0;">
+                            <a href="/government_officials/complaint/${feature.properties.id}" style="color: #0d6efd; text-decoration: none; font-size: 12px;">
+                                View Details
+                            </a>
+                        </p>
+                    </div>
+                `
+            });
+            
+            marker.addListener('click', () => {
+                infoWindow.open(map, marker);
+            });
+        });
     }
 </script>
 {% endblock %} 

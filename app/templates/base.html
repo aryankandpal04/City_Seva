@@ -60,7 +60,7 @@
                     {% if current_user.is_authenticated %}
                     {% if current_user.role in ['admin', 'official'] %}
                     <li class="nav-item mx-1">
-                        <a class="nav-link d-flex align-items-center" href="{{ url_for('admin.dashboard') }}">
+                        <a class="nav-link d-flex align-items-center" href="{% if current_user.role == 'admin' %}{{ url_for('admin.dashboard') }}{% elif current_user.role == 'official' %}{{ url_for('government_officials.dashboard') }}{% else %}{{ url_for('citizen.dashboard') }}{% endif %}">
                             <i class="fas fa-chart-line me-2"></i>Dashboard
                         </a>
                     </li>
@@ -93,7 +93,7 @@
                     </li>
                     {% else %}
                     <li class="nav-item mx-1">
-                        <a class="nav-link d-flex align-items-center" href="{{ url_for('citizen.dashboard') }}">
+                        <a class="nav-link d-flex align-items-center" href="{% if current_user.role == 'admin' %}{{ url_for('admin.dashboard') }}{% elif current_user.role == 'official' %}{{ url_for('government_officials.dashboard') }}{% else %}{{ url_for('citizen.dashboard') }}{% endif %}">
                             <i class="fas fa-home me-2"></i>Dashboard
                         </a>
                     </li>
