@@ -21,8 +21,10 @@ WTForms==3.1.1
 email-validator==2.1.0
 marshmallow==3.20.1
 
-# Authentication
+# Authentication and Security
 PyJWT==2.8.0
+bcrypt==4.0.1
+cryptography==41.0.7
 
 # Image Processing
 Pillow==10.0.0
@@ -30,13 +32,22 @@ Pillow==10.0.0
 # Environment Variables
 python-dotenv==1.0.0
 
-# HTTP Requests 
+# HTTP Requests and APIs
 requests==2.31.0
+googlemaps==4.10.0
 
 # Testing
 pytest==7.4.0
 pytest-flask==1.2.0
+pytest-cov==4.1.0
 
 # Utilities
 ipaddress==1.0.23
-uuid==1.30 
+uuid==1.30
+python-dateutil==2.8.2
+pytz==2024.1
+
+# Development Tools
+black==23.12.1
+flake8==7.0.0
+isort==5.13.2 
