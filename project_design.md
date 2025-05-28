@@ -345,375 +345,98 @@ Key aspects of the vision include:
 The frontend is built using modern web technologies with a focus on performance and user experience:
 
 1. Core Technologies
-   a. React.js for Component-Based Development
-      - Functional Components
-         * Reusable UI elements
-         * Props for data passing
-         * Component lifecycle management
-         * Performance optimization
-      
-      - Hooks for State Management
-         * useState for local state
-         * useEffect for side effects
-         * useContext for context access
-         * Custom hooks for reusable logic
-      
-      - Context API for Global State
-         * Theme management
-         * User authentication state
-         * Application settings
-         * Global notifications
+   - HTML5, CSS3, JavaScript (ES6+)
+     * Modern JavaScript features
+     * Responsive design principles
+     * Progressive enhancement
+   - Bootstrap 5.3.0
+     * Responsive grid system
+     * Component library
+     * Utility classes
+   - jQuery 3.7.1
+     * DOM manipulation
+     * Event handling
+     * AJAX requests
+   - Additional Libraries
+     * Chart.js for data visualization
+     * SweetAlert2 for enhanced alerts
+     * Select2 for advanced select inputs
+     * AOS (Animate On Scroll) for animations
 
-   b. Material-UI for Consistent Design
-      - Custom Theme Configuration
-         * Brand color scheme
-         * Typography system
-         * Spacing rules
-         * Component styling
-      
-      - Responsive Components
-         * Mobile-first design
-         * Breakpoint system
-         * Grid layout
-         * Adaptive components
-      
-      - Accessibility Features
-         * ARIA labels
-         * Keyboard navigation
-         * Screen reader support
-         * Color contrast compliance
-
-   c. Redux for State Management
-      - Centralized State Store
-         * Application state
-         * User preferences
-         * Cache management
-         * Session data
-      
-      - Action Creators
-         * API requests
-         * State updates
-         * Side effects
-         * Error handling
-      
-      - Reducers for State Updates
-         * State mutations
-         * Data normalization
-         * State persistence
-         * State validation
-
-   d. Axios for API Communication
-      - Request/Response Interceptors
-         * Authentication headers
-         * Error handling
-         * Request logging
-         * Response transformation
-      
-      - Error Handling
-         * Network errors
-         * API errors
-         * Validation errors
-         * Timeout handling
-      
-      - Request Caching
-         * Response caching
-         * Cache invalidation
-         * Cache persistence
-         * Cache optimization
-
-   e. Socket.io-client for Real-time Features
-      - Real-time Updates
-         * Complaint status changes
-         * Notification delivery
-         * Chat messages
-         * System alerts
-      
-      - Chat Functionality
-         * User-to-user chat
-         * Group chat
-         * File sharing
-         * Message history
-      
-      - Notifications
-         * Push notifications
-         * In-app alerts
-         * Email notifications
-         * SMS notifications
-
-2. Performance Optimizations
-   a. Code Splitting
-      - Route-based splitting
-      - Component-based splitting
-      - Dynamic imports
-      - Bundle optimization
-
-   b. Lazy Loading
-      - Component lazy loading
-      - Image lazy loading
-      - Route lazy loading
-      - Resource lazy loading
-
-   c. Image Optimization
-      - Image compression
-      - WebP format
-      - Responsive images
-      - Lazy loading
-
-   d. Service Worker Implementation
-      - Offline support
-      - Cache management
-      - Push notifications
-      - Background sync
-
-   e. Progressive Web App Features
-      - Installable
-      - Offline capability
-      - Push notifications
-      - App-like experience
+2. Progressive Web App Features
+   - Service Workers
+     * Offline functionality
+     * Cache management
+     * Push notifications
+   - Performance Optimizations
+     * Code minification
+     * Asset compression
+     * Lazy loading
+     * Image optimization
+   - Responsive Design
+     * Mobile-first approach
+     * Cross-browser compatibility
+     * Accessibility compliance
 
 ### 3.2.2 Backend Architecture
-The backend follows a microservices architecture for scalability and maintainability:
+The backend follows a monolithic architecture using Flask for robust and maintainable code:
 
-1. Core Services
-   a. Node.js/Express.js Server
-      - RESTful API Endpoints
-         * Resource endpoints
-         * Authentication endpoints
-         * File upload endpoints
-         * Webhook endpoints
-      
-      - Middleware Implementation
-         * Request parsing
-         * Authentication
-         * Logging
-         * Error handling
-      
-      - Error Handling
-         * Global error handler
-         * Custom error types
-         * Error logging
-         * Error responses
+1. Core Framework
+   - Flask 2.3.3
+     * RESTful API endpoints
+     * Blueprint-based routing
+     * Middleware implementation
+     * Error handling
+   - Flask Extensions
+     * Flask-Login 0.6.3 for authentication
+     * Flask-WTF 1.2.1 for form handling
+     * Flask-Mailman 0.3.0 for email
+     * Flask-JWT-Extended 4.5.3 for API auth
+     * Flask-Migrate 4.0.7 for database migrations
+     * Flask-Cors 4.0.0 for CORS support
 
-   b. WebSocket Support
-      - Real-time Communication
-         * Bi-directional communication
-         * Event-based messaging
-         * Room management
-         * Connection handling
-      
-      - Event Handling
-         * Event subscription
-         * Event broadcasting
-         * Event filtering
-         * Event persistence
-      
-      - Connection Management
-         * Connection pooling
-         * Heartbeat monitoring
-         * Reconnection logic
-         * Session management
-
-   c. Microservices
-      - Authentication Service
-         * User authentication
-         * Token management
-         * Session handling
-         * OAuth integration
-      
-      - Complaint Management
-         * Complaint processing
-         * Status updates
-         * Assignment logic
-         * Resolution tracking
-      
-      - User Management
-         * User profiles
-         * Role management
-         * Permission control
-         * Account settings
-      
-      - Notification Service
-         * Notification delivery
-         * Template management
-         * Channel routing
-         * Delivery tracking
-
-   d. Authentication and Authorization
-      - JWT Validation
-         * Token verification
-         * Token refresh
-         * Token revocation
-         * Token storage
-      
-      - Role-Based Access Control
-         * Role definition
-         * Permission mapping
-         * Access control
-         * Policy enforcement
-      
-      - Session Management
-         * Session creation
-         * Session validation
-         * Session timeout
-         * Session cleanup
-
-2. Data Processing
-   a. Request Validation
-      - Input validation
-      - Schema validation
-      - Custom validation
-      - Error reporting
-
-   b. Data Transformation
-      - Data normalization
-      - Format conversion
-      - Data enrichment
-      - Response formatting
-
-   c. Error Handling
-      - Error classification
-      - Error logging
-      - Error reporting
-      - Error recovery
-
-   d. Logging and Monitoring
-      - Request logging
-      - Error logging
-      - Performance monitoring
-      - Security monitoring
-
-   e. Rate Limiting
-      - Request limiting
-      - IP-based limiting
-      - User-based limiting
-      - Service-based limiting
+2. Server and Processing
+   - Gunicorn 21.2.0
+     * WSGI HTTP Server
+     * Worker management
+     * Process monitoring
+   - Data Processing
+     * Request validation
+     * Data transformation
+     * Error handling
+     * Logging and monitoring
+     * Rate limiting
 
 ### 3.2.3 Database Architecture
-The database layer is designed for scalability and performance:
+The database layer is designed for reliability and ease of maintenance:
 
-1. Primary Database (MongoDB)
-   a. Document-Based Storage
-      - Schema design
-      - Data modeling
-      - Indexing strategy
-      - Query optimization
+1. Primary Database (SQLite)
+   - SQLAlchemy 2.0.27 ORM
+     * Object-relational mapping
+     * Query optimization
+     * Relationship management
+     * Transaction handling
+   - Alembic 1.13.1
+     * Database migrations
+     * Version control
+     * Schema management
+     * Data integrity
 
-   b. Sharding for Horizontal Scaling
-      - Shard key selection
-      - Data distribution
-      - Shard balancing
-      - Shard management
-
-   c. Replication for High Availability
-      - Primary-secondary setup
-      - Replica set configuration
-      - Failover handling
-      - Data consistency
-
-   d. Index Optimization
-      - Index types
-      - Index creation
-      - Index maintenance
-      - Query performance
-
-   e. Backup Strategies
-      - Automated backups
-      - Incremental backups
-      - Point-in-time recovery
-      - Backup verification
-
-2. Caching Layer (Redis)
-   a. Session Storage
-      - Session data
-      - User sessions
-      - Temporary data
-      - Cache invalidation
-
-   b. API Response Caching
-      - Response caching
-      - Cache policies
-      - Cache invalidation
-      - Cache optimization
-
-   c. Real-time Data
-      - Live updates
-      - Event streaming
-      - Real-time analytics
-      - Data synchronization
-
-   d. Rate Limiting
-      - Request limiting
-      - IP-based limiting
-      - User-based limiting
-      - Service-based limiting
-
-   e. Job Queues
-      - Task queuing
-      - Job processing
-      - Priority queuing
-      - Queue management
-
-3. Search Engine (Elasticsearch)
-   a. Full-text Search
-      - Text indexing
-      - Search queries
-      - Relevance scoring
-      - Search optimization
-
-   b. Geospatial Queries
-      - Location indexing
-      - Distance queries
-      - Area queries
-      - Spatial analysis
-
-   c. Analytics
-      - Data aggregation
-      - Metrics calculation
-      - Trend analysis
-      - Reporting
-
-   d. Log Management
-      - Log indexing
-      - Log analysis
-      - Log retention
-      - Log visualization
-
-   e. Data Aggregation
-      - Data collection
-      - Data processing
-      - Data analysis
-      - Data visualization
-
-4. File Storage
-   a. Cloud Storage Integration
-      - File upload
-      - File download
-      - File management
-      - Storage optimization
-
-   b. CDN Distribution
-      - Content delivery
-      - Edge caching
-      - Load balancing
-      - Performance optimization
-
-   c. File Versioning
-      - Version control
-      - Change tracking
-      - Rollback support
-      - Version management
-
-   d. Access Control
-      - Permission management
-      - Access policies
-      - Security rules
-      - Audit logging
-
-   e. Backup and Recovery
-      - File backup
-      - Disaster recovery
-      - Data retention
-      - Recovery testing
+2. Data Management
+   - Backup Strategies
+     * Regular automated backups
+     * Point-in-time recovery
+     * Data export/import
+   - Security Features
+     * Password hashing with bcrypt 4.0.1
+     * JWT-based authentication
+     * Rate limiting
+     * OTP verification
+   - Additional Tools
+     * Pillow 10.0.0 for image processing
+     * Python-dotenv 1.0.0 for environment management
+     * Pytest 7.4.0 for testing
+     * Code quality tools (Black, Flake8, isort)
 
 ## 3.3 User Interface Design
 
