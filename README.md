@@ -38,6 +38,8 @@ CitySeva is a comprehensive civic complaint management system that facilitates s
 - SweetAlert2 for enhanced alerts
 - Select2 for advanced select inputs
 - AOS (Animate On Scroll) for animations
+- Progressive Web App (PWA) support
+- Service Workers for offline functionality
 
 ### Backend
 - Flask 2.3.3 (Python web framework)
@@ -46,19 +48,32 @@ CitySeva is a comprehensive civic complaint management system that facilitates s
 - Flask-WTF 1.2.1 (Form handling)
 - Flask-Mailman 0.3.0 (Email functionality)
 - Flask-JWT-Extended 4.5.3 (API authentication)
+- Flask-Migrate 4.0.7 (Database migrations)
+- Flask-Cors 4.0.0 (Cross-Origin Resource Sharing)
+- Gunicorn 21.2.0 (WSGI HTTP Server)
+- Marshmallow 3.20.1 (Object serialization/deserialization)
 
 ### Database
 - SQLite (Primary database)
 - Alembic 1.13.1 (Database migrations)
+- SQLAlchemy 2.0.27 (ORM and database toolkit)
 
 ### Security Features
-- Password hashing with bcrypt
+- Password hashing with bcrypt 4.0.1
 - JWT-based API authentication
 - Rate limiting for login attempts
 - OTP-based email verification
 - Session management
 - CSRF protection
 - XSS prevention
+- Cryptography 41.0.7 for enhanced security
+
+### Additional Tools
+- Pillow 10.0.0 for image processing
+- Google Maps API integration
+- Python-dotenv 1.0.0 for environment management
+- Pytest 7.4.0 for testing
+- Black, Flake8, and isort for code quality
 
 ## Installation
 
