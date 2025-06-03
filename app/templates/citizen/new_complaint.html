@@ -8,17 +8,23 @@
 <div class="container py-4">
     <div class="row justify-content-center">
         <div class="col-md-10">
-            <div class="card shadow">
-                <div class="card-header bg-primary text-white">
+            <div class="card shadow" data-aos="fade-up">
+                <div class="card-header">
                     <h4 class="mb-0"><i class="fas fa-edit me-2"></i>Submit New Complaint</h4>
                 </div>
                 <div class="card-body">
-                    <form method="POST" action="{{ url_for('citizen.new_complaint') }}" enctype="multipart/form-data">
+                    <form method="POST" action="{{ url_for('citizen.new_complaint') }}" enctype="multipart/form-data" class="needs-validation" novalidate>
                         {{ form.hidden_tag() }}
                         
                         <div class="mb-3">
                             {{ form.title.label(class="form-label") }}
-                            {{ form.title(class="form-control", placeholder="Enter a descriptive title for your complaint") }}
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-heading"></i></span>
+                                {{ form.title(class="form-control", placeholder="Enter a descriptive title for your complaint", required=True, minlength=5, maxlength=128) }}
+                                <div class="invalid-feedback">
+                                    Please enter a title (5-128 characters).
+                                </div>
+                            </div>
                             {% for error in form.title.errors %}
                                 <div class="text-danger">{{ error }}</div>
                             {% endfor %}
@@ -27,7 +33,13 @@
                         <div class="row mb-3">
                             <div class="col-md-6">
                                 {{ form.category_id.label(class="form-label") }}
-                                {{ form.category_id(class="form-select") }}
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fas fa-tag"></i></span>
+                                    {{ form.category_id(class="form-select", required=True) }}
+                                    <div class="invalid-feedback">
+                                        Please select a category.
+                                    </div>
+                                </div>
                                 {% for error in form.category_id.errors %}
                                     <div class="text-danger">{{ error }}</div>
                                 {% endfor %}
@@ -35,7 +47,13 @@
                             
                             <div class="col-md-6">
                                 {{ form.priority.label(class="form-label") }}
-                                {{ form.priority(class="form-select") }}
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fas fa-exclamation-circle"></i></span>
+                                    {{ form.priority(class="form-select", required=True) }}
+                                    <div class="invalid-feedback">
+                                        Please select a priority level.
+                                    </div>
+                                </div>
                                 {% for error in form.priority.errors %}
                                     <div class="text-danger">{{ error }}</div>
                                 {% endfor %}
@@ -44,7 +62,13 @@
                         
                         <div class="mb-3">
                             {{ form.description.label(class="form-label") }}
-                            {{ form.description(class="form-control", rows=5, placeholder="Provide a detailed description of the issue") }}
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-align-left"></i></span>
+                                {{ form.description(class="form-control", rows=5, placeholder="Provide a detailed description of the issue", required=True, minlength=10, maxlength=1000) }}
+                                <div class="invalid-feedback">
+                                    Please provide a detailed description (10-1000 characters).
+                                </div>
+                            </div>
                             {% for error in form.description.errors %}
                                 <div class="text-danger">{{ error }}</div>
                             {% endfor %}
@@ -53,13 +77,19 @@
                         
                         <div class="mb-3">
                             <label class="form-label">Location on Map <span class="text-danger">*</span></label>
-                            <div id="complaint-map" style="height: 400px; border-radius: 5px;"></div>
-                            <div class="form-text mt-2">Click on the map to set the location of the issue. <strong>Location is required for verification.</strong></div>
+                            <div id="complaint-map" class="shadow-sm"></div>
+                            <div class="form-text mt-2"><i class="fas fa-info-circle me-1"></i> Click on the map to set the location of the issue. <strong>Location is required for verification.</strong></div>
                         </div>
                         
                         <div class="mb-3">
                             {{ form.location.label(class="form-label") }} <span class="text-danger">*</span>
-                            {{ form.location(class="form-control", placeholder="Enter the location of the issue") }}
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-map-marker-alt"></i></span>
+                                {{ form.location(class="form-control", placeholder="Enter the location of the issue", required=True, minlength=5, maxlength=256) }}
+                                <div class="invalid-feedback">
+                                    Please enter a valid location.
+                                </div>
+                            </div>
                             {% for error in form.location.errors %}
                                 <div class="text-danger">{{ error }}</div>
                             {% endfor %}
@@ -68,12 +98,16 @@
                         </div>
                         
                         <div class="mb-4">
-                            {{ form.media_files.label(class="form-label") }} <span class="text-danger">*</span>
-                            {{ form.media_files(class="form-control", accept=".jpg,.jpeg,.png,.gif,.mp4,.mov,.avi", multiple=True) }}
+                            {{ form.media_files.label(class="form-label") }}
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-camera"></i></span>
+                                {{ form.media_files(class="form-control", accept=".jpg,.jpeg,.png,.gif,.mp4,.mov,.avi", multiple=True) }}
+                            </div>
                             {% for error in form.media_files.errors %}
                                 <div class="text-danger">{{ error }}</div>
                             {% endfor %}
-                            <div class="form-text">Upload images or videos of the issue for verification purposes. You can select multiple files. Accepted formats: JPG, JPEG, PNG, GIF, MP4, MOV, AVI. Max size: 10MB per file.</div>
+                            <div class="form-text"><i class="fas fa-info-circle me-1"></i> Upload images or videos of the issue for verification purposes. You can select multiple files. Accepted formats: JPG, JPEG, PNG, GIF, MP4, MOV, AVI. Max size: 10MB per file.</div>
+                            <div id="preview-container" class="mt-2 d-flex flex-wrap gap-2"></div>
                         </div>
                         
                         <div class="d-grid gap-2">
@@ -87,4 +121,98 @@
 </div>
 {% endblock %}
 
-{% block scripts %}{% endblock %} 
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // File preview functionality
+    const mediaFilesInput = document.querySelector('input[type="file"]');
+    const previewContainer = document.getElementById('preview-container');
+    
+    if (mediaFilesInput && previewContainer) {
+        mediaFilesInput.addEventListener('change', function() {
+            // Clear previous previews
+            previewContainer.innerHTML = '';
+            
+            if (this.files.length > 0) {
+                Array.from(this.files).forEach(file => {
+                    const reader = new FileReader();
+                    const previewItem = document.createElement('div');
+                    previewItem.className = 'preview-item';
+                    previewItem.style.position = 'relative';
+                    previewItem.style.width = '100px';
+                    previewItem.style.height = '100px';
+                    previewItem.style.overflow = 'hidden';
+                    previewItem.style.borderRadius = '8px';
+                    previewItem.style.boxShadow = '0 2px 5px rgba(0,0,0,0.1)';
+                    previewItem.style.animation = 'fadeIn 0.5s ease-out';
+                    
+                    reader.onload = function(e) {
+                        if (file.type.startsWith('image/')) {
+                            // Image preview
+                            const img = document.createElement('img');
+                            img.src = e.target.result;
+                            img.style.width = '100%';
+                            img.style.height = '100%';
+                            img.style.objectFit = 'cover';
+                            previewItem.appendChild(img);
+                        } else if (file.type.startsWith('video/')) {
+                            // Video preview
+                            previewItem.innerHTML = `
+                                <div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; background-color: #f0f0f0;">
+                                    <i class="fas fa-video fa-2x"></i>
+                                </div>
+                                <span style="position: absolute; bottom: 0; left: 0; right: 0; background-color: rgba(0,0,0,0.6); color: white; font-size: 10px; text-align: center; padding: 2px;">VIDEO</span>
+                            `;
+                        }
+                        
+                        // Add file name tooltip
+                        previewItem.title = file.name;
+                        
+                        previewContainer.appendChild(previewItem);
+                    };
+                    
+                    reader.readAsDataURL(file);
+                });
+            }
+        });
+    }
+    
+    // Form validation
+    const form = document.querySelector('form.needs-validation');
+    if (form) {
+        form.addEventListener('submit', function(event) {
+            if (!form.checkValidity()) {
+                event.preventDefault();
+                event.stopPropagation();
+            }
+            
+            form.classList.add('was-validated');
+            
+            // Check if location is selected on map
+            const latInput = document.getElementById('latitude');
+            const lngInput = document.getElementById('longitude');
+            
+            if (!latInput.value || !lngInput.value) {
+                event.preventDefault();
+                
+                // Show error message
+                const mapElement = document.getElementById('complaint-map');
+                if (mapElement) {
+                    mapElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    
+                    // Add pulsing border to highlight the map
+                    mapElement.style.animation = 'pulse 1s infinite';
+                    mapElement.style.boxShadow = '0 0 0 2px var(--danger)';
+                    
+                    // Remove animation after 3 seconds
+                    setTimeout(() => {
+                        mapElement.style.animation = '';
+                        mapElement.style.boxShadow = '';
+                    }, 3000);
+                }
+            }
+        });
+    }
+});
+</script>
+{% endblock %} 

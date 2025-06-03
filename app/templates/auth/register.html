@@ -3,15 +3,15 @@
 {% block title %}Register | CitySeva{% endblock %}
 
 {% block content %}
-<div class="container">
+<div class="container py-4">
     <div class="row justify-content-center">
         <div class="col-md-8">
-            <div class="auth-card">
+            <div class="auth-card" data-aos="fade-up">
                 <div class="card-header">
                     <h3><i class="fas fa-user-plus me-2"></i>Register</h3>
                 </div>
                 <div class="card-body">
-                    <form method="POST" action="{{ url_for('auth.register') }}">
+                    <form method="POST" action="{{ url_for('auth.register') }}" id="registerForm" class="needs-validation" novalidate>
                         {{ form.hidden_tag() }}
                         
                         <!-- Role Selection -->
@@ -21,15 +21,17 @@
                                 <div class="form-check form-check-inline flex-grow-1">
                                     <input class="form-check-input visually-hidden" type="radio" name="role" id="role-citizen" value="citizen" {% if form.role.data == 'citizen' %}checked{% endif %}>
                                     <label class="form-check-label btn btn-outline-primary w-100 py-3" for="role-citizen">
-                                        <i class="fas fa-user me-2"></i>Citizen
-                                        <div class="small text-muted mt-1">Report issues in your area</div>
+                                        <i class="fas fa-user fa-2x mb-2 d-block"></i>
+                                        <div>Citizen</div>
+                                        <div class="small text-muted">Report issues in your area</div>
                                     </label>
                                 </div>
                                 <div class="form-check form-check-inline flex-grow-1">
                                     <input class="form-check-input visually-hidden" type="radio" name="role" id="role-official" value="official" {% if form.role.data == 'official' %}checked{% endif %}>
-                                    <label class="form-check-label btn btn-outline-info w-100 py-3" for="role-official">
-                                        <i class="fas fa-user-tie me-2"></i>Government Official
-                                        <div class="small text-muted mt-1">Manage citizen complaints</div>
+                                    <label class="form-check-label btn btn-outline-primary w-100 py-3" for="role-official">
+                                        <i class="fas fa-user-tie fa-2x mb-2 d-block"></i>
+                                        <div>Government Official</div>
+                                        <div class="small text-muted">Manage citizen complaints</div>
                                     </label>
                                 </div>
                             </div>
@@ -41,7 +43,11 @@
                         <div class="row">
                             <div class="col-md-6 mb-3">
                                 {{ form.first_name.label(class="form-label") }}
-                                {{ form.first_name(class="form-control", placeholder="Enter your first name") }}
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fas fa-user"></i></span>
+                                    {{ form.first_name(class="form-control", placeholder="Enter your first name", required=True) }}
+                                    <div class="invalid-feedback">Please enter your first name</div>
+                                </div>
                                 {% for error in form.first_name.errors %}
                                     <div class="text-danger">{{ error }}</div>
                                 {% endfor %}
@@ -49,7 +55,11 @@
                             
                             <div class="col-md-6 mb-3">
                                 {{ form.last_name.label(class="form-label") }}
-                                {{ form.last_name(class="form-control", placeholder="Enter your last name") }}
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fas fa-user"></i></span>
+                                    {{ form.last_name(class="form-control", placeholder="Enter your last name", required=True) }}
+                                    <div class="invalid-feedback">Please enter your last name</div>
+                                </div>
                                 {% for error in form.last_name.errors %}
                                     <div class="text-danger">{{ error }}</div>
                                 {% endfor %}
@@ -58,7 +68,11 @@
                         
                         <div class="mb-3">
                             {{ form.email.label(class="form-label") }}
-                            {{ form.email(class="form-control", placeholder="Enter your email") }}
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-envelope"></i></span>
+                                {{ form.email(class="form-control", placeholder="Enter your email", required=True) }}
+                                <div class="invalid-feedback">Please enter a valid email address</div>
+                            </div>
                             {% for error in form.email.errors %}
                                 <div class="text-danger">{{ error }}</div>
                             {% endfor %}
@@ -66,40 +80,69 @@
                         
                         <div class="mb-3">
                             {{ form.username.label(class="form-label") }}
-                            {{ form.username(class="form-control", placeholder="Choose a username") }}
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-at"></i></span>
+                                {{ form.username(class="form-control", placeholder="Choose a username", required=True) }}
+                                <div class="invalid-feedback">Please choose a username</div>
+                            </div>
                             {% for error in form.username.errors %}
-                                <div class="text-danger">{{ error }}</div>
-                            {% endfor %}
-                        </div>
-                        
-                        <div class="mb-3">
-                            {{ form.phone.label(class="form-label") }}
-                            {{ form.phone(class="form-control", placeholder="Optional") }}
-                            {% for error in form.phone.errors %}
-                                <div class="text-danger">{{ error }}</div>
-                            {% endfor %}
-                        </div>
-                        
-                        <div class="mb-3">
-                            {{ form.address.label(class="form-label") }}
-                            {{ form.address(class="form-control", rows=3, placeholder="Optional") }}
-                            {% for error in form.address.errors %}
                                 <div class="text-danger">{{ error }}</div>
                             {% endfor %}
                         </div>
                         
                         <div class="row">
                             <div class="col-md-6 mb-3">
-                                {{ form.password.label(class="form-label") }}
-                                {{ form.password(class="form-control", placeholder="Choose a password") }}
-                                {% for error in form.password.errors %}
+                                {{ form.phone.label(class="form-label") }}
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fas fa-phone"></i></span>
+                                    {{ form.phone(class="form-control", placeholder="Optional") }}
+                                </div>
+                                {% for error in form.phone.errors %}
                                     <div class="text-danger">{{ error }}</div>
                                 {% endfor %}
                             </div>
                             
                             <div class="col-md-6 mb-3">
+                                {{ form.address.label(class="form-label") }}
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fas fa-map-marker-alt"></i></span>
+                                    {{ form.address(class="form-control", placeholder="Optional") }}
+                                </div>
+                                {% for error in form.address.errors %}
+                                    <div class="text-danger">{{ error }}</div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                {{ form.password.label(class="form-label") }}
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fas fa-lock"></i></span>
+                                    {{ form.password(class="form-control", placeholder="Choose a password", required=True) }}
+                                    <button class="btn btn-outline-secondary toggle-password" type="button" tabindex="-1">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                    <div class="invalid-feedback">Please enter a password</div>
+                                </div>
+                                {% for error in form.password.errors %}
+                                    <div class="text-danger">{{ error }}</div>
+                                {% endfor %}
+                                <div class="form-text">
+                                    <small>Password must contain at least 8 characters with uppercase, lowercase, number, and special character.</small>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
                                 {{ form.confirm_password.label(class="form-label") }}
-                                {{ form.confirm_password(class="form-control", placeholder="Confirm your password") }}
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fas fa-lock"></i></span>
+                                    {{ form.confirm_password(class="form-control", placeholder="Confirm your password", required=True) }}
+                                    <button class="btn btn-outline-secondary toggle-password" type="button" tabindex="-1">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                    <div class="invalid-feedback">Passwords must match</div>
+                                </div>
                                 {% for error in form.confirm_password.errors %}
                                     <div class="text-danger">{{ error }}</div>
                                 {% endfor %}
@@ -108,8 +151,8 @@
                         
                         <!-- Government Official Fields (conditionally shown) -->
                         <div id="official-fields" class="official-fields mt-4" style="display: none;">
-                            <div class="card border-info mb-4">
-                                <div class="card-header bg-info text-white">
+                            <div class="card mb-4">
+                                <div class="card-header">
                                     <h5 class="mb-0"><i class="fas fa-id-badge me-2"></i>Government Official Information</h5>
                                 </div>
                                 <div class="card-body">
@@ -120,7 +163,10 @@
                                     
                                     <div class="mb-3">
                                         {{ form.department.label(class="form-label") }}
-                                        {{ form.department(class="form-select") }}
+                                        <div class="input-group">
+                                            <span class="input-group-text"><i class="fas fa-building"></i></span>
+                                            {{ form.department(class="form-select") }}
+                                        </div>
                                         {% for error in form.department.errors %}
                                             <div class="text-danger">{{ error }}</div>
                                         {% endfor %}
@@ -128,29 +174,43 @@
                                     
                                     <div class="mb-3" id="otherDepartmentContainer" style="display: none;">
                                         <label for="otherDepartment" class="form-label">Custom Department Name <span class="text-danger">*</span></label>
-                                        <input type="text" class="form-control" id="otherDepartment" name="other_department">
+                                        <div class="input-group">
+                                            <span class="input-group-text"><i class="fas fa-building"></i></span>
+                                            <input type="text" class="form-control" id="otherDepartment" name="other_department">
+                                        </div>
                                         <div class="form-text">Please specify the custom department name.</div>
                                     </div>
                                     
-                                    <div class="mb-3">
-                                        {{ form.position.label(class="form-label") }}
-                                        {{ form.position(class="form-control", placeholder="Your job title or position") }}
-                                        {% for error in form.position.errors %}
-                                            <div class="text-danger">{{ error }}</div>
-                                        {% endfor %}
-                                    </div>
-                                    
-                                    <div class="mb-3">
-                                        {{ form.employee_id.label(class="form-label") }}
-                                        {{ form.employee_id(class="form-control", placeholder="Your government employee ID") }}
-                                        {% for error in form.employee_id.errors %}
-                                            <div class="text-danger">{{ error }}</div>
-                                        {% endfor %}
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            {{ form.position.label(class="form-label") }}
+                                            <div class="input-group">
+                                                <span class="input-group-text"><i class="fas fa-briefcase"></i></span>
+                                                {{ form.position(class="form-control", placeholder="Your job title or position") }}
+                                            </div>
+                                            {% for error in form.position.errors %}
+                                                <div class="text-danger">{{ error }}</div>
+                                            {% endfor %}
+                                        </div>
+                                        
+                                        <div class="col-md-6 mb-3">
+                                            {{ form.employee_id.label(class="form-label") }}
+                                            <div class="input-group">
+                                                <span class="input-group-text"><i class="fas fa-id-card"></i></span>
+                                                {{ form.employee_id(class="form-control", placeholder="Your government employee ID") }}
+                                            </div>
+                                            {% for error in form.employee_id.errors %}
+                                                <div class="text-danger">{{ error }}</div>
+                                            {% endfor %}
+                                        </div>
                                     </div>
                                     
                                     <div class="mb-3">
                                         {{ form.office_phone.label(class="form-label") }}
-                                        {{ form.office_phone(class="form-control", placeholder="Your official contact number") }}
+                                        <div class="input-group">
+                                            <span class="input-group-text"><i class="fas fa-phone-office"></i></span>
+                                            {{ form.office_phone(class="form-control", placeholder="Your official contact number") }}
+                                        </div>
                                         {% for error in form.office_phone.errors %}
                                             <div class="text-danger">{{ error }}</div>
                                         {% endfor %}
@@ -158,7 +218,10 @@
                                     
                                     <div class="mb-3">
                                         {{ form.justification.label(class="form-label") }}
-                                        {{ form.justification(class="form-control", rows=3, placeholder="Explain how you will use an official account") }}
+                                        <div class="input-group">
+                                            <span class="input-group-text"><i class="fas fa-comment"></i></span>
+                                            {{ form.justification(class="form-control", rows=3, placeholder="Explain how you will use an official account") }}
+                                        </div>
                                         {% for error in form.justification.errors %}
                                             <div class="text-danger">{{ error }}</div>
                                         {% endfor %}
@@ -175,15 +238,15 @@
                             </div>
                         </div>
                         
-                        <div class="d-grid gap-2 mt-3">
-                            {{ form.submit(class="btn btn-primary") }}
+                        <div class="d-grid gap-2 mt-4">
+                            {{ form.submit(class="btn btn-primary btn-lg") }}
                         </div>
                     </form>
                     
                     <hr>
                     
                     <div class="text-center">
-                        <p>Already have an account? <a href="{{ url_for('auth.login') }}">Login here</a></p>
+                        <p>Already have an account? <a href="{{ url_for('auth.login') }}" class="text-decoration-none">Login here</a></p>
                     </div>
                 </div>
             </div>
@@ -191,9 +254,25 @@
     </div>
 </div>
 
-<!-- JavaScript to toggle official fields -->
+{% block scripts %}
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    // Toggle password visibility
+    const togglePasswordButtons = document.querySelectorAll('.toggle-password');
+    togglePasswordButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const input = this.previousElementSibling;
+            const type = input.getAttribute('type') === 'password' ? 'text' : 'password';
+            input.setAttribute('type', type);
+            
+            // Toggle icon
+            const icon = this.querySelector('i');
+            icon.classList.toggle('fa-eye');
+            icon.classList.toggle('fa-eye-slash');
+        });
+    });
+
+    // Toggle official fields
     const citizenRadio = document.getElementById('role-citizen');
     const officialRadio = document.getElementById('role-official');
     const officialFields = document.getElementById('official-fields');
@@ -229,21 +308,49 @@ document.addEventListener('DOMContentLoaded', function() {
     const otherDepartmentContainer = document.getElementById('otherDepartmentContainer');
     const otherDepartmentField = document.getElementById('otherDepartment');
     
-    departmentSelect.addEventListener('change', function() {
-        if (this.value === 'Other') {
+    if (departmentSelect) {
+        departmentSelect.addEventListener('change', function() {
+            if (this.value === 'Other') {
+                otherDepartmentContainer.style.display = 'block';
+                otherDepartmentField.setAttribute('required', 'required');
+            } else {
+                otherDepartmentContainer.style.display = 'none';
+                otherDepartmentField.removeAttribute('required');
+            }
+        });
+        
+        // Check initial state
+        if (departmentSelect.value === 'Other') {
             otherDepartmentContainer.style.display = 'block';
             otherDepartmentField.setAttribute('required', 'required');
-        } else {
-            otherDepartmentContainer.style.display = 'none';
-            otherDepartmentField.removeAttribute('required');
         }
-    });
+    }
     
-    // Check initial state
-    if (departmentSelect.value === 'Other') {
-        otherDepartmentContainer.style.display = 'block';
-        otherDepartmentField.setAttribute('required', 'required');
+    // Form validation
+    const form = document.getElementById('registerForm');
+    if (form) {
+        form.addEventListener('submit', function(event) {
+            if (!form.checkValidity()) {
+                event.preventDefault();
+                event.stopPropagation();
+            }
+            
+            // Check if passwords match
+            const password = document.getElementById('password');
+            const confirmPassword = document.getElementById('confirm_password');
+            
+            if (password && confirmPassword && password.value !== confirmPassword.value) {
+                confirmPassword.setCustomValidity("Passwords don't match");
+                event.preventDefault();
+            } else if (confirmPassword) {
+                confirmPassword.setCustomValidity('');
+            }
+            
+            form.classList.add('was-validated');
+        });
     }
 });
 </script>
+{% endblock %}
+
 {% endblock %} 

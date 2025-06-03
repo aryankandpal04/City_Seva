@@ -3,22 +3,22 @@
 {% block title %}Login | CitySeva{% endblock %}
 
 {% block content %}
-<div class="container">
+<div class="container py-4">
     <div class="row justify-content-center">
         <div class="col-md-6">
             {% if needs_verification %}
-            <div class="alert alert-warning">
+            <div class="alert alert-warning animate-fade-in">
                 <strong>Email Verification Required</strong>
                 <p>You need to verify your email address before logging in. Please check your email for a verification code or use the OTP verification option.</p>
             </div>
             {% endif %}
             
-            <div class="auth-card">
+            <div class="auth-card" data-aos="fade-up">
                 <div class="card-header">
                     <h3><i class="fas fa-sign-in-alt me-2"></i>Login</h3>
                 </div>
                 <div class="card-body">
-                    <form method="POST" action="{{ url_for('auth.login') }}">
+                    <form method="POST" action="{{ url_for('auth.login') }}" id="loginForm" novalidate>
                         {{ form.hidden_tag() }}
                         
                         <!-- Role Selection Cards -->
@@ -35,7 +35,7 @@
                                 </div>
                                 <div class="form-check form-check-inline flex-grow-1">
                                     <input class="form-check-input visually-hidden" type="radio" name="role" id="role-official" value="official" {% if form.role.data == 'official' %}checked{% endif %}>
-                                    <label class="form-check-label btn btn-outline-info w-100 py-3" for="role-official">
+                                    <label class="form-check-label btn btn-outline-primary w-100 py-3" for="role-official">
                                         <i class="fas fa-user-tie fa-2x mb-2 d-block"></i>
                                         <div>Government Official</div>
                                         <div class="small text-muted">Manage citizen complaints</div>
@@ -50,7 +50,10 @@
                         <!-- Department Selection (only shown for officials) -->
                         <div id="department-field" class="mb-3" style="display: none;">
                             {{ form.department.label(class="form-label") }}
-                            {{ form.department(class="form-select") }}
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-building"></i></span>
+                                {{ form.department(class="form-select") }}
+                            </div>
                             {% for error in form.department.errors %}
                                 <div class="text-danger">{{ error }}</div>
                             {% endfor %}
@@ -60,13 +63,20 @@
                         <!-- Custom Department Field (only shown when "Other" is selected) -->
                         <div id="otherDepartmentContainer" class="mb-3" style="display: none;">
                             <label for="otherDepartment" class="form-label">Custom Department Name <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control" id="otherDepartment" name="other_department">
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-building"></i></span>
+                                <input type="text" class="form-control" id="otherDepartment" name="other_department">
+                            </div>
                             <div class="form-text">Please specify the custom department name.</div>
                         </div>
                         
                         <div class="mb-3">
                             {{ form.email.label(class="form-label") }}
-                            {{ form.email(class="form-control", placeholder="Enter your email") }}
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-envelope"></i></span>
+                                {{ form.email(class="form-control", placeholder="Enter your email", required=True) }}
+                            </div>
+                            <div class="invalid-feedback" id="email-feedback">Please enter a valid email address</div>
                             {% for error in form.email.errors %}
                                 <div class="text-danger">{{ error }}</div>
                             {% endfor %}
@@ -74,7 +84,14 @@
                         
                         <div class="mb-3">
                             {{ form.password.label(class="form-label") }}
-                            {{ form.password(class="form-control", placeholder="Enter your password") }}
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-lock"></i></span>
+                                {{ form.password(class="form-control", placeholder="Enter your password", required=True) }}
+                                <button class="btn btn-outline-secondary toggle-password" type="button" tabindex="-1">
+                                    <i class="fas fa-eye" id="toggleIcon"></i>
+                                </button>
+                            </div>
+                            <div class="invalid-feedback" id="password-feedback">Please enter your password</div>
                             {% for error in form.password.errors %}
                                 <div class="text-danger">{{ error }}</div>
                             {% endfor %}
@@ -86,22 +103,22 @@
                         </div>
                         
                         <div class="d-grid gap-2">
-                            {{ form.submit(class="btn btn-primary") }}
+                            {{ form.submit(class="btn btn-primary btn-lg") }}
                         </div>
                     </form>
                     
                     <hr>
                     
                     <div class="text-center">
-                        <a href="{{ url_for('auth.reset_password_request') }}">Forgot Password?</a>
-                        <p class="mt-3">Don't have an account? <a href="{{ url_for('auth.register') }}">Register here</a></p>
+                        <a href="{{ url_for('auth.reset_password_request') }}" class="text-decoration-none">Forgot Password?</a>
+                        <p class="mt-3">Don't have an account? <a href="{{ url_for('auth.register') }}" class="text-decoration-none">Register here</a></p>
                     </div>
                 </div>
             </div>
             
             <!-- Government Official Info -->
-            <div class="card mt-3">
-                <div class="card-header bg-info text-white">
+            <div class="card mt-3" data-aos="fade-up" data-aos-delay="200">
+                <div class="card-header">
                     <h5 class="mb-0"><i class="fas fa-info-circle me-2"></i>Government Officials</h5>
                 </div>
                 <div class="card-body">
@@ -113,7 +130,7 @@
                         Administrators will verify your information before granting official access.
                     </p>
                     <div class="d-grid">
-                        <a href="{{ url_for('auth.register') }}" class="btn btn-outline-info">
+                        <a href="{{ url_for('auth.register') }}" class="btn btn-outline-primary">
                             <i class="fas fa-user-plus me-2"></i>Register as a Government Official
                         </a>
                     </div>
@@ -125,11 +142,11 @@
 
 {% block scripts %}
 <script>
-// Toggle department field based on role selection
 document.addEventListener('DOMContentLoaded', function() {
+    // Toggle department field based on role selection
     const roleRadios = document.querySelectorAll('input[name="role"]');
     const departmentField = document.getElementById('department-field');
-    const departmentSelect = document.getElementById('department_id');
+    const departmentSelect = document.getElementById('department');
     const otherDepartmentContainer = document.getElementById('otherDepartmentContainer');
     
     // Function to toggle department field visibility
@@ -164,6 +181,94 @@ document.addEventListener('DOMContentLoaded', function() {
     toggleDepartmentField();
     if (departmentSelect) {
         toggleOtherDepartment();
+    }
+    
+    // Password visibility toggle
+    const togglePasswordBtn = document.querySelector('.toggle-password');
+    const passwordInput = document.getElementById('password');
+    const toggleIcon = document.getElementById('toggleIcon');
+    
+    if (togglePasswordBtn && passwordInput && toggleIcon) {
+        togglePasswordBtn.addEventListener('click', function() {
+            const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+            passwordInput.setAttribute('type', type);
+            
+            // Toggle icon
+            toggleIcon.classList.toggle('fa-eye');
+            toggleIcon.classList.toggle('fa-eye-slash');
+        });
+    }
+    
+    // Form validation
+    const loginForm = document.getElementById('loginForm');
+    const emailInput = document.getElementById('email');
+    const emailFeedback = document.getElementById('email-feedback');
+    const passwordFeedback = document.getElementById('password-feedback');
+    
+    if (loginForm) {
+        loginForm.addEventListener('submit', function(event) {
+            let isValid = true;
+            
+            // Validate email
+            if (!emailInput.value.trim()) {
+                emailInput.classList.add('is-invalid');
+                emailFeedback.textContent = 'Please enter your email address';
+                isValid = false;
+            } else {
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                if (!emailRegex.test(emailInput.value.trim())) {
+                    emailInput.classList.add('is-invalid');
+                    emailFeedback.textContent = 'Please enter a valid email address';
+                    isValid = false;
+                } else {
+                    emailInput.classList.remove('is-invalid');
+                    emailInput.classList.add('is-valid');
+                }
+            }
+            
+            // Validate password
+            if (!passwordInput.value.trim()) {
+                passwordInput.classList.add('is-invalid');
+                passwordFeedback.textContent = 'Please enter your password';
+                isValid = false;
+            } else {
+                passwordInput.classList.remove('is-invalid');
+                passwordInput.classList.add('is-valid');
+            }
+            
+            if (!isValid) {
+                event.preventDefault();
+            }
+        });
+        
+        // Real-time validation
+        emailInput.addEventListener('input', function() {
+            if (this.value.trim()) {
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                if (emailRegex.test(this.value.trim())) {
+                    this.classList.remove('is-invalid');
+                    this.classList.add('is-valid');
+                } else {
+                    this.classList.add('is-invalid');
+                    this.classList.remove('is-valid');
+                    emailFeedback.textContent = 'Please enter a valid email address';
+                }
+            } else {
+                this.classList.add('is-invalid');
+                this.classList.remove('is-valid');
+                emailFeedback.textContent = 'Please enter your email address';
+            }
+        });
+        
+        passwordInput.addEventListener('input', function() {
+            if (this.value.trim()) {
+                this.classList.remove('is-invalid');
+                this.classList.add('is-valid');
+            } else {
+                this.classList.add('is-invalid');
+                this.classList.remove('is-valid');
+            }
+        });
     }
 });
 </script>

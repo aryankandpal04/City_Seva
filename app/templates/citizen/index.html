@@ -21,7 +21,7 @@
                 </div>
             </div>
             <div class="col-lg-6 d-none d-lg-block">
-                <img src="{{ url_for('static', filename='img/hero-image.svg') }}" alt="CitySeva" class="img-fluid">
+                <img src="{{ url_for('static', filename='img/hero-image.svg') }}" alt="CitySeva" class="img-fluid animate-float">
             </div>
         </div>
     </div>
@@ -30,28 +30,28 @@
 <!-- Stats Section -->
 <section class="container py-5">
     <div class="row text-center">
-        <div class="col-md-4 mb-4">
+        <div class="col-md-4 mb-4" data-aos="fade-up" data-aos-delay="100">
             <div class="card dashboard-card h-100">
                 <div class="card-body">
-                    <i class="fas fa-clipboard-list icon text-primary"></i>
+                    <i class="fas fa-clipboard-list icon"></i>
                     <h5 class="card-title">Total Complaints</h5>
                     <p class="card-text">{{ total_complaints }}</p>
                 </div>
             </div>
         </div>
-        <div class="col-md-4 mb-4">
+        <div class="col-md-4 mb-4" data-aos="fade-up" data-aos-delay="200">
             <div class="card dashboard-card h-100">
                 <div class="card-body">
-                    <i class="fas fa-check-circle icon text-success"></i>
+                    <i class="fas fa-check-circle icon"></i>
                     <h5 class="card-title">Resolved Issues</h5>
                     <p class="card-text">{{ resolved_complaints }}</p>
                 </div>
             </div>
         </div>
-        <div class="col-md-4 mb-4">
+        <div class="col-md-4 mb-4" data-aos="fade-up" data-aos-delay="300">
             <div class="card dashboard-card h-100">
                 <div class="card-body">
-                    <i class="fas fa-chart-line icon text-info"></i>
+                    <i class="fas fa-chart-line icon"></i>
                     <h5 class="card-title">Resolution Rate</h5>
                     <p class="card-text">{{ '%.1f'|format(resolved_complaints / total_complaints * 100) if total_complaints > 0 else '0' }}%</p>
                 </div>
@@ -62,27 +62,27 @@
 
 <!-- Features Section -->
 <section class="container py-5" id="about">
-    <div class="text-center mb-5">
+    <div class="text-center mb-5" data-aos="fade-up">
         <h2>How CitySeva Works</h2>
         <p class="lead">A simple and transparent process to resolve civic issues</p>
     </div>
     
     <div class="row">
-        <div class="col-md-4 mb-4">
+        <div class="col-md-4 mb-4" data-aos="fade-up" data-aos-delay="100">
             <div class="feature-card h-100">
                 <i class="fas fa-edit"></i>
                 <h3>Report an Issue</h3>
                 <p>Submit complaints with details, location, and images of civic issues in your area.</p>
             </div>
         </div>
-        <div class="col-md-4 mb-4">
+        <div class="col-md-4 mb-4" data-aos="fade-up" data-aos-delay="200">
             <div class="feature-card h-100">
                 <i class="fas fa-tasks"></i>
                 <h3>Track Progress</h3>
                 <p>Get real-time updates and track the status of your complaints until resolution.</p>
             </div>
         </div>
-        <div class="col-md-4 mb-4">
+        <div class="col-md-4 mb-4" data-aos="fade-up" data-aos-delay="300">
             <div class="feature-card h-100">
                 <i class="fas fa-star"></i>
                 <h3>Provide Feedback</h3>
@@ -94,17 +94,17 @@
 
 <!-- Categories Section -->
 <section class="container py-5">
-    <div class="text-center mb-5">
+    <div class="text-center mb-5" data-aos="fade-up">
         <h2>Report Issues in Various Categories</h2>
         <p class="lead">From potholes to garbage collection, we've got you covered</p>
     </div>
     
     <div class="row row-cols-2 row-cols-md-3 row-cols-lg-4 g-4">
         {% for category in categories %}
-            <div class="col">
+            <div class="col" data-aos="zoom-in" data-aos-delay="{{ loop.index * 50 }}">
                 <div class="card h-100 text-center">
                     <div class="card-body">
-                        <i class="fas {{ category.icon }} fa-3x text-primary mb-3"></i>
+                        <i class="fas {{ category.icon }} fa-3x mb-3"></i>
                         <h5 class="card-title">{{ category.name }}</h5>
                         <p class="card-text small">{{ category.description }}</p>
                     </div>
@@ -122,41 +122,44 @@
 </section>
 
 <!-- Contact Section -->
-<section class="bg-light py-5" id="contact">
+<section class="py-5" id="contact">
     <div class="container">
-        <div class="text-center mb-5">
+        <div class="text-center mb-5" data-aos="fade-up">
             <h2>Contact Us</h2>
             <p class="lead">Have questions or suggestions? We'd love to hear from you!</p>
         </div>
         
         <div class="row">
-            <div class="col-md-6 mb-4">
+            <div class="col-md-6 mb-4" data-aos="fade-right">
                 <div class="card h-100">
                     <div class="card-body">
                         <h5 class="mb-3">Contact Information</h5>
-                        <p><i class="fas fa-map-marker-alt me-2 text-primary"></i> 123 Main Street, City Center</p>
-                        <p><i class="fas fa-phone me-2 text-primary"></i> +1 (555) 123-4567</p>
-                        <p><i class="fas fa-envelope me-2 text-primary"></i> info@cityseva.com</p>
-                        <p><i class="fas fa-clock me-2 text-primary"></i> Monday - Friday, 9:00 AM - 5:00 PM</p>
+                        <p><i class="fas fa-map-marker-alt me-2"></i> 123 Main Street, City Center</p>
+                        <p><i class="fas fa-phone me-2"></i> +1 (555) 123-4567</p>
+                        <p><i class="fas fa-envelope me-2"></i> info@cityseva.com</p>
+                        <p><i class="fas fa-clock me-2"></i> Monday - Friday, 9:00 AM - 5:00 PM</p>
                     </div>
                 </div>
             </div>
-            <div class="col-md-6 mb-4">
+            <div class="col-md-6 mb-4" data-aos="fade-left">
                 <div class="card h-100">
                     <div class="card-body">
                         <h5 class="mb-3">Send Us a Message</h5>
-                        <form>
+                        <form id="contactForm">
                             <div class="mb-3">
                                 <label for="name" class="form-label">Name</label>
                                 <input type="text" class="form-control" id="name" required>
+                                <div class="invalid-feedback">Please enter your name</div>
                             </div>
                             <div class="mb-3">
                                 <label for="email" class="form-label">Email</label>
                                 <input type="email" class="form-control" id="email" required>
+                                <div class="invalid-feedback">Please enter a valid email address</div>
                             </div>
                             <div class="mb-3">
                                 <label for="message" class="form-label">Message</label>
                                 <textarea class="form-control" id="message" rows="3" required></textarea>
+                                <div class="invalid-feedback">Please enter your message</div>
                             </div>
                             <button type="submit" class="btn btn-primary">Send Message</button>
                         </form>
@@ -166,4 +169,71 @@
         </div>
     </div>
 </section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Contact form validation
+    const contactForm = document.getElementById('contactForm');
+    if (contactForm) {
+        contactForm.addEventListener('submit', function(event) {
+            event.preventDefault();
+            
+            let isValid = true;
+            const nameInput = document.getElementById('name');
+            const emailInput = document.getElementById('email');
+            const messageInput = document.getElementById('message');
+            
+            // Validate name
+            if (!nameInput.value.trim()) {
+                nameInput.classList.add('is-invalid');
+                isValid = false;
+            } else {
+                nameInput.classList.remove('is-invalid');
+                nameInput.classList.add('is-valid');
+            }
+            
+            // Validate email
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailInput.value.trim() || !emailRegex.test(emailInput.value.trim())) {
+                emailInput.classList.add('is-invalid');
+                isValid = false;
+            } else {
+                emailInput.classList.remove('is-invalid');
+                emailInput.classList.add('is-valid');
+            }
+            
+            // Validate message
+            if (!messageInput.value.trim()) {
+                messageInput.classList.add('is-invalid');
+                isValid = false;
+            } else {
+                messageInput.classList.remove('is-invalid');
+                messageInput.classList.add('is-valid');
+            }
+            
+            if (isValid) {
+                // Show success message
+                contactForm.reset();
+                const formElements = contactForm.querySelectorAll('.form-control');
+                formElements.forEach(el => {
+                    el.classList.remove('is-valid');
+                });
+                
+                // Create success alert
+                const alertDiv = document.createElement('div');
+                alertDiv.className = 'alert alert-success mt-3 animate-fade-in';
+                alertDiv.textContent = 'Your message has been sent successfully!';
+                contactForm.appendChild(alertDiv);
+                
+                // Remove alert after 5 seconds
+                setTimeout(() => {
+                    alertDiv.remove();
+                }, 5000);
+            }
+        });
+    }
+});
+</script>
 {% endblock %} 

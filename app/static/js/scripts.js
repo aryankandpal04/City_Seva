@@ -7,6 +7,35 @@ function initializeToasts() {
     toastList.forEach(toast => toast.show());
 }
 
+// Function to add animation classes to elements when they come into view
+function initializeScrollAnimations() {
+    const animatedElements = document.querySelectorAll('.animate-on-scroll');
+    
+    if (!animatedElements.length) return;
+    
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                const el = entry.target;
+                const animation = el.dataset.animation || 'fadeIn';
+                const delay = el.dataset.delay || 0;
+                
+                setTimeout(() => {
+                    el.classList.add('animated', animation);
+                    el.style.opacity = 1;
+                }, delay);
+                
+                observer.unobserve(el);
+            }
+        });
+    }, { threshold: 0.1 });
+    
+    animatedElements.forEach(el => {
+        el.style.opacity = 0;
+        observer.observe(el);
+    });
+}
+
 // Function to initialize the complaint submission map
 function initializeComplaintMap() {
     // Check if the map element exists
@@ -22,7 +51,54 @@ function initializeComplaintMap() {
     // Initialize the map with Google Maps
     const map = new google.maps.Map(mapElement, {
         center: { lat: 20.5937, lng: 78.9629 }, // Default center on India
-        zoom: 5
+        zoom: 5,
+        styles: [
+            {
+                "featureType": "water",
+                "elementType": "geometry",
+                "stylers": [{"color": "#e9e9e9"}, {"lightness": 17}]
+            },
+            {
+                "featureType": "landscape",
+                "elementType": "geometry",
+                "stylers": [{"color": "#f5f5f5"}, {"lightness": 20}]
+            },
+            {
+                "featureType": "road.highway",
+                "elementType": "geometry.fill",
+                "stylers": [{"color": "#ffffff"}, {"lightness": 17}]
+            },
+            {
+                "featureType": "road.highway",
+                "elementType": "geometry.stroke",
+                "stylers": [{"color": "#ffffff"}, {"lightness": 29}, {"weight": 0.2}]
+            },
+            {
+                "featureType": "road.arterial",
+                "elementType": "geometry",
+                "stylers": [{"color": "#ffffff"}, {"lightness": 18}]
+            },
+            {
+                "featureType": "road.local",
+                "elementType": "geometry",
+                "stylers": [{"color": "#ffffff"}, {"lightness": 16}]
+            },
+            {
+                "featureType": "poi",
+                "elementType": "geometry",
+                "stylers": [{"color": "#f5f5f5"}, {"lightness": 21}]
+            },
+            {
+                "featureType": "poi.park",
+                "elementType": "geometry",
+                "stylers": [{"color": "#dedede"}, {"lightness": 21}]
+            },
+            {
+                "featureType": "administrative",
+                "elementType": "geometry.stroke",
+                "stylers": [{"color": "#fefefe"}, {"lightness": 17}, {"weight": 1.2}]
+            }
+        ]
     });
 
     // Add marker for the complaint location (if editing a complaint)
@@ -36,7 +112,8 @@ function initializeComplaintMap() {
         
         marker = new google.maps.Marker({
             position: { lat, lng },
-            map: map
+            map: map,
+            animation: google.maps.Animation.DROP
         });
     }
 
@@ -55,7 +132,8 @@ function initializeComplaintMap() {
         } else {
             marker = new google.maps.Marker({
                 position: e.latLng,
-                map: map
+                map: map,
+                animation: google.maps.Animation.DROP
             });
         }
         
@@ -63,12 +141,17 @@ function initializeComplaintMap() {
         const locationInput = document.getElementById('location');
         if (!locationInput) return;
         
+        // Animate location input to show it's being updated
+        locationInput.classList.add('is-loading');
+        
         // Reverse geocode to get address
         const geocoder = new google.maps.Geocoder();
         geocoder.geocode({ location: e.latLng }, function(results, status) {
             if (status === 'OK' && results[0]) {
                 locationInput.value = results[0].formatted_address;
+                locationInput.classList.add('is-valid');
             }
+            locationInput.classList.remove('is-loading');
         });
     });
     
@@ -78,8 +161,25 @@ function initializeComplaintMap() {
         form.addEventListener('submit', function(event) {
             if (!latInput.value || !lngInput.value) {
                 event.preventDefault();
-                alert('Please select a location on the map. This is required for verification purposes.');
-                document.getElementById('complaint-map').scrollIntoView({ behavior: 'smooth' });
+                
+                // Create and show alert
+                const alertDiv = document.createElement('div');
+                alertDiv.className = 'alert alert-danger animate-fade-in mt-3';
+                alertDiv.innerHTML = '<i class="fas fa-exclamation-triangle me-2"></i> Please select a location on the map. This is required for verification purposes.';
+                
+                const mapContainer = document.getElementById('complaint-map').parentElement;
+                mapContainer.insertAdjacentElement('afterend', alertDiv);
+                
+                // Scroll to map with smooth animation
+                document.getElementById('complaint-map').scrollIntoView({ 
+                    behavior: 'smooth',
+                    block: 'center'
+                });
+                
+                // Remove alert after 5 seconds
+                setTimeout(() => {
+                    alertDiv.remove();
+                }, 5000);
             }
         });
     }
@@ -94,6 +194,21 @@ function initializeDashboardCharts() {
     
     if (!categoryChartElement && !priorityChartElement && !timelineChartElement) return;
     
+    // Chart.js animation options
+    const animationOptions = {
+        responsive: true,
+        maintainAspectRatio: false,
+        animation: {
+            duration: 2000,
+            easing: 'easeOutQuart'
+        },
+        plugins: {
+            legend: {
+                position: 'bottom'
+            }
+        }
+    };
+    
     // Fetch the category data
     if (categoryChartElement) {
         fetch('/api/stats/category')
@@ -107,18 +222,27 @@ function initializeDashboardCharts() {
                             datasets: [{
                                 data: data.data.values,
                                 backgroundColor: [
-                                    '#4e73df', '#1cc88a', '#36b9cc', '#f6c23e', 
-                                    '#e74a3b', '#858796', '#5a5c69', '#f8f9fc'
+                                    '#00bcd4', '#3f51b5', '#03a9f4', '#ff9800', 
+                                    '#f44336', '#4caf50', '#9c27b0', '#e91e63'
                                 ],
-                                borderWidth: 1
+                                borderWidth: 2,
+                                borderColor: '#ffffff'
                             }]
                         },
                         options: {
-                            responsive: true,
-                            maintainAspectRatio: false,
+                            ...animationOptions,
                             plugins: {
-                                legend: {
-                                    position: 'bottom'
+                                ...animationOptions.plugins,
+                                tooltip: {
+                                    callbacks: {
+                                        label: function(context) {
+                                            const label = context.label || '';
+                                            const value = context.raw || 0;
+                                            const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                            const percentage = Math.round((value / total) * 100);
+                                            return `${label}: ${value} (${percentage}%)`;
+                                        }
+                                    }
                                 }
                             }
                         }
@@ -141,17 +265,27 @@ function initializeDashboardCharts() {
                             datasets: [{
                                 data: data.data.values,
                                 backgroundColor: [
-                                    '#5cb85c', '#f0ad4e', '#d9534f', '#8b0000'
+                                    '#4caf50', '#ff9800', '#f44336', '#8b0000'
                                 ],
-                                borderWidth: 1
+                                borderWidth: 2,
+                                borderColor: '#ffffff'
                             }]
                         },
                         options: {
-                            responsive: true,
-                            maintainAspectRatio: false,
+                            ...animationOptions,
+                            cutout: '70%',
                             plugins: {
-                                legend: {
-                                    position: 'bottom'
+                                ...animationOptions.plugins,
+                                tooltip: {
+                                    callbacks: {
+                                        label: function(context) {
+                                            const label = context.label || '';
+                                            const value = context.raw || 0;
+                                            const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                            const percentage = Math.round((value / total) * 100);
+                                            return `${label}: ${value} (${percentage}%)`;
+                                        }
+                                    }
                                 }
                             }
                         }
@@ -174,19 +308,29 @@ function initializeDashboardCharts() {
                             datasets: data.data.datasets.map((dataset, index) => ({
                                 label: dataset.label,
                                 data: dataset.data,
-                                borderColor: index === 0 ? '#4e73df' : '#1cc88a',
-                                backgroundColor: 'transparent',
-                                borderWidth: 2,
-                                pointBackgroundColor: index === 0 ? '#4e73df' : '#1cc88a',
+                                borderColor: index === 0 ? '#00bcd4' : '#4caf50',
+                                backgroundColor: index === 0 ? 'rgba(0, 188, 212, 0.1)' : 'rgba(76, 175, 80, 0.1)',
+                                borderWidth: 3,
+                                pointBackgroundColor: index === 0 ? '#00bcd4' : '#4caf50',
+                                pointRadius: 4,
+                                pointHoverRadius: 6,
+                                fill: true,
                                 tension: 0.3
                             }))
                         },
                         options: {
-                            responsive: true,
-                            maintainAspectRatio: false,
+                            ...animationOptions,
                             scales: {
                                 y: {
-                                    beginAtZero: true
+                                    beginAtZero: true,
+                                    grid: {
+                                        color: 'rgba(0, 0, 0, 0.05)'
+                                    }
+                                },
+                                x: {
+                                    grid: {
+                                        color: 'rgba(0, 0, 0, 0.05)'
+                                    }
                                 }
                             }
                         }
@@ -197,149 +341,252 @@ function initializeDashboardCharts() {
     }
 }
 
-// Function to initialize the complaints map
-function initializeComplaintsMap() {
-    // Check if the map element exists
-    const mapElement = document.getElementById('complaints-map');
-    if (!mapElement) return;
+// Function to initialize enhanced form validation
+function initializeFormValidation() {
+    const forms = document.querySelectorAll('form.needs-validation');
     
-    // Initialize the map with Google Maps
-    const map = new google.maps.Map(mapElement, {
-        center: { lat: 20.5937, lng: 78.9629 }, // Default center on India
-        zoom: 5
-    });
+    if (!forms.length) return;
     
-    // Fetch complaint data for the map
-    fetch('/api/map/complaints')
-        .then(response => response.json())
-        .then(data => {
-            // Create bounds to fit all markers
-            const bounds = new google.maps.LatLngBounds();
-            
-            // Add markers for each complaint
-            if (data.features && data.features.length > 0) {
-                data.features.forEach(feature => {
-                    // Get coordinates
-                    const lng = feature.geometry.coordinates[0];
-                    const lat = feature.geometry.coordinates[1];
-                    const position = new google.maps.LatLng(lat, lng);
-                    
-                    // Choose marker color based on status
-                    let markerColor = '#f0ad4e'; // Default/pending - yellow
-                    if (feature.properties.status === 'in_progress') {
-                        markerColor = '#5bc0de'; // Blue
-                    } else if (feature.properties.status === 'resolved') {
-                        markerColor = '#5cb85c'; // Green
-                    } else if (feature.properties.status === 'rejected') {
-                        markerColor = '#d9534f'; // Red
-                    }
-                    
-                    // Create marker using custom SVG icon
-                    const marker = new google.maps.Marker({
-                        position: position,
-                        map: map,
-                        title: feature.properties.title,
-                        icon: {
-                            path: google.maps.SymbolPath.CIRCLE,
-                            fillColor: markerColor,
-                            fillOpacity: 0.8,
-                            strokeWeight: 1,
-                            strokeColor: '#FFFFFF',
-                            scale: 10
-                        }
-                    });
-                    
-                    // Create info window content
-                    const contentString = `
-                        <div>
-                            <strong>${feature.properties.title}</strong><br>
-                            Category: ${feature.properties.category}<br>
-                            Status: ${feature.properties.status}<br>
-                            Priority: ${feature.properties.priority}<br>
-                            Date: ${feature.properties.created_at}<br>
-                            <a href="/complaint/${feature.properties.id}" class="btn btn-sm btn-primary mt-2">View Details</a>
-                        </div>
-                    `;
-                    
-                    // Create info window
-                    const infoWindow = new google.maps.InfoWindow({
-                        content: contentString
-                    });
-                    
-                    // Add click listener to open info window
-                    marker.addListener('click', function() {
-                        infoWindow.open(map, marker);
-                    });
-                    
-                    // Extend bounds to include this marker
-                    bounds.extend(position);
-                });
+    forms.forEach(form => {
+        // Add submit event listener
+        form.addEventListener('submit', function(event) {
+            if (!form.checkValidity()) {
+                event.preventDefault();
+                event.stopPropagation();
                 
-                // Fit the map to show all markers
-                map.fitBounds(bounds);
-                
-                // If only one marker, zoom out a bit
-                if (data.features.length === 1) {
-                    google.maps.event.addListenerOnce(map, 'bounds_changed', function() {
-                        map.setZoom(Math.min(15, map.getZoom()));
+                // Find the first invalid element and focus it
+                const firstInvalid = form.querySelector(':invalid');
+                if (firstInvalid) {
+                    firstInvalid.focus();
+                    
+                    // Scroll to the invalid element with smooth animation
+                    firstInvalid.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'center'
                     });
                 }
             }
-        })
-        .catch(error => console.error('Error fetching map data:', error));
+            
+            form.classList.add('was-validated');
+        });
+        
+        // Add input event listeners for real-time validation
+        const inputs = form.querySelectorAll('input, select, textarea');
+        inputs.forEach(input => {
+            input.addEventListener('input', function() {
+                if (this.checkValidity()) {
+                    this.classList.remove('is-invalid');
+                    this.classList.add('is-valid');
+                } else {
+                    this.classList.remove('is-valid');
+                    this.classList.add('is-invalid');
+                }
+            });
+        });
+    });
 }
 
-// Initialize everything when the DOM is loaded
+// Function to initialize animated counters
+function initializeCounters() {
+    const counters = document.querySelectorAll('.counter');
+    
+    if (!counters.length) return;
+    
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                const counter = entry.target;
+                const target = parseInt(counter.getAttribute('data-target'));
+                const duration = parseInt(counter.getAttribute('data-duration') || 2000);
+                const increment = target / (duration / 16); // 60fps
+                
+                let current = 0;
+                const updateCounter = () => {
+                    current += increment;
+                    if (current < target) {
+                        counter.textContent = Math.ceil(current);
+                        requestAnimationFrame(updateCounter);
+                    } else {
+                        counter.textContent = target;
+                    }
+                };
+                
+                updateCounter();
+                observer.unobserve(counter);
+            }
+        });
+    }, { threshold: 0.5 });
+    
+    counters.forEach(counter => {
+        observer.observe(counter);
+    });
+}
+
+// Function to initialize the complaints map
+function initializeComplaintsMap() {
+    const mapElement = document.getElementById('complaints-map');
+    if (!mapElement) return;
+    
+    const complaintsData = JSON.parse(mapElement.getAttribute('data-complaints') || '[]');
+    if (!complaintsData.length) return;
+    
+    // Initialize the map
+    const map = new google.maps.Map(mapElement, {
+        center: { lat: 20.5937, lng: 78.9629 }, // Default center on India
+        zoom: 5,
+        styles: [
+            {
+                "featureType": "water",
+                "elementType": "geometry",
+                "stylers": [{"color": "#e9e9e9"}, {"lightness": 17}]
+            },
+            {
+                "featureType": "landscape",
+                "elementType": "geometry",
+                "stylers": [{"color": "#f5f5f5"}, {"lightness": 20}]
+            },
+            {
+                "featureType": "road.highway",
+                "elementType": "geometry.fill",
+                "stylers": [{"color": "#ffffff"}, {"lightness": 17}]
+            },
+            {
+                "featureType": "road.highway",
+                "elementType": "geometry.stroke",
+                "stylers": [{"color": "#ffffff"}, {"lightness": 29}, {"weight": 0.2}]
+            },
+            {
+                "featureType": "road.arterial",
+                "elementType": "geometry",
+                "stylers": [{"color": "#ffffff"}, {"lightness": 18}]
+            },
+            {
+                "featureType": "road.local",
+                "elementType": "geometry",
+                "stylers": [{"color": "#ffffff"}, {"lightness": 16}]
+            },
+            {
+                "featureType": "poi",
+                "elementType": "geometry",
+                "stylers": [{"color": "#f5f5f5"}, {"lightness": 21}]
+            },
+            {
+                "featureType": "poi.park",
+                "elementType": "geometry",
+                "stylers": [{"color": "#dedede"}, {"lightness": 21}]
+            },
+            {
+                "featureType": "administrative",
+                "elementType": "geometry.stroke",
+                "stylers": [{"color": "#fefefe"}, {"lightness": 17}, {"weight": 1.2}]
+            }
+        ]
+    });
+    
+    // Add markers for each complaint
+    const bounds = new google.maps.LatLngBounds();
+    const infoWindow = new google.maps.InfoWindow();
+    
+    complaintsData.forEach(complaint => {
+        const position = { lat: parseFloat(complaint.latitude), lng: parseFloat(complaint.longitude) };
+        
+        // Skip if invalid coordinates
+        if (isNaN(position.lat) || isNaN(position.lng)) return;
+        
+        // Add marker
+        const marker = new google.maps.Marker({
+            position,
+            map,
+            title: complaint.title,
+            animation: google.maps.Animation.DROP,
+            icon: {
+                url: getMarkerIconByStatus(complaint.status),
+                scaledSize: new google.maps.Size(30, 30)
+            }
+        });
+        
+        // Extend bounds
+        bounds.extend(position);
+        
+        // Add click listener
+        marker.addListener('click', () => {
+            // Create info window content
+            const content = `
+                <div class="info-window">
+                    <h5>${complaint.title}</h5>
+                    <p><strong>Status:</strong> <span class="status-badge status-${complaint.status.toLowerCase()}">${complaint.status}</span></p>
+                    <p><strong>Category:</strong> ${complaint.category}</p>
+                    <p><strong>Location:</strong> ${complaint.location}</p>
+                    <a href="/complaint/${complaint.id}" class="btn btn-sm btn-primary">View Details</a>
+                </div>
+            `;
+            
+            infoWindow.setContent(content);
+            infoWindow.open(map, marker);
+        });
+    });
+    
+    // Fit map to bounds if we have valid complaints
+    if (!bounds.isEmpty()) {
+        map.fitBounds(bounds);
+        
+        // Don't zoom in too far
+        const listener = google.maps.event.addListener(map, 'idle', function() {
+            if (map.getZoom() > 15) {
+                map.setZoom(15);
+            }
+            google.maps.event.removeListener(listener);
+        });
+    }
+}
+
+// Helper function to get marker icon based on complaint status
+function getMarkerIconByStatus(status) {
+    switch (status.toLowerCase()) {
+        case 'pending':
+            return 'https://maps.google.com/mapfiles/ms/icons/yellow-dot.png';
+        case 'in progress':
+            return 'https://maps.google.com/mapfiles/ms/icons/blue-dot.png';
+        case 'resolved':
+            return 'https://maps.google.com/mapfiles/ms/icons/green-dot.png';
+        case 'rejected':
+            return 'https://maps.google.com/mapfiles/ms/icons/red-dot.png';
+        default:
+            return 'https://maps.google.com/mapfiles/ms/icons/purple-dot.png';
+    }
+}
+
+// Initialize all components when the DOM is loaded
 document.addEventListener('DOMContentLoaded', function() {
-    // Initialize Bootstrap tooltips
+    // Initialize tooltips
     const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
-    const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl));
+    [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl));
     
-    // Initialize toast messages
+    // Initialize popovers
+    const popoverTriggerList = document.querySelectorAll('[data-bs-toggle="popover"]');
+    [...popoverTriggerList].map(popoverTriggerEl => new bootstrap.Popover(popoverTriggerEl));
+    
+    // Initialize all components
     initializeToasts();
-    
-    // Initialize complaint submission map
+    initializeScrollAnimations();
     initializeComplaintMap();
-    
-    // Initialize dashboard charts
     initializeDashboardCharts();
-    
-    // Initialize complaints map
+    initializeFormValidation();
+    initializeCounters();
     initializeComplaintsMap();
     
-    // Handle complaint status updates via API
-    const statusUpdateButtons = document.querySelectorAll('.update-status-btn');
-    statusUpdateButtons.forEach(button => {
-        button.addEventListener('click', function() {
-            const complaintId = this.dataset.complaintId;
-            const newStatus = this.dataset.status;
-            const comment = prompt("Enter a comment for this status update (optional):");
+    // Add smooth scrolling to all links
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function(e) {
+            const target = document.querySelector(this.getAttribute('href'));
+            if (!target) return;
             
-            if (complaintId && newStatus) {
-                fetch(`/api/complaints/${complaintId}/status`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        status: newStatus,
-                        comment: comment || `Status updated to ${newStatus}`
-                    })
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.status === 'success') {
-                        // Reload the page to show updated status
-                        window.location.reload();
-                    } else {
-                        alert("Error updating complaint status: " + data.message);
-                    }
-                })
-                .catch(error => {
-                    console.error('Error updating status:', error);
-                    alert("Error updating complaint status. Please try again.");
-                });
-            }
+            e.preventDefault();
+            
+            target.scrollIntoView({
+                behavior: 'smooth',
+                block: 'start'
+            });
         });
     });
 }); 
