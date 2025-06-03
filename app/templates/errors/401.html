@@ -1,0 +1,8 @@
+{% extends "errors/error.html" %}
+
+{% block content %}
+{% set error_code = "401" %}
+{% set error_title = "Unauthorized Access" %}
+{% set error_message = "Please log in to access this resource." %}
+{{ super() }}
+{% endblock %} 

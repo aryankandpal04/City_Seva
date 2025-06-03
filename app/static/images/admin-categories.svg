@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="800" height="400" viewBox="0 0 800 400" xmlns="http://www.w3.org/2000/svg">
+    <!-- Background -->
+    <rect width="800" height="400" fill="#f8fafc"/>
+    
+    <!-- Categories Container -->
+    <g transform="translate(400, 200)">
+        <!-- Main Container -->
+        <rect x="-350" y="-150" width="700" height="300" rx="15" fill="#00bcd4" opacity="0.8"/>
+        
+        <!-- Header -->
+        <g transform="translate(0, -120)">
+            <text x="0" y="0" text-anchor="middle" fill="white" font-size="24" font-weight="bold">Category Management</text>
+            <text x="0" y="30" text-anchor="middle" fill="white" font-size="14">Manage complaint categories and departments</text>
+        </g>
+        
+        <!-- Add Category Button -->
+        <g transform="translate(-300, -70)">
+            <rect x="0" y="0" width="200" height="40" rx="20" fill="#00e5ff"/>
+            <text x="100" y="25" text-anchor="middle" fill="white" font-size="14" font-weight="bold">Add New Category</text>
+        </g>
+        
+        <!-- Category List -->
+        <g transform="translate(-300, -20)">
+            <!-- Category 1 -->
+            <rect x="0" y="0" width="600" height="60" rx="10" fill="white" opacity="0.6"/>
+            <text x="20" y="25" fill="#00bcd4" font-size="16" font-weight="bold">Road Maintenance</text>
+            <text x="20" y="45" fill="#00bcd4" font-size="12">Public Works Department</text>
+            <text x="500" y="30" text-anchor="middle" fill="#00bcd4" font-size="12">156 Complaints</text>
+            
+            <!-- Category 2 -->
+            <rect x="0" y="70" width="600" height="60" rx="10" fill="white" opacity="0.6"/>
+            <text x="20" y="95" fill="#00bcd4" font-size="16" font-weight="bold">Garbage Collection</text>
+            <text x="20" y="115" fill="#00bcd4" font-size="12">Sanitation Department</text>
+            <text x="500" y="100" text-anchor="middle" fill="#00bcd4" font-size="12">89 Complaints</text>
+            
+            <!-- Category 3 -->
+            <rect x="0" y="140" width="600" height="60" rx="10" fill="white" opacity="0.6"/>
+            <text x="20" y="165" fill="#00bcd4" font-size="16" font-weight="bold">Street Lighting</text>
+            <text x="20" y="185" fill="#00bcd4" font-size="12">Public Works Department</text>
+            <text x="500" y="170" text-anchor="middle" fill="#00bcd4" font-size="12">67 Complaints</text>
+        </g>
+        
+        <!-- Action Buttons -->
+        <g transform="translate(250, -70)">
+            <!-- Edit Button -->
+            <rect x="0" y="0" width="40" height="40" rx="20" fill="white" opacity="0.6"/>
+            <path d="M-8,-8 L8,8 M-8,8 L8,-8" stroke="#00bcd4" stroke-width="2"/>
+            
+            <!-- Delete Button -->
+            <rect x="50" y="0" width="40" height="40" rx="20" fill="white" opacity="0.6"/>
+            <path d="M-8,0 L8,0" stroke="#00bcd4" stroke-width="2"/>
+        </g>
+    </g>
+    
+    <!-- Decorative Elements -->
+    <circle cx="100" cy="100" r="30" fill="#00e5ff" opacity="0.2"/>
+    <circle cx="700" cy="150" r="40" fill="#00bcd4" opacity="0.2"/>
+    <circle cx="400" cy="80" r="25" fill="#00e5ff" opacity="0.2"/>
+    
+    <!-- Icons -->
+    <g transform="translate(150, 200)">
+        <!-- Category Icon -->
+        <circle cx="0" cy="0" r="30" fill="#00bcd4" opacity="0.8"/>
+        <rect x="-10" y="-10" width="20" height="20" fill="white"/>
+        <path d="M-5,-5 L5,-5 M-5,0 L5,0 M-5,5 L5,5" stroke="white" stroke-width="2"/>
+    </g>
+    
+    <g transform="translate(650, 200)">
+        <!-- Department Icon -->
+        <circle cx="0" cy="0" r="30" fill="#00bcd4" opacity="0.8"/>
+        <path d="M-15,-15 L15,-15 L15,15 L-15,15 Z" stroke="white" stroke-width="2" fill="none"/>
+        <path d="M-5,-15 L-5,15 M5,-15 L5,15" stroke="white" stroke-width="2"/>
+    </g>
+</svg> 

@@ -1,0 +1,28 @@
+Hello {{ name }},
+
+There has been an update to your complaint in CitySeva.
+
+COMPLAINT DETAILS:
+------------------
+Complaint #{{ complaint.id }}
+Title: {{ complaint.title }}
+Status: {{ complaint.status.replace('_', ' ').title() }}
+
+UPDATE DETAILS:
+--------------
+{{ message }}
+{% if comment %}
+Comment: {{ comment }}
+{% endif %}
+
+To view the full complaint details and updates, please visit:
+{{ complaint_url }}
+
+Thank you for using CitySeva.
+
+Best regards,
+The CitySeva Team
+
+--
+This is an automated message. Please do not reply to this email.
+© CitySeva. All rights reserved. 

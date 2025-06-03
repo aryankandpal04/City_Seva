@@ -4,24 +4,31 @@
 
 {% block content %}
 <!-- Hero Section -->
-<section class="hero-section">
-    <div class="container">
-        <div class="row align-items-center">
+<section class="hero-section position-relative mx-3 my-5" style="height: 500px; overflow: hidden; background: linear-gradient(to right, #00bfff, #00ffff); border-radius: 20px;">
+    <!-- Overlay -->
+    <div class="position-absolute top-0 start-0 w-100 h-100" style="background: rgba(0, 0, 0, 0.3); z-index: 1; border-radius: 20px;"></div>
+    <div class="container position-relative" style="z-index: 2; height: 100%;">
+        <div class="row align-items-center h-100">
             <div class="col-lg-6">
-                <h1>Report and Track Civic Issues in Your City</h1>
-                <p>CitySeva connects citizens with municipal authorities to efficiently resolve civic issues like potholes, garbage collection, water supply, and more.</p>
+                <h1 class="text-white fw-bold mb-4" style="text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);">Report and Track Civic Issues in Your City</h1>
+                <p class="text-white lead mb-4">CitySeva connects citizens with municipal authorities to efficiently resolve civic issues like potholes, garbage collection, water supply, and more.</p>
                 <div class="d-grid gap-2 d-md-flex">
                     {% if current_user.is_authenticated %}
-                        <a href="{{ url_for('citizen.new_complaint') }}" class="btn btn-light btn-lg px-4 me-md-2">Report an Issue</a>
-                        <a href="{{ url_for('citizen.complaints') }}" class="btn btn-outline-light btn-lg px-4">Track Your Complaints</a>
+                        <a href="{{ url_for('citizen.new_complaint') }}" class="btn btn-light btn-lg px-4 me-md-2 rounded-pill shadow-sm hover-shadow transition">Report an Issue</a>
+                        <a href="{{ url_for('citizen.complaints') }}" class="btn btn-outline-light btn-lg px-4 rounded-pill hover-shadow transition">Track Your Complaints</a>
                     {% else %}
-                        <a href="{{ url_for('auth.register') }}" class="btn btn-light btn-lg px-4 me-md-2">Register Now</a>
-                        <a href="{{ url_for('auth.login') }}" class="btn btn-outline-light btn-lg px-4">Login</a>
+                        <a href="{{ url_for('auth.register') }}" class="btn btn-light btn-lg px-4 me-md-2 rounded-pill shadow-sm hover-shadow transition">Register Now</a>
+                        <a href="{{ url_for('auth.login') }}" class="btn btn-outline-light btn-lg px-4 rounded-pill hover-shadow transition">Login</a>
                     {% endif %}
                 </div>
             </div>
+<<<<<<< HEAD
             <div class="col-lg-6 d-none d-lg-block">
                 <img src="{{ url_for('static', filename='img/hero-image.svg') }}" alt="CitySeva" class="img-fluid animate-float">
+=======
+            <div class="col-lg-6 d-none d-lg-block text-center">
+                <img src="{{ url_for('static', filename='images/hero-image.svg') }}" alt="CitySeva" class="img-fluid" style="max-width: 80%; filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.1));">
+>>>>>>> 928b86656950660435efba515a1cc264cd47215b
             </div>
         </div>
     </div>
@@ -68,29 +75,147 @@
     </div>
     
     <div class="row">
+<<<<<<< HEAD
         <div class="col-md-4 mb-4" data-aos="fade-up" data-aos-delay="100">
             <div class="feature-card h-100">
                 <i class="fas fa-edit"></i>
+=======
+        <div class="col-lg-3 col-md-6 mb-4">
+            <div class="feature-card h-100" style="border-top: 4px solid #00bfff;">
+                <div class="process-step">1</div>
+                <i class="fas fa-edit fa-2x mb-3" style="color: #00bfff;"></i>
+>>>>>>> 928b86656950660435efba515a1cc264cd47215b
                 <h3>Report an Issue</h3>
-                <p>Submit complaints with details, location, and images of civic issues in your area.</p>
+                <p>Submit detailed complaints with location, images, and descriptions of civic issues through our user-friendly interface.</p>
+                <div class="mt-auto">
+                    {% if current_user.is_authenticated %}
+                        <a href="{{ url_for('citizen.new_complaint') }}" class="btn btn-sm btn-outline-info mt-2">Report Now</a>
+                    {% endif %}
+                </div>
             </div>
         </div>
+<<<<<<< HEAD
         <div class="col-md-4 mb-4" data-aos="fade-up" data-aos-delay="200">
             <div class="feature-card h-100">
                 <i class="fas fa-tasks"></i>
-                <h3>Track Progress</h3>
-                <p>Get real-time updates and track the status of your complaints until resolution.</p>
+=======
+        <div class="col-lg-3 col-md-6 mb-4">
+            <div class="feature-card h-100" style="border-top: 4px solid #20d6ea;">
+                <div class="process-step">2</div>
+                <i class="fas fa-paper-plane fa-2x mb-3" style="color: #20d6ea;"></i>
+                <h3>Assignment</h3>
+                <p>Your complaint is automatically assigned to the relevant department officials who are notified immediately.</p>
             </div>
         </div>
+        <div class="col-lg-3 col-md-6 mb-4">
+            <div class="feature-card h-100" style="border-top: 4px solid #33ddff;">
+                <div class="process-step">3</div>
+                <i class="fas fa-tasks fa-2x mb-3" style="color: #33ddff;"></i>
+>>>>>>> 928b86656950660435efba515a1cc264cd47215b
+                <h3>Track Progress</h3>
+                <p>Monitor the real-time status of your complaint with updates and notifications at each stage of resolution.</p>
+                <div class="mt-auto">
+                    {% if current_user.is_authenticated %}
+                        <a href="{{ url_for('citizen.complaints') }}" class="btn btn-sm btn-outline-info mt-2">View Complaints</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+<<<<<<< HEAD
         <div class="col-md-4 mb-4" data-aos="fade-up" data-aos-delay="300">
             <div class="feature-card h-100">
                 <i class="fas fa-star"></i>
+=======
+        <div class="col-lg-3 col-md-6 mb-4">
+            <div class="feature-card h-100" style="border-top: 4px solid #00ffff;">
+                <div class="process-step">4</div>
+                <i class="fas fa-star fa-2x mb-3" style="color: #00ffff;"></i>
+>>>>>>> 928b86656950660435efba515a1cc264cd47215b
                 <h3>Provide Feedback</h3>
-                <p>Rate and review the resolution to help improve municipal services.</p>
+                <p>Rate the resolution quality and share your experience to help improve municipal services for everyone.</p>
             </div>
         </div>
     </div>
+    
+    <div class="text-center mt-4">
+        <div class="process-timeline">
+            <div class="timeline-node" style="background: linear-gradient(to right, #00bfff, #00ffff);"></div>
+            <div class="timeline-node" style="background: linear-gradient(to right, #00bfff, #00ffff);"></div>
+            <div class="timeline-node" style="background: linear-gradient(to right, #00bfff, #00ffff);"></div>
+            <div class="timeline-node" style="background: linear-gradient(to right, #00bfff, #00ffff);"></div>
+        </div>
+    </div>
+    
+    <div class="text-center mt-5">
+        <div class="p-4 rounded" style="background: linear-gradient(to right, rgba(0, 191, 255, 0.1), rgba(0, 255, 255, 0.1));">
+            <h4 class="mb-3">Our Commitment</h4>
+            <p>At CitySeva, we're dedicated to creating a transparent bridge between citizens and municipal authorities. Every complaint is tracked, every action is logged, and every resolution is validated to ensure accountability and efficiency.</p>
+            {% if not current_user.is_authenticated %}
+                <a href="{{ url_for('auth.register') }}" class="btn btn-info mt-2">Join CitySeva Today</a>
+            {% endif %}
+        </div>
+    </div>
 </section>
+
+<style>
+    .feature-card {
+        padding: 25px;
+        border-radius: 10px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+        transition: transform 0.3s, box-shadow 0.3s;
+        background: white;
+        display: flex;
+        flex-direction: column;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .feature-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.12);
+    }
+    
+    .process-step {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        width: 30px;
+        height: 30px;
+        background: linear-gradient(to right, #00bfff, #00ffff);
+        color: white;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+    }
+    
+    .process-timeline {
+        display: flex;
+        justify-content: space-between;
+        width: 70%;
+        margin: 0 auto;
+        position: relative;
+    }
+    
+    .process-timeline:before {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 0;
+        right: 0;
+        height: 2px;
+        background: linear-gradient(to right, #00bfff, #00ffff);
+        z-index: 0;
+    }
+    
+    .timeline-node {
+        width: 15px;
+        height: 15px;
+        border-radius: 50%;
+        z-index: 1;
+    }
+</style>
 
 <!-- Categories Section -->
 <section class="container py-5">
@@ -121,6 +246,7 @@
     </div>
 </section>
 
+<<<<<<< HEAD
 <!-- Contact Section -->
 <section class="py-5" id="contact">
     <div class="container">
@@ -163,12 +289,53 @@
                             </div>
                             <button type="submit" class="btn btn-primary">Send Message</button>
                         </form>
+=======
+<!-- Key Benefits Section -->
+<section class="bg-light py-5">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h2>Why Choose CitySeva?</h2>
+            <p class="lead">Experience the power of efficient civic engagement</p>
+        </div>
+        
+        <div class="row">
+            <div class="col-md-6 mb-4">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-body">
+                        <h5 class="mb-3"><i class="fas fa-bolt text-primary me-2"></i>Quick Response</h5>
+                        <p class="mb-0">Get faster resolution with our streamlined complaint management system and direct communication with authorities.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 mb-4">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-body">
+                        <h5 class="mb-3"><i class="fas fa-map-marked-alt text-primary me-2"></i>Location Tracking</h5>
+                        <p class="mb-0">Pin exact locations of issues for precise resolution and better resource allocation.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 mb-4">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-body">
+                        <h5 class="mb-3"><i class="fas fa-bell text-primary me-2"></i>Real-time Updates</h5>
+                        <p class="mb-0">Stay informed with instant notifications about your complaint status and resolution progress.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 mb-4">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-body">
+                        <h5 class="mb-3"><i class="fas fa-chart-line text-primary me-2"></i>Performance Analytics</h5>
+                        <p class="mb-0">Track resolution rates and response times to ensure accountability and continuous improvement.</p>
+>>>>>>> 928b86656950660435efba515a1cc264cd47215b
                     </div>
                 </div>
             </div>
         </div>
     </div>
 </section>
+<<<<<<< HEAD
 {% endblock %}
 
 {% block scripts %}
@@ -236,4 +403,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 </script>
+=======
+
+>>>>>>> 928b86656950660435efba515a1cc264cd47215b
 {% endblock %} 

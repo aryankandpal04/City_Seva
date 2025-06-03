@@ -62,7 +62,17 @@
 {% endblock %}
 
 {% block content %}
-<div class="container">
+<div class="container py-5">
+    <div class="row align-items-center mb-5">
+        <div class="col-md-6">
+            <h1 class="display-4 mb-4">Complaint Details</h1>
+            <p class="lead">View and manage complaint information</p>
+        </div>
+        <div class="col-md-6">
+            <img src="{{ url_for('static', filename='images/admin-complaints.svg') }}" alt="Complaint Details" class="img-fluid">
+        </div>
+    </div>
+
     <nav aria-label="breadcrumb" class="mb-4">
         <ol class="breadcrumb">
             <li class="breadcrumb-item"><a href="{{ url_for('admin.dashboard') }}">Dashboard</a></li>
@@ -274,35 +284,26 @@
                 </div>
                 <div class="card-body">
                     <form method="post" action="{{ url_for('admin.complaint_detail', complaint_id=complaint.id) }}">
-                        {{ form.hidden_tag() }}
+                        {{ form.csrf_token }}
+                        {{ form.complaint_id(value=complaint.id) }}
                         
                         <div class="row mb-3">
                             <div class="col-md-6">
                                 <label for="status" class="form-label">Status</label>
-                                <select class="form-select" id="status" name="status">
-                                    <option value="pending" {% if form.status.data == 'pending' %}selected{% endif %}>Pending</option>
-                                    <option value="in_progress" {% if form.status.data == 'in_progress' %}selected{% endif %}>In Progress</option>
-                                    <option value="resolved" {% if form.status.data == 'resolved' %}selected{% endif %}>Resolved</option>
-                                    <option value="rejected" {% if form.status.data == 'rejected' %}selected{% endif %}>Rejected</option>
-                                </select>
+                                {{ form.status(class="form-select") }}
                             </div>
-                            <div class="col-md-6">
-                                <label for="assigned_to_id" class="form-label">Assign To</label>
-                                <select class="form-select" id="assigned_to_id" name="assigned_to_id">
-                                    {% if form.assigned_to_id and form.assigned_to_id.choices %}
-                                        {% for id, name in form.assigned_to_id.choices %}
-                                            <option value="{{ id }}" {% if form.assigned_to_id.data == id %}selected{% endif %}>{{ name }}</option>
-                                        {% endfor %}
-                                    {% else %}
-                                        <option value="0">Not Available</option>
-                                    {% endif %}
-                                </select>
+                        </div>
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-12">
+                                <label for="assigned_to" class="form-label">Assign To</label>
+                                {{ form.assigned_to(class="form-select") }}
                             </div>
                         </div>
                         
                         <div class="mb-3">
                             <label for="comment" class="form-label">Comment</label>
-                            <textarea class="form-control" id="comment" name="comment" rows="3" required></textarea>
+                            {{ form.comment(class="form-control", rows=3, required=true) }}
                             <div class="form-text">Provide details about the status update. This will be visible to the citizen.</div>
                         </div>
                         
@@ -488,39 +489,26 @@
 {% if complaint.latitude and complaint.longitude %}
 <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD8atpL2upxvA99KrVaZFlv8XxgrqbGZGE&libraries=places"></script>
 <script>
-    // Wait for the document to be ready
-    document.addEventListener('DOMContentLoaded', function() {
-        // Get map container element
-        var mapElement = document.getElementById('complaint-map');
+    function initMap() {
+        const mapElement = document.getElementById('complaint-map');
+        const lat = parseFloat(mapElement.dataset.lat);
+        const lng = parseFloat(mapElement.dataset.lng);
+        const title = mapElement.dataset.title;
         
-        // Get data from HTML attributes
-        var lat = parseFloat(mapElement.getAttribute('data-lat'));
-        var lng = parseFloat(mapElement.getAttribute('data-lng'));
-        var title = mapElement.getAttribute('data-title');
-        
-        // Create map
-        var map = new google.maps.Map(mapElement, {
-            center: {lat: lat, lng: lng},
+        const map = new google.maps.Map(mapElement, {
+            center: { lat, lng },
             zoom: 15
         });
         
-        // Create marker
-        var marker = new google.maps.Marker({
-            position: {lat: lat, lng: lng},
+        new google.maps.Marker({
+            position: { lat, lng },
             map: map,
             title: title
         });
-        
-        // Create and open info window
-        var infoWindow = new google.maps.InfoWindow({
-            content: title
-        });
-        
-        // Add click event to marker
-        marker.addListener('click', function() {
-            infoWindow.open(map, marker);
-        });
-    });
+    }
+    
+    // Initialize map when the page loads
+    window.onload = initMap;
 </script>
 {% endif %}
 {% endblock %} 

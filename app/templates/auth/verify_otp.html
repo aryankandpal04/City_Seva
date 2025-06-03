@@ -7,13 +7,13 @@
     <div class="row justify-content-center">
         <div class="col-md-6">
             <div class="card shadow my-5">
-                <div class="card-header bg-primary text-white">
-                    <h4 class="mb-0">Email Verification</h4>
+                <div class="card-header" style="background: linear-gradient(to right, #00bfff, #00ffff); color: white;">
+                    <h4 class="mb-0"><i class="fas fa-envelope-open-text me-2"></i>Email Verification</h4>
                 </div>
                 <div class="card-body">
                     {% if verification_sent %}
                     <div class="alert alert-info">
-                        <p><strong>Verification Code Sent!</strong></p>
+                        <p><strong><i class="fas fa-paper-plane me-2"></i>Verification Code Sent!</strong></p>
                         <p>We've sent a verification code to your email address: <strong>{{ email }}</strong></p>
                         <p>Please check your inbox (and spam folder) for the verification code.</p>
                     </div>
@@ -21,36 +21,45 @@
                     
                     {% if verification_error %}
                     <div class="alert alert-danger">
-                        <p><strong>Verification Failed</strong></p>
+                        <p><strong><i class="fas fa-exclamation-circle me-2"></i>Verification Failed</strong></p>
                         <p>{{ verification_error }}</p>
                     </div>
                     {% endif %}
                     
                     {% if debug_otp %}
                     <div class="alert alert-warning">
-                        <p><strong>Development Mode: Verification Code</strong></p>
+                        <p><strong><i class="fas fa-bug me-2"></i>Development Mode: Verification Code</strong></p>
                         <p>Email sending may have failed, but you can use this code for testing:</p>
                         <h3 class="text-center">{{ debug_otp }}</h3>
                         <p class="text-center text-muted small">This is only shown in development mode</p>
                     </div>
                     {% endif %}
                     
+                    <div class="text-center mb-4">
+                        <img src="{{ url_for('static', filename='images/email-verification.png') }}" alt="Email Verification" 
+                             class="img-fluid" style="max-width: 150px; margin-bottom: 20px;" onerror="this.style.display='none'">
+                        <p class="lead">Please enter the 6-digit verification code sent to your email</p>
+                    </div>
+                    
                     <form method="POST" action="{{ url_for('auth.verify_otp') }}">
                         <input type="hidden" name="email" value="{{ email }}">
                         
-                        <div class="form-group">
-                            <label for="otp">Verification Code</label>
-                            <input type="text" class="form-control form-control-lg text-center" 
-                                   id="otp" name="otp" placeholder="Enter 6-digit code"
-                                   pattern="[0-9]{6}" maxlength="6" required>
-                            <small class="form-text text-muted">
+                        <div class="mb-4">
+                            <div class="otp-input-container d-flex justify-content-center mb-3">
+                                <input type="text" class="form-control form-control-lg text-center" 
+                                       id="otp" name="otp" placeholder="Enter 6-digit code"
+                                       pattern="[0-9]{6}" maxlength="6" required
+                                       style="font-size: 24px; letter-spacing: 5px; width: 220px;">
+                            </div>
+                            <small class="form-text text-muted text-center d-block">
                                 Enter the 6-digit code sent to your email address.
+                                The code will expire in 10 minutes.
                             </small>
                         </div>
                         
-                        <div class="form-group mt-4">
-                            <button type="submit" class="btn btn-primary btn-block">
-                                Verify Email
+                        <div class="d-grid gap-2 mb-4">
+                            <button type="submit" class="btn btn-primary btn-lg" style="background: linear-gradient(to right, #00bfff, #00ffff); border: none;">
+                                <i class="fas fa-check-circle me-2"></i>Verify Email
                             </button>
                         </div>
                     </form>
@@ -59,22 +68,79 @@
                     
                     <div class="text-center">
                         <p>Didn't receive the code?</p>
-                        <form action="{{ url_for('auth.resend_otp') }}" method="POST">
-                            <input type="hidden" name="email" value="{{ email }}">
-                            <button type="submit" class="btn btn-outline-secondary">
-                                Resend Verification Code
-                            </button>
-                        </form>
+                        <div id="resend-container">
+                            <form action="{{ url_for('auth.resend_otp') }}" method="POST" id="resend-form">
+                                <input type="hidden" name="email" value="{{ email }}">
+                                <button type="submit" class="btn btn-outline-primary" id="resend-button">
+                                    <i class="fas fa-sync-alt me-2"></i>Resend Verification Code
+                                </button>
+                            </form>
+                            <div id="countdown-timer" class="mt-2 d-none">
+                                <small class="text-muted">You can request a new code in <span id="countdown">60</span> seconds</small>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
             
             <div class="text-center mt-3">
                 <a href="{{ url_for('auth.login') }}" class="btn btn-link">
-                    Back to Login
+                    <i class="fas fa-arrow-left me-2"></i>Back to Login
                 </a>
             </div>
         </div>
     </div>
 </div>
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Set up countdown timer functionality
+        const resendForm = document.getElementById('resend-form');
+        const resendButton = document.getElementById('resend-button');
+        const countdownTimer = document.getElementById('countdown-timer');
+        const countdownSpan = document.getElementById('countdown');
+        
+        // Check if the form was just submitted (verification_sent is true)
+        {% if verification_sent %}
+            startCountdown();
+        {% endif %}
+        
+        resendForm.addEventListener('submit', function(e) {
+            // Start countdown after form submission
+            startCountdown();
+        });
+        
+        function startCountdown() {
+            // Disable the resend button
+            resendButton.disabled = true;
+            
+            // Show the countdown timer
+            countdownTimer.classList.remove('d-none');
+            
+            // Set the countdown time (60 seconds)
+            let seconds = 60;
+            countdownSpan.textContent = seconds;
+            
+            // Update the countdown every second
+            const countdownInterval = setInterval(function() {
+                seconds--;
+                countdownSpan.textContent = seconds;
+                
+                if (seconds <= 0) {
+                    // Enable the resend button again
+                    resendButton.disabled = false;
+                    
+                    // Hide the countdown timer
+                    countdownTimer.classList.add('d-none');
+                    
+                    // Clear the interval
+                    clearInterval(countdownInterval);
+                }
+            }, 1000);
+        }
+    });
+</script>
+{% endblock %}
+
 {% endblock %} 

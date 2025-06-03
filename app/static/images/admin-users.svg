@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="800" height="400" viewBox="0 0 800 400" xmlns="http://www.w3.org/2000/svg">
+    <!-- Background -->
+    <rect width="800" height="400" fill="#f8fafc"/>
+    
+    <!-- Users Container -->
+    <g transform="translate(400, 200)">
+        <!-- Main Container -->
+        <rect x="-350" y="-150" width="700" height="300" rx="15" fill="#00bcd4" opacity="0.8"/>
+        
+        <!-- Header -->
+        <g transform="translate(0, -120)">
+            <text x="0" y="0" text-anchor="middle" fill="white" font-size="24" font-weight="bold">User Management</text>
+            <text x="0" y="30" text-anchor="middle" fill="white" font-size="14">Manage system users and roles</text>
+        </g>
+        
+        <!-- Search and Filters -->
+        <g transform="translate(-300, -70)">
+            <!-- Search Bar -->
+            <rect x="0" y="0" width="300" height="40" rx="20" fill="white" opacity="0.6"/>
+            <text x="20" y="25" fill="#00bcd4" font-size="14">Search users...</text>
+            
+            <!-- Filter Buttons -->
+            <g transform="translate(320, 0)">
+                <rect x="0" y="0" width="100" height="30" rx="15" fill="#00e5ff"/>
+                <text x="50" y="20" text-anchor="middle" fill="white" font-size="12" font-weight="bold">All</text>
+                
+                <rect x="110" y="0" width="100" height="30" rx="15" fill="white" opacity="0.6"/>
+                <text x="160" y="20" text-anchor="middle" fill="#00bcd4" font-size="12">Citizens</text>
+                
+                <rect x="220" y="0" width="100" height="30" rx="15" fill="white" opacity="0.6"/>
+                <text x="270" y="20" text-anchor="middle" fill="#00bcd4" font-size="12">Officials</text>
+            </g>
+        </g>
+        
+        <!-- User List -->
+        <g transform="translate(-300, -20)">
+            <!-- User 1 -->
+            <rect x="0" y="0" width="600" height="60" rx="10" fill="white" opacity="0.6"/>
+            <circle cx="30" cy="30" r="20" fill="#00e5ff"/>
+            <text x="30" y="35" text-anchor="middle" fill="white" font-size="12" font-weight="bold">JD</text>
+            <text x="70" y="25" fill="#00bcd4" font-size="14" font-weight="bold">John Doe</text>
+            <text x="70" y="45" fill="#00bcd4" font-size="12">john.doe@email.com</text>
+            <text x="500" y="30" text-anchor="middle" fill="#00bcd4" font-size="12">Admin</text>
+            
+            <!-- User 2 -->
+            <rect x="0" y="70" width="600" height="60" rx="10" fill="white" opacity="0.6"/>
+            <circle cx="30" cy="100" r="20" fill="#00e5ff"/>
+            <text x="30" y="105" text-anchor="middle" fill="white" font-size="12" font-weight="bold">JS</text>
+            <text x="70" y="95" fill="#00bcd4" font-size="14" font-weight="bold">Jane Smith</text>
+            <text x="70" y="115" fill="#00bcd4" font-size="12">jane.smith@email.com</text>
+            <text x="500" y="100" text-anchor="middle" fill="#00bcd4" font-size="12">Official</text>
+        </g>
+        
+        <!-- Pagination -->
+        <g transform="translate(0, 180)">
+            <rect x="-20" y="0" width="40" height="30" rx="5" fill="white" opacity="0.6"/>
+            <text x="0" y="20" text-anchor="middle" fill="#00bcd4" font-size="14">1</text>
+            
+            <rect x="30" y="0" width="40" height="30" rx="5" fill="#00e5ff"/>
+            <text x="50" y="20" text-anchor="middle" fill="white" font-size="14">2</text>
+            
+            <rect x="80" y="0" width="40" height="30" rx="5" fill="white" opacity="0.6"/>
+            <text x="100" y="20" text-anchor="middle" fill="#00bcd4" font-size="14">3</text>
+        </g>
+    </g>
+    
+    <!-- Decorative Elements -->
+    <circle cx="100" cy="100" r="30" fill="#00e5ff" opacity="0.2"/>
+    <circle cx="700" cy="150" r="40" fill="#00bcd4" opacity="0.2"/>
+    <circle cx="400" cy="80" r="25" fill="#00e5ff" opacity="0.2"/>
+    
+    <!-- Icons -->
+    <g transform="translate(150, 200)">
+        <!-- Users Icon -->
+        <circle cx="0" cy="0" r="30" fill="#00bcd4" opacity="0.8"/>
+        <circle cx="-8" cy="-5" r="8" fill="white"/>
+        <circle cx="8" cy="-5" r="8" fill="white"/>
+        <path d="M-15,15 A15,15 0 0,0 15,15" stroke="white" stroke-width="3" fill="none"/>
+    </g>
+    
+    <g transform="translate(650, 200)">
+        <!-- Settings Icon -->
+        <circle cx="0" cy="0" r="30" fill="#00bcd4" opacity="0.8"/>
+        <circle cx="0" cy="0" r="10" fill="white"/>
+        <path d="M0,-20 A20,20 0 0,1 0,20" stroke="white" stroke-width="3" fill="none"/>
+    </g>
+</svg> 

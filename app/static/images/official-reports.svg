@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="800" height="400" viewBox="0 0 800 400" xmlns="http://www.w3.org/2000/svg">
+    <!-- Background -->
+    <rect width="800" height="400" fill="#f8fafc"/>
+    
+    <!-- Reports Container -->
+    <g transform="translate(400, 200)">
+        <!-- Main Container -->
+        <rect x="-350" y="-150" width="700" height="300" rx="15" fill="#00bcd4" opacity="0.8"/>
+        
+        <!-- Header -->
+        <g transform="translate(0, -120)">
+            <text x="0" y="0" text-anchor="middle" fill="white" font-size="24" font-weight="bold">Reports & Analytics</text>
+            <text x="0" y="30" text-anchor="middle" fill="white" font-size="14">Track performance and complaint statistics</text>
+        </g>
+        
+        <!-- Stats Cards -->
+        <g transform="translate(-300, -70)">
+            <!-- Total Complaints -->
+            <rect x="0" y="0" width="150" height="100" rx="10" fill="white" opacity="0.6"/>
+            <text x="75" y="30" text-anchor="middle" fill="#00bcd4" font-size="14">Total Complaints</text>
+            <text x="75" y="60" text-anchor="middle" fill="#00bcd4" font-size="24" font-weight="bold">156</text>
+            
+            <!-- Resolved -->
+            <rect x="170" y="0" width="150" height="100" rx="10" fill="white" opacity="0.6"/>
+            <text x="245" y="30" text-anchor="middle" fill="#00bcd4" font-size="14">Resolved</text>
+            <text x="245" y="60" text-anchor="middle" fill="#00bcd4" font-size="24" font-weight="bold">89</text>
+            
+            <!-- Pending -->
+            <rect x="340" y="0" width="150" height="100" rx="10" fill="white" opacity="0.6"/>
+            <text x="415" y="30" text-anchor="middle" fill="#00bcd4" font-size="14">Pending</text>
+            <text x="415" y="60" text-anchor="middle" fill="#00bcd4" font-size="24" font-weight="bold">67</text>
+        </g>
+        
+        <!-- Charts -->
+        <g transform="translate(-300, 40)">
+            <!-- Bar Chart -->
+            <rect x="0" y="0" width="300" height="150" rx="10" fill="white" opacity="0.6"/>
+            <text x="150" y="20" text-anchor="middle" fill="#00bcd4" font-size="14" font-weight="bold">Complaints by Category</text>
+            
+            <!-- Bar Chart Bars -->
+            <rect x="40" y="40" width="30" height="80" fill="#00e5ff"/>
+            <rect x="90" y="60" width="30" height="60" fill="#00e5ff"/>
+            <rect x="140" y="30" width="30" height="90" fill="#00e5ff"/>
+            <rect x="190" y="50" width="30" height="70" fill="#00e5ff"/>
+            <rect x="240" y="40" width="30" height="80" fill="#00e5ff"/>
+            
+            <!-- Line Chart -->
+            <rect x="320" y="0" width="300" height="150" rx="10" fill="white" opacity="0.6"/>
+            <text x="470" y="20" text-anchor="middle" fill="#00bcd4" font-size="14" font-weight="bold">Resolution Time Trend</text>
+            
+            <!-- Line Chart Line -->
+            <path d="M340,120 L380,100 L420,110 L460,80 L500,90 L540,70" 
+                  stroke="#00e5ff" stroke-width="3" fill="none"/>
+        </g>
+    </g>
+    
+    <!-- Decorative Elements -->
+    <circle cx="100" cy="100" r="30" fill="#00e5ff" opacity="0.2"/>
+    <circle cx="700" cy="150" r="40" fill="#00bcd4" opacity="0.2"/>
+    <circle cx="400" cy="80" r="25" fill="#00e5ff" opacity="0.2"/>
+    
+    <!-- Icons -->
+    <g transform="translate(150, 200)">
+        <!-- Chart Icon -->
+        <circle cx="0" cy="0" r="30" fill="#00bcd4" opacity="0.8"/>
+        <path d="M-10,10 L-10,0 L0,-5 L10,0 L10,10" stroke="white" stroke-width="2" fill="none"/>
+    </g>
+    
+    <g transform="translate(650, 200)">
+        <!-- Stats Icon -->
+        <circle cx="0" cy="0" r="30" fill="#00bcd4" opacity="0.8"/>
+        <path d="M-10,10 L-10,0 M0,10 L0,-5 M10,10 L10,0" stroke="white" stroke-width="3"/>
+    </g>
+</svg> 

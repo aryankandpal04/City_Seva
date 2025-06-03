@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="800" height="400" viewBox="0 0 800 400" xmlns="http://www.w3.org/2000/svg">
+    <!-- Background -->
+    <rect width="800" height="400" fill="#f8fafc"/>
+    
+    <!-- User Profile -->
+    <g transform="translate(200, 200)">
+        <!-- Profile Circle -->
+        <circle cx="0" cy="-50" r="40" fill="#00bcd4"/>
+        <circle cx="0" cy="-50" r="30" fill="white" opacity="0.6"/>
+        
+        <!-- User Body -->
+        <path d="M-30,0 L30,0 L20,80 L-20,80 Z" fill="#00e5ff"/>
+    </g>
+    
+    <!-- Complaint Tracking -->
+    <g transform="translate(400, 200)">
+        <!-- Status Cards -->
+        <g transform="translate(-100, -80)">
+            <rect x="0" y="0" width="80" height="100" rx="10" fill="#00bcd4" opacity="0.8"/>
+            <text x="40" y="40" text-anchor="middle" fill="white" font-size="24">P</text>
+            <text x="40" y="70" text-anchor="middle" fill="white" font-size="12">Pending</text>
+        </g>
+        
+        <g transform="translate(0, -80)">
+            <rect x="0" y="0" width="80" height="100" rx="10" fill="#00e5ff" opacity="0.8"/>
+            <text x="40" y="40" text-anchor="middle" fill="white" font-size="24">IP</text>
+            <text x="40" y="70" text-anchor="middle" fill="white" font-size="12">In Progress</text>
+        </g>
+        
+        <g transform="translate(100, -80)">
+            <rect x="0" y="0" width="80" height="100" rx="10" fill="#00bcd4" opacity="0.8"/>
+            <text x="40" y="40" text-anchor="middle" fill="white" font-size="24">R</text>
+            <text x="40" y="70" text-anchor="middle" fill="white" font-size="12">Resolved</text>
+        </g>
+        
+        <!-- Progress Bar -->
+        <rect x="-150" y="50" width="300" height="20" rx="10" fill="#00e5ff" opacity="0.3"/>
+        <rect x="-150" y="50" width="200" height="20" rx="10" fill="#00bcd4"/>
+    </g>
+    
+    <!-- Decorative Elements -->
+    <circle cx="100" cy="100" r="30" fill="#00e5ff" opacity="0.2"/>
+    <circle cx="700" cy="150" r="40" fill="#00bcd4" opacity="0.2"/>
+    <circle cx="400" cy="80" r="25" fill="#00e5ff" opacity="0.2"/>
+</svg> 

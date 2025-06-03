@@ -159,7 +159,7 @@ def login():
             next_page = url_for('admin.dashboard')
         elif user.role == 'official' and form.department.data:
             session['department'] = form.department.data
-            next_page = url_for('admin.dashboard')
+            next_page = url_for('government_officials.dashboard')
         
         return redirect(next_page)
     
@@ -350,7 +350,7 @@ def verify_otp():
                 if user.role == 'admin':
                     return redirect(url_for('admin.dashboard'))
                 elif user.role == 'official':
-                    return redirect(url_for('admin.dashboard'))
+                    return redirect(url_for('government_officials.dashboard'))
                 else:
                     return redirect(url_for('citizen.dashboard'))
             else:
@@ -369,25 +369,59 @@ def resend_otp():
     email = request.form.get('email') or session.get('verification_email')
     
     if not email:
-        return jsonify({'success': False, 'message': 'Email not provided.'}), 400
+        if request.content_type == 'application/json':
+            return jsonify({'success': False, 'message': 'Email not provided.'}), 400
+        flash('Email address not provided.', 'danger')
+        return redirect(url_for('auth.login'))
     
     # Find user
     user = User.query.filter_by(email=email).first()
     
     if not user:
-        return jsonify({'success': False, 'message': 'User not found.'}), 404
+        if request.content_type == 'application/json':
+            return jsonify({'success': False, 'message': 'User not found.'}), 404
+        flash('No account found with that email address.', 'danger')
+        return redirect(url_for('auth.login'))
+    
+    # Check if already verified
+    if user.email_verified:
+        if request.content_type == 'application/json':
+            return jsonify({'success': False, 'message': 'Email already verified.'}), 400
+        flash('Your email is already verified. Please login.', 'info')
+        return redirect(url_for('auth.login'))
     
     # Generate new OTP
     otp_code = generate_otp()
     
     # Store and send OTP
-    if store_otp(email, otp_code) and send_otp_email(user, otp_code):
-        return jsonify({
-            'success': True, 
-            'message': 'Verification code resent successfully.'
-        })
+    current_app.logger.info(f"Resending verification code to {email}")
+    success = store_otp(email, otp_code) and send_otp_email(user, otp_code)
+    
+    # Set the verification email in session
+    session['verification_email'] = email
+    
+    if success:
+        current_app.logger.info(f"Successfully resent verification code to {email}")
+        if request.content_type == 'application/json':
+            return jsonify({
+                'success': True, 
+                'message': 'Verification code resent successfully.'
+            })
+        
+        # For standard form submissions, redirect with success message
+        flash('Verification code resent. Please check your email.', 'success')
+        return redirect(url_for('auth.verify_otp', email=email, verification_sent=True))
     else:
-        return jsonify({'success': False, 'message': 'Failed to send verification code.'}), 500
+        current_app.logger.error(f"Failed to resend verification code to {email}")
+        if request.content_type == 'application/json':
+            return jsonify({
+                'success': False, 
+                'message': 'Failed to send verification code.'
+            }), 500
+        
+        # For standard form submissions, redirect with error message
+        flash('Failed to send verification code. Please try again later.', 'danger')
+        return redirect(url_for('auth.verify_otp', email=email))
 
 @auth.route('/reset_password_request', methods=['GET', 'POST'])
 def reset_password_request():
@@ -473,21 +507,46 @@ def resend_password_reset_otp():
     email = request.form.get('email') or session.get('reset_email')
     
     if not email:
-        return jsonify({'success': False, 'message': 'Email not provided.'}), 400
+        if request.content_type == 'application/json':
+            return jsonify({'success': False, 'message': 'Email not provided.'}), 400
+        flash('Email address not provided.', 'danger')
+        return redirect(url_for('auth.login'))
     
     # Find user
     user = User.query.filter_by(email=email).first()
     
     if not user:
-        return jsonify({'success': False, 'message': 'User not found.'}), 404
+        if request.content_type == 'application/json':
+            return jsonify({'success': False, 'message': 'User not found.'}), 404
+        flash('No account found with that email address.', 'danger')
+        return redirect(url_for('auth.login'))
     
     # Generate and send new OTP
+    current_app.logger.info(f"Resending password reset code to {email}")
     otp_code = send_password_reset_email(user)
     
-    return jsonify({
-        'success': True, 
-        'message': 'Password reset code resent successfully.'
-    })
+    # Make sure email stays in session
+    session['reset_email'] = email
+    
+    if otp_code:
+        current_app.logger.info(f"Successfully resent password reset code to {email}")
+        if request.content_type == 'application/json':
+            return jsonify({
+                'success': True, 
+                'message': 'Password reset code resent successfully.'
+            })
+        
+        # For standard form submissions, redirect with success message
+        flash('Password reset code resent. Please check your email.', 'success')
+        return redirect(url_for('auth.reset_password_verify', email=email, code_resent=True))
+    else:
+        current_app.logger.error(f"Failed to resend password reset code to {email}")
+        if request.content_type == 'application/json':
+            return jsonify({'success': False, 'message': 'Failed to send reset code.'}), 500
+        
+        # For standard form submissions, redirect with error message
+        flash('Failed to send reset code. Please try again later.', 'danger')
+        return redirect(url_for('auth.reset_password_verify', email=email))
 
 @auth.route('/request_official_account', methods=['GET', 'POST'])
 @login_required

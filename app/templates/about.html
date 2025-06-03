@@ -1,0 +1,133 @@
+{% extends "base.html" %}
+
+{% block title %}About Us | CitySeva{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row align-items-center mb-5">
+        <div class="col-md-6">
+            <h1 class="display-4 mb-4">About CitySeva</h1>
+            <p class="lead">Empowering citizens and government officials to build better cities together.</p>
+        </div>
+        <div class="col-md-6">
+            <img src="{{ url_for('static', filename='images/about-us.svg') }}" alt="About CitySeva" class="img-fluid">
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-lg-8 mx-auto">
+            <div class="card shadow border-0" data-aos="fade-up">
+                <div class="card-header bg-primary text-white rounded-top">
+                    <h2 class="mb-0"><i class="fas fa-info-circle me-2"></i>About CitySeva</h2>
+                </div>
+                <div class="card-body">
+                    
+                    <div class="mb-4" data-aos="fade-up" data-aos-delay="100">
+                        <h3 class="text-primary mb-3">Our Mission</h3>
+                        <p class="lead">CitySeva is dedicated to bridging the gap between citizens and local government, making civic engagement more accessible and efficient.</p>
+                    </div>
+
+                    <div class="mb-4" data-aos="fade-up" data-aos-delay="200">
+                        <h3 class="text-primary mb-3">What We Do</h3>
+                        <p>CitySeva provides a comprehensive platform for citizens to:</p>
+                        <ul class="list-group list-group-flush mb-4">
+                            <li class="list-group-item border-0 bg-transparent">
+                                <i class="fas fa-check-circle text-success me-2"></i>Submit and track civic complaints
+                            </li>
+                            <li class="list-group-item border-0 bg-transparent">
+                                <i class="fas fa-check-circle text-success me-2"></i>Communicate directly with government officials
+                            </li>
+                            <li class="list-group-item border-0 bg-transparent">
+                                <i class="fas fa-check-circle text-success me-2"></i>Monitor the status of their concerns
+                            </li>
+                            <li class="list-group-item border-0 bg-transparent">
+                                <i class="fas fa-check-circle text-success me-2"></i>Provide feedback on service delivery
+                            </li>
+                        </ul>
+                    </div>
+
+                    <!-- Read About Image Section -->
+                    <div class="mb-4" data-aos="fade-up" data-aos-delay="250">
+                        <img src="{{ url_for('static', filename='images/read-about.svg') }}" alt="Learn More About CitySeva" class="img-fluid" style="max-width: 800px; width: 100%;">
+                    </div>
+
+                    <div class="mb-4" data-aos="fade-up" data-aos-delay="300">
+                        <h3 class="text-primary mb-3">Our Values</h3>
+                        <div class="row">
+                            <div class="col-md-6 mb-3" data-aos="fade-up" data-aos-delay="400">
+                                <div class="card h-100 border-0 shadow-sm hover-shadow transition">
+                                    <div class="card-body">
+                                        <h5><i class="fas fa-handshake text-primary me-2"></i>Transparency</h5>
+                                        <p class="mb-0">We believe in open communication and clear processes.</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-3" data-aos="fade-up" data-aos-delay="500">
+                                <div class="card h-100 border-0 shadow-sm hover-shadow transition">
+                                    <div class="card-body">
+                                        <h5><i class="fas fa-users text-primary me-2"></i>Community</h5>
+                                        <p class="mb-0">Building stronger communities through active participation.</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-3" data-aos="fade-up" data-aos-delay="600">
+                                <div class="card h-100 border-0 shadow-sm hover-shadow transition">
+                                    <div class="card-body">
+                                        <h5><i class="fas fa-bolt text-primary me-2"></i>Efficiency</h5>
+                                        <p class="mb-0">Streamlining processes for better service delivery.</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-3" data-aos="fade-up" data-aos-delay="700">
+                                <div class="card h-100 border-0 shadow-sm hover-shadow transition">
+                                    <div class="card-body">
+                                        <h5><i class="fas fa-star text-primary me-2"></i>Excellence</h5>
+                                        <p class="mb-0">Committed to providing the best possible service.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Developer Section -->
+                    <div class="mb-4" data-aos="fade-up" data-aos-delay="800">
+                        <h3 class="text-primary mb-3">Meet the Developer</h3>
+                        <div class="card border-0 shadow-sm">
+                            <div class="row g-0">
+                                <div class="col-md-4">
+                                    <img src="{{ url_for('static', filename='images/me.jpg') }}" 
+                                         class="img-fluid rounded-start h-100 object-fit-cover" 
+                                         alt="Developer"
+                                         style="min-height: 300px;">
+                                </div>
+                                <div class="col-md-8">
+                                    <div class="card-body">
+                                        <h4 class="card-title text-primary">CitySeva Developer</h4>
+                                        <p class="card-text">Passionate about creating solutions that make a difference in people's lives. This platform was built with the vision of making civic engagement more accessible and efficient for everyone.</p>
+                                        <div class="d-flex gap-3 mt-3">
+                                            <a href="https://github.com/yourusername" class="text-primary" target="_blank">
+                                                <i class="fab fa-github fa-2x"></i>
+                                            </a>
+                                            <a href="https://linkedin.com/in/yourusername" class="text-primary" target="_blank">
+                                                <i class="fab fa-linkedin fa-2x"></i>
+                                            </a>
+                                            <a href="mailto:your.email@example.com" class="text-primary">
+                                                <i class="fas fa-envelope fa-2x"></i>
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="text-center mt-4" data-aos="fade-up" data-aos-delay="900">
+                        <a href="{{ url_for('main.contact') }}" class="btn btn-primary rounded-pill px-4">
+                            <i class="fas fa-envelope me-2"></i>Contact Us
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

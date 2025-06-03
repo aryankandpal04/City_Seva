@@ -1,139 +1,143 @@
-{% extends 'base.html' %}
+{% extends "base.html" %}
 
-{% block title %}Dashboard | CitySeva{% endblock %}
+{% block title %}Citizen Dashboard - CitySeva{% endblock %}
 
 {% block content %}
-<div class="container py-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1>Citizen Dashboard</h1>
-        <a href="{{ url_for('citizen.new_complaint') }}" class="btn btn-primary">
-            <i class="fas fa-plus me-2"></i>New Complaint
-        </a>
-    </div>
-    <p>Welcome, {{ current_user.first_name }}!</p>
-    
-    <div class="row mt-4">
-        <div class="col-md-4 mb-4">
-            <div class="card dashboard-card">
-                <div class="card-body">
-                    <i class="fas fa-clipboard-list icon text-primary"></i>
-                    <h5 class="card-title">Total Complaints</h5>
-                    <p class="card-text">{{ pending_count + in_progress_count + resolved_count + rejected_count }}</p>
-                </div>
-            </div>
+<div class="container py-5">
+    <div class="row align-items-center mb-5">
+        <div class="col-md-6">
+            <h1 class="display-4 mb-4">Citizen Dashboard</h1>
+            <p class="lead">Track your complaints and stay updated on their status</p>
         </div>
-        <div class="col-md-4 mb-4">
-            <div class="card dashboard-card">
-                <div class="card-body">
-                    <i class="fas fa-clock icon text-warning"></i>
-                    <h5 class="card-title">Pending</h5>
-                    <p class="card-text">{{ pending_count }}</p>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-4 mb-4">
-            <div class="card dashboard-card">
-                <div class="card-body">
-                    <i class="fas fa-check-circle icon text-success"></i>
-                    <h5 class="card-title">Resolved</h5>
-                    <p class="card-text">{{ resolved_count }}</p>
-                </div>
-            </div>
+        <div class="col-md-6">
+            <img src="{{ url_for('static', filename='images/citizen-dashboard.svg') }}" alt="Citizen Dashboard" class="img-fluid">
         </div>
     </div>
-    
-    <div class="row mt-4">
-        <div class="col-md-8">
+
+    <!-- Statistics Cards -->
+    <div class="row g-4 mb-4">
+        <div class="col-md-3">
+            <div class="card h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="icon-circle bg-primary bg-opacity-10 text-primary">
+                            <i class="fas fa-clipboard-list"></i>
+                        </div>
+                        <h6 class="card-title mb-0 ms-3">Total Complaints</h6>
+                    </div>
+                    <h3 class="mb-0 text-primary">{{ total_complaints }}</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="icon-circle bg-success bg-opacity-10 text-success">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                        <h6 class="card-title mb-0 ms-3">Resolved</h6>
+                    </div>
+                    <h3 class="mb-0 text-success">{{ resolved_count }}</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="icon-circle bg-warning bg-opacity-10 text-warning">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                        <h6 class="card-title mb-0 ms-3">Pending</h6>
+                    </div>
+                    <h3 class="mb-0 text-warning">{{ pending_count }}</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="icon-circle bg-info bg-opacity-10 text-info">
+                            <i class="fas fa-spinner"></i>
+                        </div>
+                        <h6 class="card-title mb-0 ms-3">In Progress</h6>
+                    </div>
+                    <h3 class="mb-0 text-info">{{ in_progress_count }}</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Complaints -->
+    <div class="card">
+        <div class="card-header d-flex align-items-center">
+            <h5 class="mb-0">Recent Complaints</h5>
+            <a href="{{ url_for('citizen.complaints') }}" class="btn btn-outline-primary btn-sm ms-auto">
+                View All
+            </a>
+        </div>
+        <div class="card-body p-0">
             {% if recent_complaints %}
-                <h2 class="mb-4">Recent Complaints</h2>
-                <div class="table-responsive">
-                    <table class="table table-hover">
-                        <thead>
-                            <tr>
-                                <th>#</th>
-                                <th>Title</th>
-                                <th>Category</th>
-                                <th>Status</th>
-                                <th>Date</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for complaint in recent_complaints %}
-                                <tr>
-                                    <td>{{ complaint.id }}</td>
-                                    <td>{{ complaint.title }}</td>
-                                    <td>{{ complaint.category.name }}</td>
-                                    <td>
-                                        <span class="badge bg-{{ complaint.status|replace('pending', 'warning')|replace('in_progress', 'info')|replace('resolved', 'success')|replace('rejected', 'danger') }}">
-                                            {{ complaint.status|replace('_', ' ')|title }}
-                                        </span>
-                                    </td>
-                                    <td>{{ complaint.created_at.strftime('%Y-%m-%d') }}</td>
-                                    <td>
-                                        <a href="{{ url_for('citizen.complaint_detail', complaint_id=complaint.id) }}" class="btn btn-sm btn-primary">View</a>
-                                    </td>
-                                </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-                <div class="d-flex justify-content-end mt-3">
-                    <a href="{{ url_for('citizen.complaints') }}" class="btn btn-outline-primary">
-                        <i class="fas fa-list me-2"></i>View All Complaints
-                    </a>
-                </div>
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Category</th>
+                            <th>Title</th>
+                            <th>Status</th>
+                            <th>Date</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for complaint in recent_complaints %}
+                        <tr>
+                            <td>#{{ complaint.id }}</td>
+                            <td>{{ complaint.category.name }}</td>
+                            <td>{{ complaint.title }}</td>
+                            <td>
+                                <span class="badge bg-{{ complaint.status|replace('pending', 'warning')|replace('in_progress', 'info')|replace('resolved', 'success')|replace('rejected', 'danger') }}">
+                                    {{ complaint.status|replace('_', ' ')|title }}
+                                </span>
+                            </td>
+                            <td>{{ complaint.created_at.strftime('%Y-%m-%d') }}</td>
+                            <td>
+                                <a href="{{ url_for('citizen.complaint_detail', complaint_id=complaint.id) }}" 
+                                   class="btn btn-sm btn-outline-primary">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
             {% else %}
-                <div class="alert alert-info">
-                    <i class="fas fa-info-circle me-2"></i> You haven't submitted any complaints yet.
-                    <a href="{{ url_for('citizen.new_complaint') }}" class="ms-2">Submit a complaint</a>
-                </div>
+            <div class="text-center py-5">
+                <img src="{{ url_for('static', filename='img/no-data.svg') }}" alt="No complaints" class="mb-3" style="width: 120px;">
+                <h6 class="text-secondary">No complaints found</h6>
+                <p class="text-muted mb-0">Start by creating a new complaint</p>
+                <a href="{{ url_for('citizen.new_complaint') }}" class="btn btn-primary mt-3">
+                    <i class="fas fa-plus-circle me-2"></i>New Complaint
+                </a>
+            </div>
             {% endif %}
-        </div>
-        
-        <div class="col-md-4">
-            <!-- Quick Links Card -->
-            <div class="card mb-4">
-                <div class="card-header bg-primary text-white">
-                    <h5 class="mb-0"><i class="fas fa-link me-2"></i>Quick Links</h5>
-                </div>
-                <div class="card-body">
-                    <div class="d-grid gap-2">
-                        <a href="{{ url_for('citizen.new_complaint') }}" class="btn btn-outline-primary">
-                            <i class="fas fa-plus-circle me-2"></i>Submit New Complaint
-                        </a>
-                        <a href="{{ url_for('citizen.complaints') }}" class="btn btn-outline-primary">
-                            <i class="fas fa-list-alt me-2"></i>My Complaints
-                        </a>
-                        <a href="{{ url_for('citizen.notifications') }}" class="btn btn-outline-primary">
-                            <i class="fas fa-bell me-2"></i>Notifications
-                            {% if unread_notifications > 0 %}
-                                <span class="badge bg-danger">{{ unread_notifications }}</span>
-                            {% endif %}
-                        </a>
-                        <a href="{{ url_for('citizen.profile') }}" class="btn btn-outline-primary">
-                            <i class="fas fa-user-circle me-2"></i>My Profile
-                        </a>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Government Official Request Card -->
-            <div class="card">
-                <div class="card-header bg-info text-white">
-                    <h5 class="mb-0"><i class="fas fa-user-tie me-2"></i>Government Officials</h5>
-                </div>
-                <div class="card-body">
-                    <p><strong>Are you a government employee?</strong></p>
-                    <p class="small">Government officials can manage and update complaints related to their department.</p>
-                    <div class="d-grid">
-                        <a href="{{ url_for('auth.request_official_account') }}" class="btn btn-info">
-                            <i class="fas fa-file-alt me-2"></i>Request Official Account
-                        </a>
-                    </div>
-                </div>
-            </div>
         </div>
     </div>
 </div>
+
+<style>
+.icon-circle {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+}
+</style>
 {% endblock %} 

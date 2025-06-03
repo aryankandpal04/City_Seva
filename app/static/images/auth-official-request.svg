@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="800" height="400" viewBox="0 0 800 400" xmlns="http://www.w3.org/2000/svg">
+    <!-- Background -->
+    <rect width="800" height="400" fill="#f8fafc"/>
+    
+    <!-- Official Request Form -->
+    <g transform="translate(400, 200)">
+        <!-- Form Container -->
+        <rect x="-250" y="-150" width="500" height="300" rx="15" fill="#00bcd4" opacity="0.8"/>
+        
+        <!-- Form Header -->
+        <g transform="translate(0, -100)">
+            <text x="0" y="0" text-anchor="middle" fill="white" font-size="24" font-weight="bold">Request Official Account</text>
+            <text x="0" y="30" text-anchor="middle" fill="white" font-size="14">Fill in your details to request an official account</text>
+        </g>
+        
+        <!-- Form Fields -->
+        <g transform="translate(-200, -40)">
+            <!-- Name Fields -->
+            <g transform="translate(0, 0)">
+                <!-- First Name -->
+                <rect x="0" y="0" width="180" height="40" rx="5" fill="white" opacity="0.6"/>
+                <circle cx="20" cy="20" r="10" fill="#00e5ff"/>
+                <path d="M15,20 L25,20 M20,15 L20,25" stroke="white" stroke-width="2"/>
+                <rect x="40" y="15" width="120" height="10" rx="2" fill="#00bcd4"/>
+                
+                <!-- Last Name -->
+                <rect x="200" y="0" width="180" height="40" rx="5" fill="white" opacity="0.6"/>
+                <circle cx="220" cy="20" r="10" fill="#00e5ff"/>
+                <path d="M215,20 L225,20 M220,15 L220,25" stroke="white" stroke-width="2"/>
+                <rect x="240" y="15" width="120" height="10" rx="2" fill="#00bcd4"/>
+            </g>
+            
+            <!-- Department and ID -->
+            <g transform="translate(0, 60)">
+                <!-- Department -->
+                <rect x="0" y="0" width="180" height="40" rx="5" fill="white" opacity="0.6"/>
+                <circle cx="20" cy="20" r="10" fill="#00e5ff"/>
+                <path d="M15,15 L25,15 M15,20 L25,20 M15,25 L25,25" stroke="white" stroke-width="2"/>
+                <rect x="40" y="15" width="120" height="10" rx="2" fill="#00bcd4"/>
+                
+                <!-- Official ID -->
+                <rect x="200" y="0" width="180" height="40" rx="5" fill="white" opacity="0.6"/>
+                <circle cx="220" cy="20" r="10" fill="#00e5ff"/>
+                <path d="M215,15 L225,15 M215,20 L225,20 M215,25 L225,25" stroke="white" stroke-width="2"/>
+                <rect x="240" y="15" width="120" height="10" rx="2" fill="#00bcd4"/>
+            </g>
+            
+            <!-- Email and Phone -->
+            <g transform="translate(0, 120)">
+                <!-- Email -->
+                <rect x="0" y="0" width="180" height="40" rx="5" fill="white" opacity="0.6"/>
+                <circle cx="20" cy="20" r="10" fill="#00e5ff"/>
+                <path d="M15,20 L25,20 M20,15 L20,25" stroke="white" stroke-width="2"/>
+                <rect x="40" y="15" width="120" height="10" rx="2" fill="#00bcd4"/>
+                
+                <!-- Phone -->
+                <rect x="200" y="0" width="180" height="40" rx="5" fill="white" opacity="0.6"/>
+                <circle cx="220" cy="20" r="10" fill="#00e5ff"/>
+                <path d="M215,15 L225,15 M215,20 L225,20 M215,25 L225,25" stroke="white" stroke-width="2"/>
+                <rect x="240" y="15" width="120" height="10" rx="2" fill="#00bcd4"/>
+            </g>
+        </g>
+        
+        <!-- Submit Button -->
+        <g transform="translate(-100, 100)">
+            <rect x="0" y="0" width="200" height="50" rx="25" fill="#00e5ff"/>
+            <text x="100" y="30" text-anchor="middle" fill="white" font-size="16" font-weight="bold">Submit Request</text>
+        </g>
+    </g>
+    
+    <!-- Decorative Elements -->
+    <circle cx="100" cy="100" r="30" fill="#00e5ff" opacity="0.2"/>
+    <circle cx="700" cy="150" r="40" fill="#00bcd4" opacity="0.2"/>
+    <circle cx="400" cy="80" r="25" fill="#00e5ff" opacity="0.2"/>
+    
+    <!-- Government Icons -->
+    <g transform="translate(150, 200)">
+        <!-- Government Building -->
+        <circle cx="0" cy="0" r="30" fill="#00bcd4" opacity="0.8"/>
+        <rect x="-15" y="-20" width="30" height="40" fill="white"/>
+        <path d="M-15,-20 L0,-30 L15,-20" fill="white"/>
+        <rect x="-5" y="-10" width="10" height="20" fill="#00bcd4"/>
+    </g>
+    
+    <g transform="translate(650, 200)">
+        <!-- Document Icon -->
+        <circle cx="0" cy="0" r="30" fill="#00bcd4" opacity="0.8"/>
+        <rect x="-10" y="-15" width="20" height="30" rx="2" fill="white"/>
+        <path d="M-5,-5 L5,-5 M-5,0 L5,0 M-5,5 L5,5" stroke="#00bcd4" stroke-width="2"/>
+    </g>
+</svg> 

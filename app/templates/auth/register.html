@@ -1,8 +1,9 @@
 {% extends 'base.html' %}
 
-{% block title %}Register | CitySeva{% endblock %}
+{% block title %}Register - CitySeva{% endblock %}
 
 {% block content %}
+<<<<<<< HEAD
 <div class="container py-4">
     <div class="row justify-content-center">
         <div class="col-md-8">
@@ -12,26 +13,59 @@
                 </div>
                 <div class="card-body">
                     <form method="POST" action="{{ url_for('auth.register') }}" id="registerForm" class="needs-validation" novalidate>
+=======
+<div class="container py-5">
+    <div class="row align-items-center mb-5">
+        <div class="col-md-6">
+            <h1 class="display-4 mb-4">Join CitySeva</h1>
+            <p class="lead">Create an account to report civic issues and track their resolution</p>
+        </div>
+        <div class="col-md-6">
+            <img src="{{ url_for('static', filename='images/auth-register.svg') }}" alt="Register" class="img-fluid">
+        </div>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="auth-card card shadow-lg">
+                <div class="card-header bg-primary text-white">
+                    <h3 class="mb-0"><i class="fas fa-user-plus me-2"></i>Create Your Account</h3>
+                </div>
+                <div class="card-body p-4">
+                    <form method="POST" action="{{ url_for('auth.register') }}">
+>>>>>>> 928b86656950660435efba515a1cc264cd47215b
                         {{ form.hidden_tag() }}
                         
                         <!-- Role Selection -->
                         <div class="mb-4">
-                            <label class="form-label">I want to register as:</label>
-                            <div class="d-flex justify-content-center gap-3 mt-2">
+                            <label class="form-label fw-bold">I want to register as:</label>
+                            <div class="d-flex justify-content-center gap-3 mt-3">
                                 <div class="form-check form-check-inline flex-grow-1">
                                     <input class="form-check-input visually-hidden" type="radio" name="role" id="role-citizen" value="citizen" {% if form.role.data == 'citizen' %}checked{% endif %}>
+<<<<<<< HEAD
                                     <label class="form-check-label btn btn-outline-primary w-100 py-3" for="role-citizen">
                                         <i class="fas fa-user fa-2x mb-2 d-block"></i>
                                         <div>Citizen</div>
                                         <div class="small text-muted">Report issues in your area</div>
+=======
+                                    <label class="form-check-label btn btn-outline-primary w-100 py-3 rounded-pill" for="role-citizen">
+                                        <i class="fas fa-user me-2"></i>Citizen
+                                        <div class="small text-muted mt-1">Report issues in your area</div>
+>>>>>>> 928b86656950660435efba515a1cc264cd47215b
                                     </label>
                                 </div>
                                 <div class="form-check form-check-inline flex-grow-1">
                                     <input class="form-check-input visually-hidden" type="radio" name="role" id="role-official" value="official" {% if form.role.data == 'official' %}checked{% endif %}>
+<<<<<<< HEAD
                                     <label class="form-check-label btn btn-outline-primary w-100 py-3" for="role-official">
                                         <i class="fas fa-user-tie fa-2x mb-2 d-block"></i>
                                         <div>Government Official</div>
                                         <div class="small text-muted">Manage citizen complaints</div>
+=======
+                                    <label class="form-check-label btn btn-outline-info w-100 py-3 rounded-pill" for="role-official">
+                                        <i class="fas fa-user-tie me-2"></i>Government Official
+                                        <div class="small text-muted mt-1">Manage citizen complaints</div>
+>>>>>>> 928b86656950660435efba515a1cc264cd47215b
                                     </label>
                                 </div>
                             </div>
@@ -42,24 +76,34 @@
                         
                         <div class="row">
                             <div class="col-md-6 mb-3">
+<<<<<<< HEAD
                                 {{ form.first_name.label(class="form-label") }}
                                 <div class="input-group">
                                     <span class="input-group-text"><i class="fas fa-user"></i></span>
                                     {{ form.first_name(class="form-control", placeholder="Enter your first name", required=True) }}
                                     <div class="invalid-feedback">Please enter your first name</div>
                                 </div>
+=======
+                                {{ form.first_name.label(class="form-label fw-bold") }}
+                                {{ form.first_name(class="form-control", placeholder="Enter your first name") }}
+>>>>>>> 928b86656950660435efba515a1cc264cd47215b
                                 {% for error in form.first_name.errors %}
                                     <div class="text-danger">{{ error }}</div>
                                 {% endfor %}
                             </div>
                             
                             <div class="col-md-6 mb-3">
+<<<<<<< HEAD
                                 {{ form.last_name.label(class="form-label") }}
                                 <div class="input-group">
                                     <span class="input-group-text"><i class="fas fa-user"></i></span>
                                     {{ form.last_name(class="form-control", placeholder="Enter your last name", required=True) }}
                                     <div class="invalid-feedback">Please enter your last name</div>
                                 </div>
+=======
+                                {{ form.last_name.label(class="form-label fw-bold") }}
+                                {{ form.last_name(class="form-control", placeholder="Enter your last name") }}
+>>>>>>> 928b86656950660435efba515a1cc264cd47215b
                                 {% for error in form.last_name.errors %}
                                     <div class="text-danger">{{ error }}</div>
                                 {% endfor %}
@@ -67,29 +111,40 @@
                         </div>
                         
                         <div class="mb-3">
+<<<<<<< HEAD
                             {{ form.email.label(class="form-label") }}
                             <div class="input-group">
                                 <span class="input-group-text"><i class="fas fa-envelope"></i></span>
                                 {{ form.email(class="form-control", placeholder="Enter your email", required=True) }}
                                 <div class="invalid-feedback">Please enter a valid email address</div>
                             </div>
+=======
+                            {{ form.email.label(class="form-label fw-bold") }}
+                            {{ form.email(class="form-control", placeholder="Enter your email") }}
+>>>>>>> 928b86656950660435efba515a1cc264cd47215b
                             {% for error in form.email.errors %}
                                 <div class="text-danger">{{ error }}</div>
                             {% endfor %}
                         </div>
                         
                         <div class="mb-3">
+<<<<<<< HEAD
                             {{ form.username.label(class="form-label") }}
                             <div class="input-group">
                                 <span class="input-group-text"><i class="fas fa-at"></i></span>
                                 {{ form.username(class="form-control", placeholder="Choose a username", required=True) }}
                                 <div class="invalid-feedback">Please choose a username</div>
                             </div>
+=======
+                            {{ form.username.label(class="form-label fw-bold") }}
+                            {{ form.username(class="form-control", placeholder="Choose a username") }}
+>>>>>>> 928b86656950660435efba515a1cc264cd47215b
                             {% for error in form.username.errors %}
                                 <div class="text-danger">{{ error }}</div>
                             {% endfor %}
                         </div>
                         
+<<<<<<< HEAD
                         <div class="row">
                             <div class="col-md-6 mb-3">
                                 {{ form.phone.label(class="form-label") }}
@@ -98,11 +153,40 @@
                                     {{ form.phone(class="form-control", placeholder="Optional") }}
                                 </div>
                                 {% for error in form.phone.errors %}
+=======
+                        <div class="mb-3">
+                            {{ form.phone.label(class="form-label fw-bold") }}
+                            {{ form.phone(class="form-control", placeholder="Optional") }}
+                            {% for error in form.phone.errors %}
+                                <div class="text-danger">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                        
+                        <div class="mb-3">
+                            {{ form.address.label(class="form-label fw-bold") }}
+                            {{ form.address(class="form-control", rows=3, placeholder="Optional") }}
+                            {% for error in form.address.errors %}
+                                <div class="text-danger">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                {{ form.password.label(class="form-label fw-bold") }}
+                                <div class="input-group">
+                                    {{ form.password(class="form-control", placeholder="Choose a password") }}
+                                    <button class="btn btn-outline-secondary toggle-password" type="button">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                </div>
+                                {% for error in form.password.errors %}
+>>>>>>> 928b86656950660435efba515a1cc264cd47215b
                                     <div class="text-danger">{{ error }}</div>
                                 {% endfor %}
                             </div>
                             
                             <div class="col-md-6 mb-3">
+<<<<<<< HEAD
                                 {{ form.address.label(class="form-label") }}
                                 <div class="input-group">
                                     <span class="input-group-text"><i class="fas fa-map-marker-alt"></i></span>
@@ -142,6 +226,14 @@
                                         <i class="fas fa-eye"></i>
                                     </button>
                                     <div class="invalid-feedback">Passwords must match</div>
+=======
+                                {{ form.confirm_password.label(class="form-label fw-bold") }}
+                                <div class="input-group">
+                                    {{ form.confirm_password(class="form-control", placeholder="Confirm your password") }}
+                                    <button class="btn btn-outline-secondary toggle-password" type="button">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+>>>>>>> 928b86656950660435efba515a1cc264cd47215b
                                 </div>
                                 {% for error in form.confirm_password.errors %}
                                     <div class="text-danger">{{ error }}</div>
@@ -162,17 +254,23 @@
                                     </div>
                                     
                                     <div class="mb-3">
+<<<<<<< HEAD
                                         {{ form.department.label(class="form-label") }}
                                         <div class="input-group">
                                             <span class="input-group-text"><i class="fas fa-building"></i></span>
                                             {{ form.department(class="form-select") }}
                                         </div>
+=======
+                                        {{ form.department.label(class="form-label fw-bold") }}
+                                        {{ form.department(class="form-select") }}
+>>>>>>> 928b86656950660435efba515a1cc264cd47215b
                                         {% for error in form.department.errors %}
                                             <div class="text-danger">{{ error }}</div>
                                         {% endfor %}
                                     </div>
                                     
                                     <div class="mb-3" id="otherDepartmentContainer" style="display: none;">
+<<<<<<< HEAD
                                         <label for="otherDepartment" class="form-label">Custom Department Name <span class="text-danger">*</span></label>
                                         <div class="input-group">
                                             <span class="input-group-text"><i class="fas fa-building"></i></span>
@@ -211,17 +309,48 @@
                                             <span class="input-group-text"><i class="fas fa-phone-office"></i></span>
                                             {{ form.office_phone(class="form-control", placeholder="Your official contact number") }}
                                         </div>
+=======
+                                        <label for="otherDepartment" class="form-label fw-bold">Custom Department Name <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" id="otherDepartment" name="other_department">
+                                        <div class="form-text">Please specify the custom department name.</div>
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        {{ form.position.label(class="form-label fw-bold") }}
+                                        {{ form.position(class="form-control", placeholder="Your job title or position") }}
+                                        {% for error in form.position.errors %}
+                                            <div class="text-danger">{{ error }}</div>
+                                        {% endfor %}
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        {{ form.employee_id.label(class="form-label fw-bold") }}
+                                        {{ form.employee_id(class="form-control", placeholder="Your government employee ID") }}
+                                        {% for error in form.employee_id.errors %}
+                                            <div class="text-danger">{{ error }}</div>
+                                        {% endfor %}
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        {{ form.office_phone.label(class="form-label fw-bold") }}
+                                        {{ form.office_phone(class="form-control", placeholder="Your official contact number") }}
+>>>>>>> 928b86656950660435efba515a1cc264cd47215b
                                         {% for error in form.office_phone.errors %}
                                             <div class="text-danger">{{ error }}</div>
                                         {% endfor %}
                                     </div>
                                     
                                     <div class="mb-3">
+<<<<<<< HEAD
                                         {{ form.justification.label(class="form-label") }}
                                         <div class="input-group">
                                             <span class="input-group-text"><i class="fas fa-comment"></i></span>
                                             {{ form.justification(class="form-control", rows=3, placeholder="Explain how you will use an official account") }}
                                         </div>
+=======
+                                        {{ form.justification.label(class="form-label fw-bold") }}
+                                        {{ form.justification(class="form-control", rows=3, placeholder="Explain how you will use an official account") }}
+>>>>>>> 928b86656950660435efba515a1cc264cd47215b
                                         {% for error in form.justification.errors %}
                                             <div class="text-danger">{{ error }}</div>
                                         {% endfor %}
@@ -243,10 +372,14 @@
                         </div>
                     </form>
                     
-                    <hr>
+                    <hr class="my-4">
                     
                     <div class="text-center">
+<<<<<<< HEAD
                         <p>Already have an account? <a href="{{ url_for('auth.login') }}" class="text-decoration-none">Login here</a></p>
+=======
+                        <p class="mb-0">Already have an account? <a href="{{ url_for('auth.login') }}" class="text-primary text-decoration-none">Login here</a></p>
+>>>>>>> 928b86656950660435efba515a1cc264cd47215b
                     </div>
                 </div>
             </div>
@@ -349,6 +482,25 @@ document.addEventListener('DOMContentLoaded', function() {
             form.classList.add('was-validated');
         });
     }
+});
+
+// Password toggle functionality
+const toggleButtons = document.querySelectorAll('.toggle-password');
+toggleButtons.forEach(function(button) {
+    button.addEventListener('click', function() {
+        const input = this.previousElementSibling;
+        const icon = this.querySelector('i');
+        
+        if (input.type === 'password') {
+            input.type = 'text';
+            icon.classList.remove('fa-eye');
+            icon.classList.add('fa-eye-slash');
+        } else {
+            input.type = 'password';
+            icon.classList.remove('fa-eye-slash');
+            icon.classList.add('fa-eye');
+        }
+    });
 });
 </script>
 {% endblock %}

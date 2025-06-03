@@ -1,12 +1,21 @@
-{% extends 'base.html' %}
+{% extends "base.html" %}
 
-{% block title %}Submit New Complaint | CitySeva{% endblock %}
-
-{% block styles %}{% endblock %}
+{% block title %}New Complaint - CitySeva{% endblock %}
 
 {% block content %}
-<div class="container py-4">
+<div class="container py-5">
+    <div class="row align-items-center mb-5">
+        <div class="col-md-6">
+            <h1 class="display-4 mb-4">Submit New Complaint</h1>
+            <p class="lead">Report civic issues in your area and help make your city better</p>
+        </div>
+        <div class="col-md-6">
+            <img src="{{ url_for('static', filename='images/citizen-new-complaint.svg') }}" alt="Submit New Complaint" class="img-fluid">
+        </div>
+    </div>
+
     <div class="row justify-content-center">
+<<<<<<< HEAD
         <div class="col-md-10">
             <div class="card shadow" data-aos="fade-up">
                 <div class="card-header">
@@ -108,9 +117,133 @@
                             {% endfor %}
                             <div class="form-text"><i class="fas fa-info-circle me-1"></i> Upload images or videos of the issue for verification purposes. You can select multiple files. Accepted formats: JPG, JPEG, PNG, GIF, MP4, MOV, AVI. Max size: 10MB per file.</div>
                             <div id="preview-container" class="mt-2 d-flex flex-wrap gap-2"></div>
-                        </div>
+=======
+        <div class="col-lg-8">
+            <div class="card shadow">
+                <div class="card-header">
+                    <h4 class="mb-0">Submit New Complaint</h4>
+                </div>
+                <div class="card-body">
+                    <form method="POST" enctype="multipart/form-data">
+                        {{ form.hidden_tag() }}
                         
-                        <div class="d-grid gap-2">
+                        <!-- Title -->
+                        <div class="mb-4">
+                            {{ form.title.label(class="form-label") }}
+                            {% if form.title.errors %}
+                                {{ form.title(class="form-control is-invalid") }}
+                                <div class="invalid-feedback">
+                                    {% for error in form.title.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                {{ form.title(class="form-control", placeholder="Brief title of your complaint") }}
+                            {% endif %}
+>>>>>>> 928b86656950660435efba515a1cc264cd47215b
+                        </div>
+
+                        <!-- Category Selection -->
+                        <div class="mb-4">
+                            {{ form.category.label(class="form-label") }}
+                            {% if form.category.errors %}
+                                {{ form.category(class="form-select is-invalid") }}
+                                <div class="invalid-feedback">
+                                    {% for error in form.category.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                {{ form.category(class="form-select", id="category-select") }}
+                            {% endif %}
+                            <div class="form-text">Select the most appropriate category for your complaint</div>
+                            
+                            <!-- Custom Category Field (initially hidden) -->
+                            <div id="custom-category-container" class="mt-3" style="display: none;">
+                                {{ form.custom_category.label(class="form-label") }}
+                                {% if form.custom_category.errors %}
+                                    {{ form.custom_category(class="form-control is-invalid") }}
+                                    <div class="invalid-feedback">
+                                        {% for error in form.custom_category.errors %}
+                                            {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                {% else %}
+                                    {{ form.custom_category(class="form-control", placeholder="Enter custom category") }}
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Description -->
+                        <div class="mb-4">
+                            {{ form.description.label(class="form-label") }}
+                            {% if form.description.errors %}
+                                {{ form.description(class="form-control is-invalid", rows="5") }}
+                                <div class="invalid-feedback">
+                                    {% for error in form.description.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                {{ form.description(class="form-control", rows="5", placeholder="Detailed description of the issue...") }}
+                            {% endif %}
+                        </div>
+
+                        <!-- Map Preview -->
+                        <div class="mb-4">
+                            <div class="input-group mb-3">
+                                <input type="text" id="map-location-input" class="form-control" placeholder="Search location on map...">
+                                <button class="btn btn-outline-primary" type="button" id="search-location-btn">
+                                    <i class="fas fa-search"></i>
+                                </button>
+                            </div>
+                            <div id="map" style="height: 300px; border-radius: 12px;"></div>
+                            {{ form.location(id="location-input", type="hidden") }}
+                            {{ form.latitude(id="latitude-input", type="hidden") }}
+                            {{ form.longitude(id="longitude-input", type="hidden") }}
+                            <div class="form-text mt-2">
+                                <a href="#" id="use-current-location" class="text-primary">
+                                    <i class="fas fa-map-marker-alt me-1"></i>Use current location
+                                </a>
+                            </div>
+                        </div>
+
+                        <!-- Priority -->
+                        <div class="mb-4">
+                            {{ form.priority.label(class="form-label") }}
+                            {% if form.priority.errors %}
+                                {{ form.priority(class="form-select is-invalid") }}
+                                <div class="invalid-feedback">
+                                    {% for error in form.priority.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                {{ form.priority(class="form-select") }}
+                            {% endif %}
+                        </div>
+
+                        <!-- Media Files -->
+                        <div class="mb-4">
+                            {{ form.media_files.label(class="form-label") }}
+                            {{ form.media_files(class="form-control", multiple=True, accept="image/*,video/*", id="media-files-input") }}
+                            {% if form.media_files.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {% for error in form.media_files.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                            <div class="form-text">You can upload up to 5 images or videos (optional)</div>
+                            
+                            <!-- Media Preview -->
+                            <div id="media-preview" class="mt-3">
+                                <div class="row g-2" id="preview-container"></div>
+                            </div>
+                        </div>
+
+                        <!-- Submit Button -->
+                        <div class="d-grid">
                             {{ form.submit(class="btn btn-primary btn-lg") }}
                         </div>
                     </form>
@@ -122,6 +255,7 @@
 {% endblock %}
 
 {% block scripts %}
+<<<<<<< HEAD
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     // File preview functionality
@@ -214,5 +348,397 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 });
+=======
+<!-- Google Maps API -->
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD8atpL2upxvA99KrVaZFlv8XxgrqbGZGE&libraries=places&callback=initMap" async defer></script>
+
+<script>
+// Category selection handling
+document.addEventListener('DOMContentLoaded', function() {
+    const categorySelect = document.getElementById('category-select');
+    const customCategoryContainer = document.getElementById('custom-category-container');
+    
+    console.log('Category select element:', categorySelect);
+    console.log('Custom category container:', customCategoryContainer);
+    
+    function toggleCustomCategory() {
+        console.log('Category value:', categorySelect.value);
+        // Get the selected option's text
+        const selectedOption = categorySelect.options[categorySelect.selectedIndex];
+        console.log('Selected option text:', selectedOption.text);
+        
+        if (selectedOption.text.toLowerCase() === 'others') {
+            console.log('Showing custom category field');
+            customCategoryContainer.style.display = 'block';
+            customCategoryContainer.querySelector('input').required = true;
+        } else {
+            console.log('Hiding custom category field');
+            customCategoryContainer.style.display = 'none';
+            customCategoryContainer.querySelector('input').required = false;
+        }
+    }
+    
+    // Initial check
+    toggleCustomCategory();
+    
+    // Listen for changes
+    categorySelect.addEventListener('change', toggleCustomCategory);
+});
+
+// Global variables for map and marker
+let map, marker;
+const defaultLocation = { lat: 20.5937, lng: 78.9629 }; // Default to India's center
+
+// Define initMap before the API loads
+window.initMap = function() {
+    console.log('Initializing map for new complaint form');
+
+    map = new google.maps.Map(document.getElementById('map'), {
+        zoom: 5,
+        center: defaultLocation,
+        styles: [
+            {
+                "featureType": "water",
+                "elementType": "geometry",
+                "stylers": [{"color": "#e9e9e9"}, {"lightness": 17}]
+            },
+            {
+                "featureType": "landscape",
+                "elementType": "geometry",
+                "stylers": [{"color": "#f5f5f5"}, {"lightness": 20}]
+            },
+            {
+                "featureType": "road.highway",
+                "elementType": "geometry.fill",
+                "stylers": [{"color": "#ffffff"}, {"lightness": 17}]
+            },
+            {
+                "featureType": "administrative",
+                "elementType": "geometry.stroke",
+                "stylers": [{"color": "#00bcd4"}, {"lightness": 17}, {"weight": 1.2}]
+            }
+        ]
+    });
+
+    // Initialize PlaceAutocompleteElement
+    const placeAutocomplete = document.getElementById('location-input');
+    if (placeAutocomplete) {
+        placeAutocomplete.addEventListener('gmp-place-changed', () => {
+            const place = placeAutocomplete.getPlace();
+            if (!place.geometry) {
+                showLocationError('Please select a location from the dropdown suggestions.');
+                return;
+            }
+            updateMapLocation(place.geometry.location);
+        });
+    }
+
+    // Initialize map location search
+    const mapLocationInput = document.getElementById('map-location-input');
+    const searchLocationBtn = document.getElementById('search-location-btn');
+    
+    if (mapLocationInput && searchLocationBtn) {
+        // Create autocomplete for map location input
+        const autocomplete = new google.maps.places.Autocomplete(mapLocationInput);
+        
+        // Handle place selection
+        autocomplete.addListener('place_changed', () => {
+            const place = autocomplete.getPlace();
+            if (!place.geometry) {
+                showLocationError('Please select a location from the dropdown suggestions.');
+                return;
+            }
+            updateMapLocation(place.geometry.location);
+            document.getElementById('location-input').value = place.formatted_address;
+        });
+
+        // Handle search button click
+        searchLocationBtn.addEventListener('click', () => {
+            const geocoder = new google.maps.Geocoder();
+            geocoder.geocode({ address: mapLocationInput.value }, (results, status) => {
+                if (status === 'OK' && results[0]) {
+                    updateMapLocation(results[0].geometry.location);
+                    document.getElementById('location-input').value = results[0].formatted_address;
+                } else {
+                    showLocationError('Could not find the location. Please try a different search term.');
+                }
+            });
+        });
+
+        // Handle enter key press
+        mapLocationInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                searchLocationBtn.click();
+            }
+        });
+    }
+
+    // Add marker drag event listener
+    map.addListener('click', (e) => {
+        updateMapLocation(e.latLng);
+        reverseGeocode(e.latLng);
+    });
+
+    // Initialize current location button
+    const useCurrentLocationBtn = document.getElementById('use-current-location');
+    if (useCurrentLocationBtn) {
+        useCurrentLocationBtn.addEventListener('click', handleCurrentLocationClick);
+    }
+};
+
+// Helper functions
+function showLocationError(message) {
+    let errorDiv = document.getElementById('location-error');
+    if (!errorDiv) {
+        errorDiv = document.createElement('div');
+        errorDiv.id = 'location-error';
+        errorDiv.className = 'alert alert-warning alert-dismissible fade show mt-2';
+        errorDiv.innerHTML = `
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            <div class="d-flex align-items-center">
+                <i class="fas fa-exclamation-triangle me-2"></i>
+                <span id="location-error-message"></span>
+            </div>
+        `;
+        document.getElementById('location-input').parentNode.appendChild(errorDiv);
+    }
+    document.getElementById('location-error-message').textContent = message;
+}
+
+function updateMapLocation(location) {
+    if (!map) {
+        console.error('Map not initialized');
+        return;
+    }
+
+    if (marker) {
+        marker.setMap(null);
+    }
+    
+    marker = new google.maps.Marker({
+        position: location,
+        map: map,
+        animation: google.maps.Animation.DROP,
+        draggable: true // Make marker draggable
+    });
+
+    // Add drag event listener to marker
+    marker.addListener('dragend', function(e) {
+        reverseGeocode(e.latLng);
+    });
+
+    map.setCenter(location);
+    map.setZoom(15);
+
+    // Update hidden inputs with coordinates
+    document.getElementById('latitude-input').value = location.lat();
+    document.getElementById('longitude-input').value = location.lng();
+}
+
+function reverseGeocode(latLng) {
+    if (!map) {
+        console.error('Map not initialized');
+        return;
+    }
+
+    const geocoder = new google.maps.Geocoder();
+    geocoder.geocode({ location: latLng }, (results, status) => {
+        if (status === 'OK' && results[0]) {
+            const locationInput = document.getElementById('location-input');
+            if (locationInput) {
+                locationInput.value = results[0].formatted_address;
+            }
+            // Update coordinates
+            document.getElementById('latitude-input').value = latLng.lat();
+            document.getElementById('longitude-input').value = latLng.lng();
+        } else {
+            showLocationError('Could not determine the address for this location. Please enter it manually.');
+        }
+    });
+}
+
+function handleLocationError(error) {
+    let errorMessage;
+    switch(error.code) {
+        case error.PERMISSION_DENIED:
+            errorMessage = 'Location permission was denied. Please enable location access in your browser settings or enter the location manually.';
+            break;
+        case error.POSITION_UNAVAILABLE:
+            errorMessage = 'Location information is unavailable. Please check if your device\'s location service is enabled or enter the location manually.';
+            break;
+        case error.TIMEOUT:
+            errorMessage = 'Location request timed out. Please try again or enter the location manually.';
+            break;
+        default:
+            errorMessage = 'An unknown error occurred while getting your location. Please enter it manually.';
+    }
+    showLocationError(errorMessage);
+}
+
+function handleCurrentLocationClick(e) {
+    e.preventDefault();
+    
+    if (!map) {
+        console.error('Map not initialized');
+        return;
+    }
+    
+    // Clear any existing error messages
+    const existingError = document.getElementById('location-error');
+    if (existingError) {
+        existingError.remove();
+    }
+
+    if (navigator.geolocation) {
+        // Show loading state
+        const button = e.target.closest('a');
+        const originalContent = button.innerHTML;
+        button.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Getting location...';
+        button.style.pointerEvents = 'none';
+
+        navigator.geolocation.getCurrentPosition(
+            (position) => {
+                const location = {
+                    lat: position.coords.latitude,
+                    lng: position.coords.longitude
+                };
+                updateMapLocation(location);
+                reverseGeocode(location);
+                
+                // Reset button
+                button.innerHTML = originalContent;
+                button.style.pointerEvents = 'auto';
+            },
+            (error) => {
+                handleLocationError(error);
+                
+                // Reset button
+                button.innerHTML = originalContent;
+                button.style.pointerEvents = 'auto';
+            },
+            {
+                enableHighAccuracy: true,
+                timeout: 10000,
+                maximumAge: 0
+            }
+        );
+    } else {
+        showLocationError('Geolocation is not supported by your browser. Please enter the location manually.');
+    }
+}
+
+// Media Preview Handling
+document.addEventListener('DOMContentLoaded', function() {
+    const mediaInput = document.getElementById('media-files-input');
+    const previewContainer = document.getElementById('preview-container');
+    const maxFiles = 5;
+
+    mediaInput.addEventListener('change', function(e) {
+        const files = Array.from(e.target.files);
+        
+        // Check if total files exceed limit
+        if (files.length > maxFiles) {
+            showMediaError(`You can only upload up to ${maxFiles} files.`);
+            mediaInput.value = '';
+            return;
+        }
+
+        // Clear existing previews
+        previewContainer.innerHTML = '';
+
+        files.forEach((file, index) => {
+            if (!file.type.startsWith('image/') && !file.type.startsWith('video/')) {
+                showMediaError('Please upload only images or videos.');
+                return;
+            }
+
+            const col = document.createElement('div');
+            col.className = 'col-md-4 col-sm-6';
+            
+            const card = document.createElement('div');
+            card.className = 'card h-100';
+            
+            const cardBody = document.createElement('div');
+            cardBody.className = 'card-body p-2';
+            
+            const preview = document.createElement('div');
+            preview.className = 'position-relative';
+            
+            if (file.type.startsWith('image/')) {
+                const img = document.createElement('img');
+                img.className = 'img-fluid rounded';
+                img.style.height = '150px';
+                img.style.width = '100%';
+                img.style.objectFit = 'cover';
+                
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    img.src = e.target.result;
+                };
+                reader.readAsDataURL(file);
+                
+                preview.appendChild(img);
+            } else if (file.type.startsWith('video/')) {
+                const video = document.createElement('video');
+                video.className = 'img-fluid rounded';
+                video.style.height = '150px';
+                video.style.width = '100%';
+                video.style.objectFit = 'cover';
+                video.controls = true;
+                
+                const source = document.createElement('source');
+                source.src = URL.createObjectURL(file);
+                source.type = file.type;
+                
+                video.appendChild(source);
+                preview.appendChild(video);
+            }
+            
+            // Add remove button
+            const removeBtn = document.createElement('button');
+            removeBtn.className = 'btn btn-danger btn-sm position-absolute top-0 end-0 m-1';
+            removeBtn.innerHTML = '<i class="fas fa-times"></i>';
+            removeBtn.onclick = function() {
+                col.remove();
+                // Remove the file from the input
+                const dt = new DataTransfer();
+                const files = mediaInput.files;
+                for (let i = 0; i < files.length; i++) {
+                    if (i !== index) {
+                        dt.items.add(files[i]);
+                    }
+                }
+                mediaInput.files = dt.files;
+            };
+            preview.appendChild(removeBtn);
+            
+            // Add file name
+            const fileName = document.createElement('small');
+            fileName.className = 'd-block text-truncate mt-1';
+            fileName.textContent = file.name;
+            preview.appendChild(fileName);
+            
+            cardBody.appendChild(preview);
+            card.appendChild(cardBody);
+            col.appendChild(card);
+            previewContainer.appendChild(col);
+        });
+    });
+});
+
+function showMediaError(message) {
+    const errorDiv = document.createElement('div');
+    errorDiv.className = 'alert alert-danger alert-dismissible fade show mt-2';
+    errorDiv.innerHTML = `
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        <div class="d-flex align-items-center">
+            <i class="fas fa-exclamation-triangle me-2"></i>
+            <span>${message}</span>
+        </div>
+    `;
+    document.getElementById('media-preview').insertBefore(errorDiv, document.getElementById('preview-container'));
+}
+>>>>>>> 928b86656950660435efba515a1cc264cd47215b
 </script>
 {% endblock %} 

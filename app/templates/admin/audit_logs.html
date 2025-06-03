@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+
+{% block title %}Audit Logs - CitySeva{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <!-- Welcome Section -->
+    <div class="bg-white rounded-lg shadow-md p-6 mb-8">
+        <div class="flex items-center">
+            <div class="flex-1">
+                <h1 class="text-3xl font-bold text-gray-800 mb-2">Audit Logs</h1>
+                <p class="text-gray-600">System activity and user actions</p>
+            </div>
+            <div class="ml-8">
+                <img src="{{ url_for('static', filename='images/admin-audit-logs.svg') }}" alt="Audit Logs" class="h-48">
+            </div>
+        </div>
+    </div>
+    
+    <!-- Search and Filters -->
+    <!-- ... existing code ... -->
+</div>
+{% endblock %} 

@@ -1,58 +1,90 @@
 {% extends "base.html" %}
 
-{% block title %}Reports - CitySeva{% endblock %}
+{% block title %}Reports & Analytics - CitySeva{% endblock %}
 
 {% block styles %}
 <style>
     .chart-container {
         height: 300px;
     }
+    .icon-circle {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.25rem;
+    }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="container">
-    <h1 class="mb-4">System Reports</h1>
-    
+<div class="container py-5">
+    <div class="row align-items-center mb-5">
+        <div class="col-md-6">
+            <h1 class="display-4 mb-4">Reports & Analytics</h1>
+            <p class="lead">Comprehensive insights and statistics for better decision making.</p>
+        </div>
+        <div class="col-md-6">
+            <img src="{{ url_for('static', filename='images/admin-reports.svg') }}" alt="Reports & Analytics" class="img-fluid">
+        </div>
+    </div>
+
     <!-- Resolution Time -->
     <div class="card shadow mb-4">
-        <div class="card-header bg-light">
-            <h5 class="mb-0">Resolution Time Statistics</h5>
+        <div class="card-header d-flex align-items-center">
+            <h5 class="mb-0"><i class="fas fa-clock me-2"></i>Resolution Time Statistics</h5>
         </div>
         <div class="card-body">
-            <div class="row">
+            <div class="row g-4">
                 <div class="col-md-4">
-                    <div class="card text-center bg-primary text-white">
+                    <div class="card h-100">
                         <div class="card-body">
-                            <h5 class="card-title">Average Resolution Time</h5>
+                            <div class="d-flex align-items-center mb-3">
+                                <div class="icon-circle bg-primary bg-opacity-10 text-primary">
+                                    <i class="fas fa-history"></i>
+                                </div>
+                                <h6 class="card-title mb-0 ms-3">Average Resolution Time</h6>
+                            </div>
                             {% if resolution_stats.avg_time is not none %}
-                                <h2 class="display-5">{{ "%.1f"|format(resolution_stats.avg_time) }} days</h2>
+                                <h3 class="mb-0 text-primary">{{ "%.1f"|format(resolution_stats.avg_time) }} days</h3>
                             {% else %}
-                                <h2 class="display-5">N/A</h2>
+                                <h3 class="mb-0 text-primary">N/A</h3>
                             {% endif %}
                         </div>
                     </div>
                 </div>
                 <div class="col-md-4">
-                    <div class="card text-center bg-success text-white">
+                    <div class="card h-100">
                         <div class="card-body">
-                            <h5 class="card-title">Minimum Resolution Time</h5>
+                            <div class="d-flex align-items-center mb-3">
+                                <div class="icon-circle bg-success bg-opacity-10 text-success">
+                                    <i class="fas fa-bolt"></i>
+                                </div>
+                                <h6 class="card-title mb-0 ms-3">Minimum Resolution Time</h6>
+                            </div>
                             {% if resolution_stats.min_time is not none %}
-                                <h2 class="display-5">{{ "%.1f"|format(resolution_stats.min_time) }} days</h2>
+                                <h3 class="mb-0 text-success">{{ "%.1f"|format(resolution_stats.min_time) }} days</h3>
                             {% else %}
-                                <h2 class="display-5">N/A</h2>
+                                <h3 class="mb-0 text-success">N/A</h3>
                             {% endif %}
                         </div>
                     </div>
                 </div>
                 <div class="col-md-4">
-                    <div class="card text-center bg-danger text-white">
+                    <div class="card h-100">
                         <div class="card-body">
-                            <h5 class="card-title">Maximum Resolution Time</h5>
+                            <div class="d-flex align-items-center mb-3">
+                                <div class="icon-circle bg-danger bg-opacity-10 text-danger">
+                                    <i class="fas fa-hourglass-end"></i>
+                                </div>
+                                <h6 class="card-title mb-0 ms-3">Maximum Resolution Time</h6>
+                            </div>
                             {% if resolution_stats.max_time is not none %}
-                                <h2 class="display-5">{{ "%.1f"|format(resolution_stats.max_time) }} days</h2>
+                                <h3 class="mb-0 text-danger">{{ "%.1f"|format(resolution_stats.max_time) }} days</h3>
                             {% else %}
-                                <h2 class="display-5">N/A</h2>
+                                <h3 class="mb-0 text-danger">N/A</h3>
                             {% endif %}
                         </div>
                     </div>
@@ -63,13 +95,13 @@
     
     <!-- Category Stats -->
     <div class="card shadow mb-4">
-        <div class="card-header bg-light">
-            <h5 class="mb-0">Complaints by Category</h5>
+        <div class="card-header d-flex align-items-center">
+            <h5 class="mb-0"><i class="fas fa-list-alt me-2"></i>Complaints by Category</h5>
         </div>
-        <div class="card-body">
+        <div class="card-body p-0">
             <div class="table-responsive">
-                <table class="table table-hover">
-                    <thead>
+                <table class="table table-hover mb-0">
+                    <thead class="table-light">
                         <tr>
                             <th>Category</th>
                             <th>Total</th>
@@ -92,7 +124,12 @@
                                     <td>{{ cat.rejected }}</td>
                                     <td>
                                         {% if cat.total > 0 %}
-                                            {{ "%.1f"|format((cat.resolved / cat.total) * 100) }}%
+                                            <div class="d-flex align-items-center">
+                                                <div class="progress flex-grow-1" style="height: 6px;">
+                                                    <div class="progress-bar bg-success" role="progressbar" style="width: {{ (cat.resolved / cat.total) * 100 }}%"></div>
+                                                </div>
+                                                <span class="ms-2">{{ "%.1f"|format((cat.resolved / cat.total) * 100) }}%</span>
+                                            </div>
                                         {% else %}
                                             N/A
                                         {% endif %}
@@ -101,7 +138,12 @@
                             {% endfor %}
                         {% else %}
                             <tr>
-                                <td colspan="7" class="text-center">No data available</td>
+                                <td colspan="7" class="text-center py-4">
+                                    <div class="text-muted">
+                                        <i class="fas fa-chart-bar text-muted fa-2x mb-2"></i>
+                                        <p class="mb-0">No category data available</p>
+                                    </div>
+                                </td>
                             </tr>
                         {% endif %}
                     </tbody>
@@ -112,23 +154,28 @@
     
     <!-- Feedback Stats -->
     <div class="card shadow mb-4">
-        <div class="card-header bg-light">
-            <h5 class="mb-0">Feedback Statistics</h5>
+        <div class="card-header d-flex align-items-center">
+            <h5 class="mb-0"><i class="fas fa-star me-2"></i>Feedback Statistics</h5>
         </div>
         <div class="card-body">
             <div class="row align-items-center">
                 <div class="col-md-4">
-                    <div class="card text-center bg-info text-white">
+                    <div class="card h-100">
                         <div class="card-body">
-                            <h5 class="card-title">Average Rating</h5>
-                            <h2 class="display-5">{{ "%.1f"|format(avg_rating) }}/5</h2>
+                            <div class="d-flex align-items-center mb-3">
+                                <div class="icon-circle bg-info bg-opacity-10 text-info">
+                                    <i class="fas fa-smile"></i>
+                                </div>
+                                <h6 class="card-title mb-0 ms-3">Average Rating</h6>
+                            </div>
+                            <h3 class="mb-0 text-info">{{ "%.1f"|format(avg_rating) }}/5</h3>
                         </div>
                     </div>
                 </div>
                 <div class="col-md-8">
                     <div class="table-responsive">
-                        <table class="table">
-                            <thead>
+                        <table class="table table-hover mb-0">
+                            <thead class="table-light">
                                 <tr>
                                     <th>Rating</th>
                                     <th>Count</th>
@@ -146,11 +193,23 @@
                                     {% for rating in feedback_stats %}
                                         {% if rating.rating == i %}
                                             <tr>
-                                                <td>{{ rating.rating }} stars</td>
+                                                <td>
+                                                    {% for _ in range(i) %}
+                                                        <i class="fas fa-star text-warning"></i>
+                                                    {% endfor %}
+                                                    {% for _ in range(5 - i) %}
+                                                        <i class="far fa-star text-muted"></i>
+                                                    {% endfor %}
+                                                </td>
                                                 <td>{{ rating.count }}</td>
                                                 <td>
                                                     {% if total_feedback.value > 0 %}
-                                                        {{ "%.1f"|format((rating.count / total_feedback.value) * 100) }}%
+                                                        <div class="d-flex align-items-center">
+                                                            <div class="progress flex-grow-1" style="height: 6px;">
+                                                                <div class="progress-bar bg-{{ ['danger', 'warning', 'info', 'primary', 'success'][i-1] }}" role="progressbar" style="width: {{ (rating.count / total_feedback.value) * 100 }}%"></div>
+                                                            </div>
+                                                            <span class="ms-2">{{ "%.1f"|format((rating.count / total_feedback.value) * 100) }}%</span>
+                                                        </div>
                                                     {% else %}
                                                         0%
                                                     {% endif %}
@@ -161,7 +220,14 @@
                                     {% endfor %}
                                     {% if not found %}
                                         <tr>
-                                            <td>{{ i }} stars</td>
+                                            <td>
+                                                {% for _ in range(i) %}
+                                                    <i class="fas fa-star text-warning"></i>
+                                                {% endfor %}
+                                                {% for _ in range(5 - i) %}
+                                                    <i class="far fa-star text-muted"></i>
+                                                {% endfor %}
+                                            </td>
                                             <td>0</td>
                                             <td>0%</td>
                                         </tr>
@@ -177,29 +243,44 @@
     
     <!-- Top Locations -->
     <div class="card shadow">
-        <div class="card-header bg-light">
-            <h5 class="mb-0">Top Locations with Most Complaints</h5>
+        <div class="card-header d-flex align-items-center">
+            <h5 class="mb-0"><i class="fas fa-map-marker-alt me-2"></i>Top Locations with Most Complaints</h5>
         </div>
-        <div class="card-body">
+        <div class="card-body p-0">
             <div class="table-responsive">
-                <table class="table table-hover">
-                    <thead>
+                <table class="table table-hover mb-0">
+                    <thead class="table-light">
                         <tr>
                             <th>Location</th>
                             <th>Number of Complaints</th>
+                            <th>Distribution</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% if top_locations %}
+                            {% set max_count = top_locations[0].count %}
                             {% for location in top_locations %}
                                 <tr>
                                     <td>{{ location.location }}</td>
                                     <td>{{ location.count }}</td>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <div class="progress flex-grow-1" style="height: 6px;">
+                                                <div class="progress-bar bg-primary" role="progressbar" style="width: {{ (location.count / max_count) * 100 }}%"></div>
+                                            </div>
+                                            <span class="ms-2">{{ "%.1f"|format((location.count / max_count) * 100) }}%</span>
+                                        </div>
+                                    </td>
                                 </tr>
                             {% endfor %}
                         {% else %}
                             <tr>
-                                <td colspan="2" class="text-center">No data available</td>
+                                <td colspan="3" class="text-center py-4">
+                                    <div class="text-muted">
+                                        <i class="fas fa-map-marker-alt text-muted fa-2x mb-2"></i>
+                                        <p class="mb-0">No location data available</p>
+                                    </div>
+                                </td>
                             </tr>
                         {% endif %}
                     </tbody>

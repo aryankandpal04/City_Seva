@@ -221,6 +221,11 @@ def complaint_detail(complaint_id):
     """View details of a specific complaint"""
     # Get complaint from SQLite
     complaint = Complaint.query.get_or_404(complaint_id)
+    
+    # Debug log for request method
+    current_app.logger.debug(f"Request method: {request.method}")
+    if request.method == 'POST':
+        current_app.logger.debug(f"Form data: {request.form}")
             
     # Get user information
     user = User.query.get(complaint.user_id)
@@ -236,7 +241,7 @@ def complaint_detail(complaint_id):
     
     form = ComplaintUpdateForm()
     
-    # Set up the assigned_to_id field based on user role
+    # Set up the assigned_to field based on user role
     if current_user.role == 'admin':
         # For admins, show dropdown with all officials
         if category and category.department:
@@ -245,105 +250,207 @@ def complaint_detail(complaint_id):
             officials = User.query.filter_by(role='official').all()
         
         # Add empty option and officials to choices
-        form.assigned_to_id.choices = [(0, 'Unassigned')] + [(u.id, f"{u.full_name()} ({u.department})") for u in officials]
+        form.assigned_to.choices = [(0, 'Unassigned')] + [(u.id, f"{u.full_name()} ({u.department})") for u in officials]
     else:
         # For officials, just set their own ID without showing dropdown
-        form.assigned_to_id.choices = [(current_user.id, f"{current_user.full_name()} ({current_user.department})")]
+        form.assigned_to.choices = [(current_user.id, f"{current_user.full_name()} ({current_user.department})")]
+    
+    # Debug log for form validation
+    if request.method == 'POST':
+        current_app.logger.debug(f"Form validation errors: {form.errors}")
+        current_app.logger.debug(f"Form data before validation: status={form.status.data}, comment={form.comment.data}")
     
     if form.validate_on_submit():
-        # Create update
-        update = ComplaintUpdate(
-            complaint_id=complaint.id,
-            user_id=current_user.id,
-            status=form.status.data,
-            comment=form.comment.data,
-            created_at=datetime.utcnow()
-        )
-        db.session.add(update)
-        
-        # Update complaint status
-        old_status = complaint.status
-        complaint.status = form.status.data
-        complaint.updated_at = datetime.utcnow()
-        
-        # Auto-assign to the current official when updating status
-        # This ensures the complaint is always assigned to the person who last updated it
-        if current_user.role == 'official' and complaint.assigned_to_id != current_user.id:
-            complaint.assigned_to_id = current_user.id
-            complaint.assigned_at = datetime.utcnow()
+        current_app.logger.debug("Form validation successful")
+        try:
+            # Update complaint
+            old_status = complaint.status
+            complaint.status = form.status.data
+            if form.assigned_to.data:
+                complaint.assigned_to_id = form.assigned_to.data
+            complaint.updated_at = datetime.utcnow()
             
-            # Add assignment info to the update comment if empty
-            if not form.comment.data:
-                update.comment = f"Assigned to {current_user.full_name()} ({current_user.department})"
+            current_app.logger.debug(f"Updating complaint status from {old_status} to {complaint.status}")
             
-            # Create audit log for assignment
-            assignment_log = AuditLog(
+            # Create status update
+            update = ComplaintUpdate(
+                complaint_id=complaint.id,
                 user_id=current_user.id,
-                action='assign_complaint',
-                resource_type='complaint',
-                resource_id=complaint.id,
-                details=f'Complaint assigned to {current_user.username} ({current_user.department})',
-                ip_address=request.remote_addr
+                status=form.status.data,
+                comment=form.comment.data,
+                created_at=datetime.utcnow()
             )
-            db.session.add(assignment_log)
-        # For admins using the dropdown
-        elif current_user.role == 'admin' and form.assigned_to_id.data != 0 and complaint.assigned_to_id != form.assigned_to_id.data:
-            # Admin selected a specific official
-            assigned_official = User.query.get(form.assigned_to_id.data)
-            if assigned_official:
-                complaint.assigned_to_id = assigned_official.id
+            db.session.add(update)
+            
+            # Auto-assign to the current official when updating status
+            # This ensures the complaint is always assigned to the person who last updated it
+            if current_user.role == 'official' and complaint.assigned_to_id != current_user.id:
+                was_previously_assigned = complaint.assigned_to_id is not None
+                complaint.assigned_to_id = current_user.id
                 complaint.assigned_at = datetime.utcnow()
                 
                 # Add assignment info to the update comment if empty
                 if not form.comment.data:
-                    update.comment = f"Assigned to {assigned_official.full_name()} ({assigned_official.department})"
+                    update.comment = f"Assigned to {current_user.full_name()} ({current_user.department})"
                 
-                # Create audit log for assignment by admin
+                # Create audit log for assignment
                 assignment_log = AuditLog(
                     user_id=current_user.id,
                     action='assign_complaint',
                     resource_type='complaint',
                     resource_id=complaint.id,
-                    details=f'Complaint assigned to {assigned_official.username} ({assigned_official.department}) by admin',
+                    details=f'Complaint assigned to {current_user.username} ({current_user.department})',
                     ip_address=request.remote_addr
                 )
                 db.session.add(assignment_log)
-        # Maintain backward compatibility with assign_to_me checkbox
-        elif form.assign_to_me.data and complaint.assigned_to_id != current_user.id:
-            complaint.assigned_to_id = current_user.id
-            complaint.assigned_at = datetime.utcnow()
-        
-        # If status changed to resolved, set resolved date
-        if form.status.data == 'resolved' and old_status != 'resolved':
-                complaint.resolved_at = datetime.utcnow()
+                
+                # If this is the first assignment, notify the citizen
+                if not was_previously_assigned:
+                    assignment_notification = Notification(
+                        user_id=complaint.user_id,
+                        title="Complaint Assigned",
+                        message=f"Your complaint '{complaint.title}' has been assigned to {current_user.full_name()} from the {current_user.department} department.",
+                        created_at=datetime.utcnow()
+                    )
+                    notifications_to_send.append(assignment_notification)
             
-            # Create notification for citizen
-        notification = Notification(
-                user_id=complaint.user_id,
-                title="Complaint Resolved",
-                message=f"Your complaint '{complaint.title}' has been marked as resolved. Please provide feedback.",
-                created_at=datetime.utcnow()
-        )
-        db.session.add(notification)
-        
-        # Create audit log
-        audit = AuditLog(
-            user_id=current_user.id,
-            action='update_complaint',
-            resource_type='complaint',
-            resource_id=complaint.id,
-            details=f'Updated complaint status to {form.status.data}',
-            ip_address=request.remote_addr
-        )
-        db.session.add(audit)
-        
-        db.session.commit()
-        
-        flash('Complaint updated successfully.', 'success')
-        return redirect(url_for('admin.complaint_detail', complaint_id=complaint.id))
+            # For admins using the dropdown
+            elif current_user.role == 'admin' and form.assigned_to.data != 0 and complaint.assigned_to_id != form.assigned_to.data:
+                # Admin selected a specific official
+                assigned_official = User.query.get(form.assigned_to.data)
+                if assigned_official:
+                    was_previously_assigned = complaint.assigned_to_id is not None
+                    complaint.assigned_to_id = assigned_official.id
+                    complaint.assigned_at = datetime.utcnow()
+                    
+                    # Add assignment info to the update comment if empty
+                    if not form.comment.data:
+                        update.comment = f"Assigned to {assigned_official.full_name()} ({assigned_official.department})"
+                    
+                    # Create audit log for assignment by admin
+                    assignment_log = AuditLog(
+                        user_id=current_user.id,
+                        action='assign_complaint',
+                        resource_type='complaint',
+                        resource_id=complaint.id,
+                        details=f'Complaint assigned to {assigned_official.username} ({assigned_official.department}) by admin',
+                        ip_address=request.remote_addr
+                    )
+                    db.session.add(assignment_log)
+                    
+                    # If this is the first assignment, notify the citizen
+                    if not was_previously_assigned:
+                        assignment_notification = Notification(
+                            user_id=complaint.user_id,
+                            title="Complaint Assigned",
+                            message=f"Your complaint '{complaint.title}' has been assigned to {assigned_official.full_name()} from the {assigned_official.department} department.",
+                            created_at=datetime.utcnow()
+                        )
+                        notifications_to_send.append(assignment_notification)
+            
+            # Notifications for status changes
+            notifications_to_send = []
+            
+            # If status changed to resolved, set resolved date
+            if form.status.data == 'resolved' and old_status != 'resolved':
+                complaint.resolved_at = datetime.utcnow()
+                
+                # Create notification for citizen
+                notification = Notification(
+                    user_id=complaint.user_id,
+                    title="Complaint Resolved",
+                    message=f"Your complaint '{complaint.title}' has been marked as resolved. Please provide feedback.",
+                    created_at=datetime.utcnow()
+                )
+                notifications_to_send.append(notification)
+            # Send notification for all other status changes as well
+            elif form.status.data != old_status:
+                status_display = form.status.data.replace('_', ' ').title()
+                
+                # Create notification for citizen based on new status
+                notification_messages = {
+                    'pending': f"Your complaint '{complaint.title}' is now pending review.",
+                    'in_progress': f"Your complaint '{complaint.title}' is now being processed by our team.",
+                    'rejected': f"Your complaint '{complaint.title}' has been reviewed and cannot be processed. See comments for details."
+                }
+                
+                message = notification_messages.get(form.status.data, f"Your complaint '{complaint.title}' status has been updated to {status_display}.")
+                if form.comment.data:
+                    message += f" Comment: {form.comment.data}"
+                
+                notification = Notification(
+                    user_id=complaint.user_id,
+                    title=f"Complaint Status: {status_display}",
+                    message=message,
+                    created_at=datetime.utcnow()
+                )
+                notifications_to_send.append(notification)
+            
+            # Priority notifications removed
+            
+            # Add all notifications to session and send emails
+            citizen = User.query.get(complaint.user_id)
+            for notification in notifications_to_send:
+                db.session.add(notification)
+                
+                # Send email notification if user has an email
+                if citizen and citizen.email and citizen.is_active:
+                    try:
+                        from app.utils.email import send_email
+                        
+                        # Get complaint URL for the email
+                        complaint_url = url_for('citizen.complaint_detail', complaint_id=complaint.id, _external=True)
+                        
+                        # Send the email using templates
+                        send_email(
+                            subject=notification.title,
+                            recipients=[citizen.email],
+                            text_body=render_template('email/complaint_status_update.txt', 
+                                                    name=citizen.full_name(),
+                                                    complaint=complaint,
+                                                    message=notification.message,
+                                                    comment=form.comment.data,
+                                                    complaint_url=complaint_url),
+                            html_body=render_template('email/complaint_status_update.html',
+                                                    name=citizen.full_name(),
+                                                    complaint=complaint,
+                                                    message=notification.message,
+                                                    comment=form.comment.data,
+                                                    complaint_url=complaint_url)
+                        )
+                        current_app.logger.info(f"Sent email notification to {citizen.email} about complaint {complaint.id}")
+                    except Exception as e:
+                        current_app.logger.error(f"Failed to send email notification: {e}")
+            
+            # Create audit log
+            audit_details = f"status from '{old_status}' to '{form.status.data}'"
+            
+            audit = AuditLog(
+                user_id=current_user.id,
+                action='update_complaint',
+                resource_type='complaint',
+                resource_id=complaint.id,
+                details=f'Updated {audit_details}',
+                ip_address=request.remote_addr
+            )
+            db.session.add(audit)
+            
+            db.session.commit()
+            current_app.logger.debug("Database changes committed successfully")
+            
+            flash('Complaint updated successfully.', 'success')
+            return redirect(url_for('admin.complaint_detail', complaint_id=complaint.id))
+        except Exception as e:
+            db.session.rollback()
+            current_app.logger.error(f"Error updating complaint: {e}")
+            flash('Error updating complaint. Please try again.', 'danger')
+    else:
+        current_app.logger.debug("Form validation failed")
     
-    # Pre-populate form with current status
+    # Pre-populate form with current values
     form.status.data = complaint.status
+    form.assigned_to.data = complaint.assigned_to_id
+    form.complaint_id.data = complaint.id
     
     # Check if feedback exists
     feedback = Feedback.query.filter_by(complaint_id=complaint.id).first()
@@ -485,12 +592,20 @@ def users():
     """List all users"""
     page = request.args.get('page', 1, type=int)
     per_page = 10
+    role = request.args.get('role')
     
-    # Get users from SQLite
-    users = User.query.order_by(User.created_at.desc()).paginate(
+    # Set up base query
+    query = User.query
+    
+    # Apply role filter if specified
+    if role in ['citizen', 'official', 'admin']:
+        query = query.filter_by(role=role)
+    
+    # Get users from SQLite with pagination
+    users = query.order_by(User.created_at.desc()).paginate(
         page=page, per_page=per_page, error_out=False
     )
-        
+    
     return render_template('admin/users.html', users=users)
 
 @admin.route('/user/<string:user_id>/toggle_active', methods=['POST'])
@@ -937,6 +1052,7 @@ def delete_complaint(complaint_id):
     return redirect(url_for('admin.complaints'))
 
 @admin.route('/send-notification', methods=['GET', 'POST'])
+@admin.route('/send_notification', methods=['GET', 'POST'])
 @login_required
 @admin_required
 def send_notification():
@@ -998,4 +1114,41 @@ def send_notification():
     department_list = [dept[0] for dept in departments if dept[0]]
     
     return render_template('admin/send_notification.html', 
-                          departments=department_list) 
+                          departments=department_list)
+
+@admin.route('/official-requests/<int:request_id>')
+@login_required
+@admin_required
+def view_request(request_id):
+    request = OfficialRequest.query.get_or_404(request_id)
+    return render_template('admin/request_detail.html', request=request)
+
+@admin.route('/official-request/<int:request_id>/delete', methods=['POST'])
+@login_required
+@admin_required
+def delete_request(request_id):
+    """Delete an official account request"""
+    request = OfficialRequest.query.get_or_404(request_id)
+    
+    # Check if it's already processed
+    if request.status != 'pending':
+        flash('Cannot delete a processed request.', 'warning')
+        return redirect(url_for('admin.official_requests'))
+    
+    # Log the action before deletion
+    log = AuditLog(
+        user_id=current_user.id,
+        action='delete_official_request',
+        resource_type='official_request',
+        resource_id=request.id,
+        details=f'Deleted official request from {request.user.full_name()} for {request.department} department',
+        ip_address=request.remote_addr
+    )
+    db.session.add(log)
+    
+    # Delete the request
+    db.session.delete(request)
+    db.session.commit()
+    
+    flash('Official account request has been deleted.', 'success')
+    return redirect(url_for('admin.official_requests')) 

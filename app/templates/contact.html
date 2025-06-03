@@ -1,0 +1,122 @@
+{% extends "base.html" %}
+
+{% block title %}Contact Us | CitySeva{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row align-items-center mb-5">
+        <div class="col-md-6">
+            <h1 class="display-4 mb-4">Contact Us</h1>
+            <p class="lead">Get in touch with our team for any questions or support.</p>
+        </div>
+        <div class="col-md-6">
+            <img src="{{ url_for('static', filename='images/contact-us.svg') }}" alt="Contact Us" class="img-fluid">
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-lg-8 mx-auto">
+            <div class="card shadow border-0" data-aos="fade-up">
+                <div class="card-header bg-primary text-white rounded-top">
+                    <h2 class="mb-0"><i class="fas fa-envelope me-2"></i>Contact Us</h2>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-4">
+                        <div class="col-md-6" data-aos="fade-right" data-aos-delay="100">
+                            <div class="card h-100 border-0 shadow-sm hover-shadow transition">
+                                <div class="card-body">
+                                    <h4 class="text-primary mb-3">Get in Touch</h4>
+                                    <p class="mb-4">Have questions or feedback? We'd love to hear from you. Fill out the form and we'll get back to you as soon as possible.</p>
+                                    
+                                    <div class="mb-3">
+                                        <h5><i class="fas fa-map-marker-alt text-primary me-2"></i>Address</h5>
+                                        <p class="mb-0">Haldwani<br>Nainital<br>Uttarakhand(263139)</p>
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <h5><i class="fas fa-phone text-primary me-2"></i>Phone</h5>
+                                        <p class="mb-0">+91 9876543210</p>
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <h5><i class="fas fa-envelope text-primary me-2"></i>Email</h5>
+                                        <p class="mb-0">support@cityseva.com</p>
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <h5><i class="fas fa-clock text-primary me-2"></i>Office Hours</h5>
+                                        <p class="mb-0">Monday - Friday: 9:00 AM - 5:00 PM<br>Saturday - Sunday: Closed</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6" data-aos="fade-left" data-aos-delay="200">
+                            <form method="POST" action="{{ url_for('main.contact') }}" class="needs-validation" novalidate>
+                                {{ form.hidden_tag() }}
+                                
+                                <div class="mb-3">
+                                    {{ form.name.label(class="form-label") }}
+                                    {{ form.name(class="form-control rounded-pill" + (" is-invalid" if form.name.errors else "")) }}
+                                    {% if form.name.errors %}
+                                        <div class="invalid-feedback">
+                                            {% for error in form.name.errors %}
+                                                {{ error }}
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                
+                                <div class="mb-3">
+                                    {{ form.email.label(class="form-label") }}
+                                    {{ form.email(class="form-control rounded-pill" + (" is-invalid" if form.email.errors else "")) }}
+                                    {% if form.email.errors %}
+                                        <div class="invalid-feedback">
+                                            {% for error in form.email.errors %}
+                                                {{ error }}
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                
+                                <div class="mb-3">
+                                    {{ form.subject.label(class="form-label") }}
+                                    {{ form.subject(class="form-control rounded-pill" + (" is-invalid" if form.subject.errors else "")) }}
+                                    {% if form.subject.errors %}
+                                        <div class="invalid-feedback">
+                                            {% for error in form.subject.errors %}
+                                                {{ error }}
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                
+                                <div class="mb-3">
+                                    {{ form.message.label(class="form-label") }}
+                                    {{ form.message(class="form-control rounded-3" + (" is-invalid" if form.message.errors else ""), rows="5") }}
+                                    {% if form.message.errors %}
+                                        <div class="invalid-feedback">
+                                            {% for error in form.message.errors %}
+                                                {{ error }}
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                
+                                <div class="d-grid">
+                                    {{ form.submit(class="btn btn-primary rounded-pill shadow-sm") }}
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                    
+                    <div class="text-center mt-4" data-aos="fade-up" data-aos-delay="300">
+                        <a href="{{ url_for('main.about') }}" class="btn btn-outline-primary rounded-pill">
+                            <i class="fas fa-info-circle me-2"></i>Learn More About Us
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

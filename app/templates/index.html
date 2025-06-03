@@ -1,0 +1,165 @@
+{% extends "base.html" %}
+
+{% block title %}Welcome to CitySeva{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<div class="container-fluid position-relative mx-3 my-5" data-aos="fade-down" style="height: 500px; overflow: hidden; background: linear-gradient(to right, #00bfff, #00ffff); border-radius: 20px;">
+    <!-- Overlay -->
+    <div class="position-absolute top-0 start-0 w-100 h-100" style="background: rgba(0, 0, 0, 0.3); z-index: 1; border-radius: 20px;"></div>
+    <div class="container position-relative" style="z-index: 2; height: 100%;">
+        <div class="row align-items-center h-100">
+            <div class="col-lg-6 mb-4 mb-lg-0">
+                <h1 class="display-4 fw-bold mb-4 text-white" data-aos="fade-right" data-aos-delay="100" style="text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);">Report. Track. Resolve.</h1>
+                <p class="lead mb-4 text-white" data-aos="fade-right" data-aos-delay="200">Empowering citizens to make their city better through efficient civic issue reporting and resolution.</p>
+                {% if not current_user.is_authenticated %}
+                <div class="d-grid gap-2 d-md-flex justify-content-center justify-content-lg-start" data-aos="fade-right" data-aos-delay="300">
+                    <a href="{{ url_for('auth.register') }}" class="btn btn-light btn-lg px-4 me-md-2 rounded-pill shadow-sm hover-shadow transition">
+                        <i class="fas fa-user-plus me-2"></i>Join Now
+                    </a>
+                    <a href="{{ url_for('auth.login') }}" class="btn btn-outline-light btn-lg px-4 rounded-pill hover-shadow transition">
+                        <i class="fas fa-sign-in-alt me-2"></i>Sign In
+                    </a>
+                </div>
+                {% else %}
+                <div class="d-grid gap-2 d-md-flex justify-content-center justify-content-lg-start" data-aos="fade-right" data-aos-delay="300">
+                    <a href="{{ url_for('citizen.new_complaint') }}" class="btn btn-light btn-lg px-4 rounded-pill shadow-sm hover-shadow transition">
+                        <i class="fas fa-plus-circle me-2"></i>Report Issue
+                    </a>
+                    <a href="{{ url_for('citizen.complaints') }}" class="btn btn-outline-light btn-lg px-4 rounded-pill hover-shadow transition">
+                        <i class="fas fa-list-alt me-2"></i>View My Complaints
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+            <div class="col-lg-6 text-center" data-aos="fade-left" data-aos-delay="400">
+                <img src="{{ url_for('static', filename='images/hero-image.svg') }}" alt="CitySeva Hero" class="img-fluid" style="max-width: 80%; filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.1));">
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Key Features -->
+<div class="container py-5">
+    <div class="row g-4">
+        <div class="col-sm-6 col-lg-3" data-aos="fade-up" data-aos-delay="100">
+            <div class="card h-100 border-0 shadow-sm hover-shadow transition">
+                <div class="card-body text-center">
+                    <i class="fas fa-map-marker-alt fa-2x text-primary mb-3"></i>
+                    <h4>Location-Based</h4>
+                    <p class="mb-0">Pin exact locations of issues for precise resolution</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6 col-lg-3" data-aos="fade-up" data-aos-delay="200">
+            <div class="card h-100 border-0 shadow-sm hover-shadow transition">
+                <div class="card-body text-center">
+                    <i class="fas fa-bell fa-2x text-primary mb-3"></i>
+                    <h4>Real-time Updates</h4>
+                    <p class="mb-0">Get instant notifications on complaint status</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6 col-lg-3" data-aos="fade-up" data-aos-delay="300">
+            <div class="card h-100 border-0 shadow-sm hover-shadow transition">
+                <div class="card-body text-center">
+                    <i class="fas fa-chart-pie fa-2x text-primary mb-3"></i>
+                    <h4>Analytics</h4>
+                    <p class="mb-0">Track resolution rates and response times</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6 col-lg-3" data-aos="fade-up" data-aos-delay="400">
+            <div class="card h-100 border-0 shadow-sm hover-shadow transition">
+                <div class="card-body text-center">
+                    <i class="fas fa-star fa-2x text-primary mb-3"></i>
+                    <h4>Rating System</h4>
+                    <p class="mb-0">Rate and provide feedback on resolutions</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Activity -->
+<div class="container-fluid bg-light py-5">
+    <div class="container">
+        <h2 class="text-center mb-4" data-aos="fade-up">Recent Activity</h2>
+        <div class="row g-4">
+            {% if recent_complaints %}
+            {% for complaint in recent_complaints %}
+            <div class="col-md-6 col-lg-4" data-aos="fade-up" data-aos-delay="{{ loop.index * 100 }}">
+                <div class="card h-100 border-0 shadow-sm hover-shadow transition">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="badge bg-{{ complaint.status_color }} rounded-pill">{{ complaint.status }}</span>
+                            <small class="text-muted">{{ complaint.created_at|format_timestamp }}</small>
+                        </div>
+                        <h5 class="card-title">{{ complaint.title }}</h5>
+                        <p class="card-text text-muted">{{ complaint.description|truncate(100) }}</p>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <small class="text-muted">{{ complaint.category }}</small>
+                            <a href="{{ url_for('citizen.view_complaint', id=complaint.id) }}" class="btn btn-sm btn-outline-primary rounded-pill">
+                                <i class="fas fa-eye me-1"></i>View Details
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+            {% else %}
+            <div class="col-12 text-center" data-aos="fade-up">
+                <p class="text-muted">No recent complaints to display</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Quick Stats -->
+<div class="container py-5">
+    <div class="row g-4">
+        <div class="col-sm-12 col-md-4 mb-4 mb-md-0" data-aos="fade-up" data-aos-delay="100">
+            <div class="card border-0 shadow-sm hover-shadow transition">
+                <div class="card-body text-center">
+                    <h3 class="display-4 fw-bold text-primary mb-0">{{ stats.total_complaints|default(0) }}</h3>
+                    <p class="text-muted mb-0">Total Issues Reported</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-12 col-md-4 mb-4 mb-md-0" data-aos="fade-up" data-aos-delay="200">
+            <div class="card border-0 shadow-sm hover-shadow transition">
+                <div class="card-body text-center">
+                    <h3 class="display-4 fw-bold text-success mb-0">{{ stats.resolution_rate|default(0) }}%</h3>
+                    <p class="text-muted mb-0">Resolution Rate</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-12 col-md-4" data-aos="fade-up" data-aos-delay="300">
+            <div class="card border-0 shadow-sm hover-shadow transition">
+                <div class="card-body text-center">
+                    <h3 class="display-4 fw-bold text-info mb-0">{{ stats.avg_response_time|default(0) }}h</h3>
+                    <p class="text-muted mb-0">Avg. Response Time</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Call to Action -->
+<div class="container-fluid bg-primary text-white py-5" data-aos="fade-up">
+    <div class="container text-center">
+        <h2 class="mb-4">Be Part of the Solution</h2>
+        <p class="lead mb-4">Join thousands of citizens making their communities better</p>
+        {% if not current_user.is_authenticated %}
+        <a href="{{ url_for('auth.register') }}" class="btn btn-light btn-lg px-5 rounded-pill shadow-sm">
+            <i class="fas fa-user-plus me-2"></i>Get Started
+        </a>
+        {% else %}
+        <a href="{{ url_for('citizen.new_complaint') }}" class="btn btn-light btn-lg px-5 rounded-pill shadow-sm">
+            <i class="fas fa-plus-circle me-2"></i>Report an Issue
+        </a>
+        {% endif %}
+    </div>
+</div>
+{% endblock %} 

@@ -184,14 +184,32 @@
         
         <!-- Update and Timeline -->
         <div class="col-lg-4">
+            <!-- Form Debug Information -->
+            <div class="card shadow mb-2">
+                <div class="card-header bg-dark text-white">
+                    <h5 class="mb-0"><i class="fas fa-bug me-2"></i>Form Debug Info</h5>
+                </div>
+                <div class="card-body">
+                    <pre class="bg-light p-3">
+Form status: {{ 'Valid' if form.validate() else 'Invalid' }}
+Form errors: {{ form.errors }}
+Status field exists: {{ form.status is defined }}
+Status data: {{ form.status.data if form.status is defined else 'Not available' }}
+Priority field removed (as intended)
+Comment field exists: {{ form.comment is defined }}
+                    </pre>
+                </div>
+            </div>
+            
             <!-- Update Form -->
             <div class="card shadow mb-4">
                 <div class="card-header bg-info text-white">
                     <h5 class="mb-0"><i class="fas fa-edit me-2"></i>Update Status</h5>
                 </div>
                 <div class="card-body">
-                    <form method="POST" action="{{ url_for('government_officials.complaint_detail', complaint_id=complaint.id) }}">
-                        {{ form.hidden_tag() }}
+                    <form method="POST" action="{{ url_for('admin.complaint_detail', complaint_id=complaint.id) }}">
+                        {{ form.csrf_token }}
+                        {{ form.complaint_id(value=complaint.id) }}
                         
                         <div class="mb-3">
                             <label class="form-label">Status</label>

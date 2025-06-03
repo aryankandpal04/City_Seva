@@ -1,11 +1,19 @@
 {% extends "base.html" %}
 
-{% block title %}Manage Categories - CitySeva{% endblock %}
+{% block title %}Category Management - CitySeva{% endblock %}
 
 {% block content %}
-<div class="container">
-    <h1 class="mb-4">Manage Categories</h1>
-    
+<div class="container py-5">
+    <div class="row align-items-center mb-5">
+        <div class="col-md-6">
+            <h1 class="display-4 mb-4">Category Management</h1>
+            <p class="lead">Organize and manage complaint categories effectively.</p>
+        </div>
+        <div class="col-md-6">
+            <img src="{{ url_for('static', filename='images/admin-categories.svg') }}" alt="Category Management" class="img-fluid">
+        </div>
+    </div>
+
     <!-- Action Button -->
     <div class="mb-4">
         <a href="{{ url_for('admin.add_category') }}" class="btn btn-primary">

@@ -1,0 +1,531 @@
+{% extends 'base.html' %}
+
+{% block title %}API Documentation | CitySeva{% endblock %}
+
+{% block styles %}
+<style>
+    .api-section {
+        margin-bottom: 2rem;
+        border-radius: var(--border-radius);
+        overflow: hidden;
+    }
+    
+    .api-section h3 {
+        margin-top: 2rem;
+    }
+    
+    .api-card {
+        background-color: #fff;
+        border-radius: var(--border-radius);
+        box-shadow: var(--card-shadow);
+        margin-bottom: 1.5rem;
+        overflow: hidden;
+    }
+    
+    .api-header {
+        display: flex;
+        padding: 1rem;
+        border-bottom: 1px solid #eee;
+        align-items: center;
+    }
+    
+    .api-method {
+        padding: 0.3rem 0.7rem;
+        border-radius: 4px;
+        font-weight: 600;
+        font-size: 0.8rem;
+        min-width: 60px;
+        text-align: center;
+        color: white;
+        margin-right: 1rem;
+    }
+    
+    .api-method.get {
+        background-color: #61affe;
+    }
+    
+    .api-method.post {
+        background-color: #49cc90;
+    }
+    
+    .api-method.put {
+        background-color: #fca130;
+    }
+    
+    .api-method.delete {
+        background-color: #f93e3e;
+    }
+    
+    .api-endpoint {
+        font-family: monospace;
+        font-size: 1rem;
+        margin-right: 1rem;
+        flex-grow: 1;
+    }
+    
+    .api-summary {
+        font-size: 0.9rem;
+        color: var(--text-secondary);
+    }
+    
+    .api-content {
+        padding: 1rem;
+    }
+    
+    .api-params {
+        margin-bottom: 1rem;
+    }
+    
+    .api-params h5 {
+        margin-bottom: 0.5rem;
+    }
+    
+    pre {
+        background-color: #f8f9fa;
+        padding: 1rem;
+        border-radius: 4px;
+        overflow: auto;
+        font-size: 0.9rem;
+    }
+    
+    pre.response {
+        background-color: #f0f8ff;
+    }
+    
+    pre.error {
+        background-color: #fff5f5;
+    }
+    
+    .param-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 1rem;
+    }
+    
+    .param-table th, .param-table td {
+        padding: 0.5rem;
+        text-align: left;
+        border-bottom: 1px solid #eee;
+    }
+    
+    .param-table th {
+        background-color: #f8f9fa;
+        font-weight: 600;
+    }
+    
+    .param-required {
+        color: #f93e3e;
+        font-weight: 600;
+    }
+    
+    .param-type {
+        font-family: monospace;
+        font-size: 0.85rem;
+        color: #6c757d;
+    }
+    
+    .api-auth-note {
+        background-color: #fff8e1;
+        padding: 1rem;
+        border-radius: 4px;
+        border-left: 4px solid #ffc107;
+        margin-bottom: 1rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row align-items-center mb-5">
+        <div class="col-md-6">
+            <h1 class="display-4 mb-4">API Documentation</h1>
+            <p class="lead">Comprehensive guide to the CitySeva RESTful API endpoints.</p>
+        </div>
+        <div class="col-md-6">
+            <img src="{{ url_for('static', filename='images/api-docs.svg') }}" alt="API Documentation" class="img-fluid">
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-lg-3 mb-4">
+            <!-- API Navigation Sidebar -->
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">API Documentation</h5>
+                </div>
+                <div class="card-body p-0">
+                    <div class="list-group list-group-flush">
+                        <a href="#introduction" class="list-group-item list-group-item-action">Introduction</a>
+                        <a href="#authentication" class="list-group-item list-group-item-action">Authentication</a>
+                        <a href="#categories" class="list-group-item list-group-item-action">Categories</a>
+                        <a href="#complaints" class="list-group-item list-group-item-action">Complaints</a>
+                        <a href="#updates" class="list-group-item list-group-item-action">Complaint Updates</a>
+                        <a href="#feedback" class="list-group-item list-group-item-action">Feedback</a>
+                        <a href="#statistics" class="list-group-item list-group-item-action">Statistics</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-9">
+            <!-- Introduction -->
+            <div id="introduction" class="api-section">
+                <h2>CitySeva API Documentation</h2>
+                <p class="lead">
+                    This documentation provides information about the CitySeva RESTful API endpoints,
+                    which allow developers to integrate with the CitySeva civic complaint management system.
+                </p>
+                
+                <div class="card shadow mb-4">
+                    <div class="card-body">
+                        <h4>Base URL</h4>
+                        <p>All API requests should be made to the following base URL:</p>
+                        <pre><code>{{ request.host_url }}api/v1</code></pre>
+                        
+                        <h4>API Versioning</h4>
+                        <p>
+                            The current API version is <strong>v1</strong>. The version is included in the URL to ensure 
+                            compatibility as the API evolves.
+                        </p>
+                        
+                        <h4>Response Format</h4>
+                        <p>
+                            All responses are returned in JSON format and include a <code>message</code> field that describes
+                            the result of the operation. Success responses have a 2xx status code, while error responses have 
+                            a 4xx or 5xx status code.
+                        </p>
+                        
+                        <h4>Rate Limiting</h4>
+                        <p>
+                            API requests are rate-limited to 100 requests per minute per API key. If you exceed this limit,
+                            you will receive a 429 Too Many Requests response.
+                        </p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Authentication -->
+            <div id="authentication" class="api-section">
+                <h3>Authentication</h3>
+                <p>
+                    The CitySeva API uses JSON Web Tokens (JWT) for authentication. To use the API, you must first obtain an
+                    access token by authenticating with your CitySeva account credentials.
+                </p>
+                
+                <div class="api-card">
+                    <div class="api-header">
+                        <span class="api-method post">POST</span>
+                        <span class="api-endpoint">/auth/login</span>
+                        <span class="api-summary">Authenticate and get access token</span>
+                    </div>
+                    <div class="api-content">
+                        <p>Authenticate with email and password to receive a JWT token.</p>
+                        
+                        <div class="api-params">
+                            <h5>Request Body</h5>
+                            <table class="param-table">
+                                <thead>
+                                    <tr>
+                                        <th>Parameter</th>
+                                        <th>Type</th>
+                                        <th>Required</th>
+                                        <th>Description</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>email</td>
+                                        <td><span class="param-type">string</span></td>
+                                        <td><span class="param-required">Yes</span></td>
+                                        <td>Your CitySeva account email address</td>
+                                    </tr>
+                                    <tr>
+                                        <td>password</td>
+                                        <td><span class="param-type">string</span></td>
+                                        <td><span class="param-required">Yes</span></td>
+                                        <td>Your CitySeva account password</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <h5>Example Request</h5>
+                        <pre><code>{
+  "email": "john@example.com",
+  "password": "yourpassword"
+}</code></pre>
+
+                        <h5>Example Response (200 OK)</h5>
+                        <pre class="response"><code>{
+  "message": "Login successful",
+  "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "user": {
+    "id": 1,
+    "username": "johndoe",
+    "email": "john@example.com",
+    "full_name": "John Doe",
+    "role": "citizen",
+    "created_at": "2023-01-15T08:30:00"
+  }
+}</code></pre>
+
+                        <h5>Error Response (401 Unauthorized)</h5>
+                        <pre class="error"><code>{
+  "message": "Invalid credentials"
+}</code></pre>
+                    </div>
+                </div>
+                
+                <div class="api-card">
+                    <div class="api-header">
+                        <span class="api-method get">GET</span>
+                        <span class="api-endpoint">/auth/verify</span>
+                        <span class="api-summary">Verify token and get user info</span>
+                    </div>
+                    <div class="api-content">
+                        <p>Verify if a token is valid and get the associated user information.</p>
+                        
+                        <div class="api-auth-note">
+                            <strong>Note:</strong> This endpoint requires authentication. Include the JWT token in the
+                            Authorization header as a Bearer token.
+                        </div>
+                        
+                        <h5>Example Request</h5>
+                        <pre><code>GET /api/v1/auth/verify
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...</code></pre>
+
+                        <h5>Example Response (200 OK)</h5>
+                        <pre class="response"><code>{
+  "message": "Token is valid",
+  "user": {
+    "id": 1,
+    "username": "johndoe",
+    "email": "john@example.com",
+    "full_name": "John Doe",
+    "role": "citizen",
+    "created_at": "2023-01-15T08:30:00"
+  }
+}</code></pre>
+                    </div>
+                </div>
+                
+                <div class="mt-4">
+                    <h4>Using Authentication</h4>
+                    <p>
+                        After obtaining the access token, include it in the Authorization header for all authenticated requests:
+                    </p>
+                    <pre><code>Authorization: Bearer YOUR_ACCESS_TOKEN</code></pre>
+                    <p>
+                        Access tokens expire after 24 hours, after which you need to authenticate again to get a new token.
+                    </p>
+                </div>
+            </div>
+            
+            <!-- Categories -->
+            <div id="categories" class="api-section">
+                <h3>Categories</h3>
+                <p>
+                    Categories represent different types of civic complaints (e.g., Water Supply, Roads, Sanitation).
+                    These endpoints allow you to retrieve available categories.
+                </p>
+                
+                <div class="api-card">
+                    <div class="api-header">
+                        <span class="api-method get">GET</span>
+                        <span class="api-endpoint">/categories</span>
+                        <span class="api-summary">Get all categories</span>
+                    </div>
+                    <div class="api-content">
+                        <p>Retrieve a list of all available complaint categories.</p>
+                        
+                        <h5>Example Response (200 OK)</h5>
+                        <pre class="response"><code>{
+  "message": "Categories retrieved successfully",
+  "categories": [
+    {
+      "id": 1,
+      "name": "Water Supply",
+      "description": "Issues related to water supply and distribution",
+      "department": "Water Department"
+    },
+    {
+      "id": 2,
+      "name": "Roads and Footpaths",
+      "description": "Issues related to roads, streets, and footpaths",
+      "department": "Public Works"
+    },
+    ...
+  ]
+}</code></pre>
+                    </div>
+                </div>
+                
+                <div class="api-card">
+                    <div class="api-header">
+                        <span class="api-method get">GET</span>
+                        <span class="api-endpoint">/categories/{category_id}</span>
+                        <span class="api-summary">Get a specific category</span>
+                    </div>
+                    <div class="api-content">
+                        <p>Retrieve information about a specific category by ID.</p>
+                        
+                        <div class="api-params">
+                            <h5>Path Parameters</h5>
+                            <table class="param-table">
+                                <thead>
+                                    <tr>
+                                        <th>Parameter</th>
+                                        <th>Type</th>
+                                        <th>Required</th>
+                                        <th>Description</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>category_id</td>
+                                        <td><span class="param-type">integer</span></td>
+                                        <td><span class="param-required">Yes</span></td>
+                                        <td>The ID of the category to retrieve</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <h5>Example Response (200 OK)</h5>
+                        <pre class="response"><code>{
+  "message": "Category retrieved successfully",
+  "category": {
+    "id": 1,
+    "name": "Water Supply",
+    "description": "Issues related to water supply and distribution",
+    "department": "Water Department"
+  }
+}</code></pre>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Complaints -->
+            <div id="complaints" class="api-section">
+                <h3>Complaints</h3>
+                <p>
+                    Complaints are the core resource of the CitySeva API. These endpoints allow users to create,
+                    retrieve, and manage civic complaints.
+                </p>
+                
+                <div class="api-card">
+                    <div class="api-header">
+                        <span class="api-method get">GET</span>
+                        <span class="api-endpoint">/complaints</span>
+                        <span class="api-summary">Get complaints with optional filtering</span>
+                    </div>
+                    <div class="api-content">
+                        <p>
+                            Retrieve complaints with pagination. Citizens can only view their own complaints,
+                            officials can view complaints in their department, and admins can view all complaints.
+                        </p>
+                        
+                        <div class="api-auth-note">
+                            <strong>Note:</strong> This endpoint requires authentication. Include the JWT token in the
+                            Authorization header as a Bearer token.
+                        </div>
+                        
+                        <div class="api-params">
+                            <h5>Query Parameters</h5>
+                            <table class="param-table">
+                                <thead>
+                                    <tr>
+                                        <th>Parameter</th>
+                                        <th>Type</th>
+                                        <th>Required</th>
+                                        <th>Description</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>status</td>
+                                        <td><span class="param-type">string</span></td>
+                                        <td>No</td>
+                                        <td>Filter by status (pending, in_progress, resolved, rejected)</td>
+                                    </tr>
+                                    <tr>
+                                        <td>category_id</td>
+                                        <td><span class="param-type">integer</span></td>
+                                        <td>No</td>
+                                        <td>Filter by category ID</td>
+                                    </tr>
+                                    <tr>
+                                        <td>priority</td>
+                                        <td><span class="param-type">string</span></td>
+                                        <td>No</td>
+                                        <td>Filter by priority (low, medium, high, urgent)</td>
+                                    </tr>
+                                    <tr>
+                                        <td>page</td>
+                                        <td><span class="param-type">integer</span></td>
+                                        <td>No</td>
+                                        <td>Page number (default: 1)</td>
+                                    </tr>
+                                    <tr>
+                                        <td>per_page</td>
+                                        <td><span class="param-type">integer</span></td>
+                                        <td>No</td>
+                                        <td>Results per page (default: 10, max: 50)</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <h5>Example Response (200 OK)</h5>
+                        <pre class="response"><code>{
+  "message": "Complaints retrieved successfully",
+  "complaints": [
+    {
+      "id": 123,
+      "title": "Water leak on Main Street",
+      "description": "There is a major water leak...",
+      "location": "123 Main Street",
+      "latitude": 34.0522,
+      "longitude": -118.2437,
+      "status": "pending",
+      "priority": "high",
+      "category_id": 1,
+      "created_at": "2023-06-15T14:30:00",
+      "updated_at": "2023-06-15T14:30:00",
+      "category": {
+        "id": 1,
+        "name": "Water Supply"
+      }
+    },
+    ...
+  ],
+  "pagination": {
+    "total_items": 42,
+    "total_pages": 5,
+    "current_page": 1,
+    "per_page": 10,
+    "has_next": true,
+    "has_prev": false
+  }
+}</code></pre>
+                    </div>
+                </div>
+                
+                <!-- More complaint endpoints would be here -->
+            </div>
+            
+            <!-- More sections for updates, feedback, statistics would go here -->
+            
+            <div class="alert alert-info mt-5">
+                <h4 class="alert-heading">Need more information?</h4>
+                <p>
+                    This documentation covers the basic endpoints of the CitySeva API. For more detailed information
+                    or to request API access, please contact our technical support team.
+                </p>
+                <p class="mb-0">
+                    <a href="mailto:api@cityseva.com" class="btn btn-outline-primary mt-2">Contact API Support</a>
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

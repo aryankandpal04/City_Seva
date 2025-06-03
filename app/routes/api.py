@@ -195,41 +195,132 @@ def update_complaint_status(complaint_id):
     })
 
 @api.route('/map/complaints')
-def map_data():
-    """API endpoint to get complaint data for map view"""
-    # Get complaints with location data
-    complaints = Complaint.query.filter(
-        Complaint.latitude.isnot(None),
-        Complaint.longitude.isnot(None)
-    ).all()
-    
-    # Build GeoJSON format
-    features = []
-    for complaint in complaints:
-        # Skip complaints without coordinates
-        if not complaint.latitude or not complaint.longitude:
-            continue
-            
-        feature = {
-            'type': 'Feature',
-            'geometry': {
-                'type': 'Point',
-                'coordinates': [complaint.longitude, complaint.latitude]
-            },
-            'properties': {
-                'id': complaint.id,
-                'title': complaint.title,
-                'status': complaint.status,
-                'category': complaint.category.name,
-                'priority': complaint.priority,
-                'created_at': complaint.created_at.strftime('%Y-%m-%d')
+@login_required
+def map_complaints():
+    """API endpoint to get all complaints for display on a map"""
+    try:
+        # Base query for complaints with coordinates
+        query = Complaint.query.filter(
+            Complaint.latitude.isnot(None),
+            Complaint.longitude.isnot(None)
+        )
+        
+        # Filter by status if provided
+        status = request.args.get('status')
+        if status in ['pending', 'in_progress', 'resolved', 'rejected']:
+            query = query.filter_by(status=status)
+        
+        # Get all complaints with lat/long
+        complaints = query.all()
+        
+        # Format as GeoJSON
+        features = []
+        for complaint in complaints:
+            # Skip if no coordinates
+            if not complaint.latitude or not complaint.longitude:
+                continue
+                
+            # Create GeoJSON feature
+            feature = {
+                'type': 'Feature',
+                'geometry': {
+                    'type': 'Point',
+                    'coordinates': [float(complaint.longitude), float(complaint.latitude)]
+                },
+                'properties': {
+                    'id': complaint.id,
+                    'title': complaint.title,
+                    'status': complaint.status,
+                    'priority': complaint.priority,
+                    'location': complaint.location,
+                    'category': complaint.category.name if complaint.category else 'Uncategorized'
+                }
             }
-        }
-        features.append(feature)
-    
-    geo_json = {
-        'type': 'FeatureCollection',
-        'features': features
-    }
-    
-    return jsonify(geo_json) 
+            features.append(feature)
+        
+        return jsonify({
+            'type': 'FeatureCollection',
+            'features': features
+        })
+        
+    except Exception as e:
+        return jsonify({
+            'status': 'error',
+            'message': str(e)
+        }), 500
+
+@api.route('/map/department_complaints')
+@login_required
+@official_required
+def department_complaints_map():
+    """API endpoint to get complaints for a specific department to display on a map"""
+    try:
+        # Get the current official's department
+        department = current_user.department
+        if not department:
+            return jsonify({
+                'status': 'error',
+                'message': 'No department assigned to this official'
+            }), 400
+            
+        # Find categories assigned to this department
+        categories = Category.query.filter_by(department=department).all()
+        if not categories:
+            return jsonify({
+                'status': 'error',
+                'message': f'No categories found for department: {department}'
+            }), 404
+            
+        category_ids = [c.id for c in categories]
+        
+        # Base query for complaints in this department with coordinates
+        query = Complaint.query.filter(
+            Complaint.category_id.in_(category_ids),
+            Complaint.latitude.isnot(None),
+            Complaint.longitude.isnot(None)
+        )
+        
+        # Filter by status if provided
+        status = request.args.get('status')
+        if status in ['pending', 'in_progress', 'resolved', 'rejected']:
+            query = query.filter_by(status=status)
+        
+        # Get all department complaints with lat/long
+        complaints = query.all()
+        
+        # Format as GeoJSON
+        features = []
+        for complaint in complaints:
+            # Skip if no coordinates
+            if not complaint.latitude or not complaint.longitude:
+                continue
+                
+            # Create GeoJSON feature
+            feature = {
+                'type': 'Feature',
+                'geometry': {
+                    'type': 'Point',
+                    'coordinates': [float(complaint.longitude), float(complaint.latitude)]
+                },
+                'properties': {
+                    'id': complaint.id,
+                    'title': complaint.title,
+                    'status': complaint.status,
+                    'priority': complaint.priority,
+                    'location': complaint.location,
+                    'category': complaint.category.name if complaint.category else 'Uncategorized',
+                    'created_at': complaint.created_at.strftime('%Y-%m-%d'),
+                }
+            }
+            features.append(feature)
+        
+        return jsonify({
+            'type': 'FeatureCollection',
+            'features': features
+        })
+        
+    except Exception as e:
+        return jsonify({
+            'status': 'error',
+            'message': str(e)
+        }), 500 
