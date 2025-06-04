@@ -3,7 +3,6 @@
 {% block title %}Login - CitySeva{% endblock %}
 
 {% block content %}
-<<<<<<< HEAD
 <div class="container py-4">
     <div class="row justify-content-center">
         <div class="col-md-6">
@@ -20,30 +19,8 @@
                 </div>
                 <div class="card-body">
                     <form method="POST" action="{{ url_for('auth.login') }}" id="loginForm" novalidate>
-=======
-<div class="container py-5">
-    <div class="row align-items-center mb-5">
-        <div class="col-md-6">
-            <h1 class="display-4 mb-4">Welcome Back</h1>
-            <p class="lead">Sign in to access your CitySeva account and manage your complaints</p>
-        </div>
-        <div class="col-md-6">
-            <img src="{{ url_for('static', filename='images/auth-login.svg') }}" alt="Login" class="img-fluid">
-        </div>
-    </div>
-
-    <div class="row justify-content-center">
-        <div class="col-md-6">
-            <div class="card shadow">
-                <div class="card-header text-center">
-                    <h4 class="mb-0">Welcome Back</h4>
-                </div>
-                <div class="card-body">
-                    <form method="POST" action="">
->>>>>>> 928b86656950660435efba515a1cc264cd47215b
                         {{ form.hidden_tag() }}
                         <div class="mb-4">
-<<<<<<< HEAD
                             <label class="form-label">I want to login as:</label>
                             <div class="d-flex justify-content-center gap-3 mt-2">
                                 <div class="form-check form-check-inline flex-grow-1">
@@ -101,23 +78,9 @@
                             {% for error in form.email.errors %}
                                 <div class="text-danger">{{ error }}</div>
                             {% endfor %}
-=======
-                            {{ form.email.label(class="form-label") }}
-                            {% if form.email.errors %}
-                                {{ form.email(class="form-control is-invalid") }}
-                                <div class="invalid-feedback">
-                                    {% for error in form.email.errors %}
-                                        {{ error }}
-                                    {% endfor %}
-                                </div>
-                            {% else %}
-                                {{ form.email(class="form-control", placeholder="Enter your email") }}
-                            {% endif %}
->>>>>>> 928b86656950660435efba515a1cc264cd47215b
                         </div>
                         <div class="mb-4">
                             {{ form.password.label(class="form-label") }}
-<<<<<<< HEAD
                             <div class="input-group">
                                 <span class="input-group-text"><i class="fas fa-lock"></i></span>
                                 {{ form.password(class="form-control", placeholder="Enter your password", required=True) }}
@@ -129,28 +92,6 @@
                             {% for error in form.password.errors %}
                                 <div class="text-danger">{{ error }}</div>
                             {% endfor %}
-=======
-                            {% if form.password.errors %}
-                                <div class="input-group">
-                                    {{ form.password(class="form-control is-invalid") }}
-                                    <button class="btn btn-outline-secondary toggle-password" type="button">
-                                        <i class="fas fa-eye"></i>
-                                    </button>
-                                </div>
-                                <div class="invalid-feedback">
-                                    {% for error in form.password.errors %}
-                                        {{ error }}
-                                    {% endfor %}
-                                </div>
-                            {% else %}
-                                <div class="input-group">
-                                    {{ form.password(class="form-control", placeholder="Enter your password") }}
-                                    <button class="btn btn-outline-secondary toggle-password" type="button">
-                                        <i class="fas fa-eye"></i>
-                                    </button>
-                                </div>
-                            {% endif %}
->>>>>>> 928b86656950660435efba515a1cc264cd47215b
                         </div>
                         <div class="mb-4">
                             {{ form.role.label(class="form-label") }}
@@ -191,7 +132,6 @@
                             {{ form.submit(class="btn btn-primary btn-lg") }}
                         </div>
                     </form>
-<<<<<<< HEAD
                     
                     <hr>
                     
@@ -220,14 +160,6 @@
                             <i class="fas fa-user-plus me-2"></i>Register as a Government Official
                         </a>
                     </div>
-=======
-                </div>
-                <div class="card-footer bg-transparent border-0 text-center py-4">
-                    <p class="mb-0 text-secondary">
-                        Don't have an account? 
-                        <a href="{{ url_for('auth.register') }}" class="text-primary text-decoration-none">Register here</a>
-                    </p>
->>>>>>> 928b86656950660435efba515a1cc264cd47215b
                 </div>
             </div>
         </div>
@@ -236,16 +168,11 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-<<<<<<< HEAD
     // Toggle department field based on role selection
     const roleRadios = document.querySelectorAll('input[name="role"]');
     const departmentField = document.getElementById('department-field');
     const departmentSelect = document.getElementById('department');
     const otherDepartmentContainer = document.getElementById('otherDepartmentContainer');
-=======
-    const roleSelect = document.getElementById('role');
-    const departmentField = document.getElementById('departmentField');
->>>>>>> 928b86656950660435efba515a1cc264cd47215b
     
     function toggleDepartmentField() {
         if (roleSelect.value === 'official') {
@@ -257,7 +184,6 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Set initial state
     toggleDepartmentField();
-<<<<<<< HEAD
     if (departmentSelect) {
         toggleOtherDepartment();
     }
@@ -349,30 +275,6 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     }
-=======
-    
-    // Add event listener for role changes
-    roleSelect.addEventListener('change', toggleDepartmentField);
-    
-    // Password toggle functionality
-    const toggleButtons = document.querySelectorAll('.toggle-password');
-    toggleButtons.forEach(function(button) {
-        button.addEventListener('click', function() {
-            const input = this.previousElementSibling;
-            const icon = this.querySelector('i');
-            
-            if (input.type === 'password') {
-                input.type = 'text';
-                icon.classList.remove('fa-eye');
-                icon.classList.add('fa-eye-slash');
-            } else {
-                input.type = 'password';
-                icon.classList.remove('fa-eye-slash');
-                icon.classList.add('fa-eye');
-            }
-        });
-    });
->>>>>>> 928b86656950660435efba515a1cc264cd47215b
 });
 </script>
 {% endblock %} 
