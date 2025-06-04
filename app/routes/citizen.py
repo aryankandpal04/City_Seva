@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, redirect, url_for, flash, request, abort, current_app
+from flask import Blueprint, render_template, redirect, url_for, flash, request, abort, current_app, jsonify
 from flask import current_app, send_from_directory
 from flask_login import login_required, current_user
 from datetime import datetime
@@ -132,6 +132,155 @@ def new_complaint():
     # Populate category choices
     form.category.choices = [(c.id, c.name) for c in Category.query.order_by('name')]
     
+    # Handle AJAX requests
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        if request.method == 'POST':
+            if form.validate_on_submit():
+                try:
+                    # Check if this is a custom category
+                    selected_category = Category.query.get(form.category.data)
+                    if selected_category and selected_category.name.lower() == 'others' and form.custom_category.data:
+                        # Create new category for the custom category
+                        custom_category = Category(
+                            name=form.custom_category.data,
+                            department='Other',
+                            description=f'Custom category created by {current_user.full_name()}'
+                        )
+                        db.session.add(custom_category)
+                        db.session.flush()
+                        category_id = custom_category.id
+                    else:
+                        category_id = form.category.data
+                    
+                    # Create complaint
+                    complaint = Complaint(
+                        title=form.title.data,
+                        description=form.description.data,
+                        category_id=category_id,
+                        location=form.location.data,
+                        latitude=float(form.latitude.data),
+                        longitude=float(form.longitude.data),
+                        priority=form.priority.data,
+                        user_id=current_user.id,
+                        status='pending',
+                        created_at=datetime.utcnow(),
+                        updated_at=datetime.utcnow()
+                    )
+                    
+                    db.session.add(complaint)
+                    db.session.flush()
+                    
+                    # Create initial status update
+                    update = ComplaintUpdate(
+                        complaint_id=complaint.id,
+                        user_id=current_user.id,
+                        status='pending',
+                        comment='Complaint submitted',
+                        created_at=datetime.utcnow()
+                    )
+                    db.session.add(update)
+                    
+                    # Handle file upload if provided
+                    if form.media_files.data:
+                        files_to_process = form.media_files.data if isinstance(form.media_files.data, list) else [form.media_files.data]
+                        
+                        for media_file in files_to_process:
+                            if media_file and media_file.filename:
+                                filename = secure_filename(media_file.filename)
+                                _, file_extension = os.path.splitext(filename)
+                                unique_filename = f"{uuid.uuid4()}{file_extension}"
+                                
+                                os.makedirs(current_app.config['UPLOAD_FOLDER'], exist_ok=True)
+                                file_path = os.path.join(current_app.config['UPLOAD_FOLDER'], unique_filename)
+                                media_file.save(file_path)
+                                
+                                mime_type = mimetypes.guess_type(file_path)[0]
+                                media_type = 'image' if mime_type and mime_type.startswith('image') else 'video'
+                                
+                                media = ComplaintMedia(
+                                    complaint_id=complaint.id,
+                                    file_path=unique_filename,
+                                    media_type=media_type,
+                                    created_at=datetime.utcnow()
+                                )
+                                db.session.add(media)
+                    
+                    # Create audit log
+                    log = AuditLog(
+                        user_id=current_user.id,
+                        action='create_complaint',
+                        resource_type='complaint',
+                        resource_id=complaint.id,
+                        details=f'Created complaint: {complaint.title}',
+                        ip_address=request.remote_addr
+                    )
+                    db.session.add(log)
+                    
+                    # Commit all changes
+                    db.session.commit()
+                    
+                    # Send notifications
+                    category = Category.query.get(category_id)
+                    if category:
+                        email_success = False
+                        try:
+                            email_success = send_complaint_notification(complaint, category)
+                        except Exception as e:
+                            current_app.logger.error(f"Error sending email notification: {e}")
+                        
+                        app_notification_count = 0
+                        try:
+                            app_notification_count = send_complaint_notification_in_app(complaint)
+                        except Exception as e:
+                            current_app.logger.error(f"Error sending in-app notification: {e}")
+                        
+                        if email_success and app_notification_count > 0:
+                            return jsonify({
+                                'success': True,
+                                'message': 'Your complaint has been submitted and officials have been notified.',
+                                'redirect': url_for('citizen.complaints')
+                            })
+                        elif app_notification_count > 0:
+                            return jsonify({
+                                'success': True,
+                                'message': 'Your complaint has been submitted and officials have been notified in-app.',
+                                'redirect': url_for('citizen.complaints')
+                            })
+                        else:
+                            return jsonify({
+                                'success': True,
+                                'message': 'Your complaint has been submitted, but there was an error notifying officials.',
+                                'redirect': url_for('citizen.complaints')
+                            })
+                    else:
+                        return jsonify({
+                            'success': True,
+                            'message': 'Your complaint has been submitted.',
+                            'redirect': url_for('citizen.complaints')
+                        })
+                    
+                except Exception as e:
+                    db.session.rollback()
+                    current_app.logger.error(f"Error creating complaint: {e}")
+                    return jsonify({
+                        'success': False,
+                        'message': 'An error occurred while submitting your complaint. Please try again.'
+                    }), 500
+            else:
+                # Return validation errors
+                return jsonify({
+                    'success': False,
+                    'message': 'Please correct the errors in the form.',
+                    'errors': form.errors
+                }), 400
+        else:
+            # GET request - return form data
+            return jsonify({
+                'success': True,
+                'categories': [(c.id, c.name) for c in Category.query.order_by('name')]
+            })
+    
+    # Regular form submission (non-AJAX)
     if form.validate_on_submit():
         try:
             # Check if this is a custom category
@@ -140,16 +289,16 @@ def new_complaint():
                 # Create new category for the custom category
                 custom_category = Category(
                     name=form.custom_category.data,
-                    department='Other',  # Default department for custom categories
+                    department='Other',
                     description=f'Custom category created by {current_user.full_name()}'
                 )
                 db.session.add(custom_category)
-                db.session.flush()  # Get the ID without committing
+                db.session.flush()
                 category_id = custom_category.id
             else:
                 category_id = form.category.data
             
-            # Create complaint in SQLite
+            # Create complaint
             complaint = Complaint(
                 title=form.title.data,
                 description=form.description.data,
@@ -165,7 +314,7 @@ def new_complaint():
             )
             
             db.session.add(complaint)
-            db.session.flush()  # Get the ID without committing
+            db.session.flush()
             
             # Create initial status update
             update = ComplaintUpdate(
@@ -179,28 +328,21 @@ def new_complaint():
             
             # Handle file upload if provided
             if form.media_files.data:
-                # Handle single file or multiple files
                 files_to_process = form.media_files.data if isinstance(form.media_files.data, list) else [form.media_files.data]
                 
                 for media_file in files_to_process:
-                    if media_file and media_file.filename:  # Check if file exists and has a filename
+                    if media_file and media_file.filename:
                         filename = secure_filename(media_file.filename)
-                        # Generate unique filename
                         _, file_extension = os.path.splitext(filename)
                         unique_filename = f"{uuid.uuid4()}{file_extension}"
                         
-                        # Ensure upload directory exists
                         os.makedirs(current_app.config['UPLOAD_FOLDER'], exist_ok=True)
-                        
-                        # Save file
                         file_path = os.path.join(current_app.config['UPLOAD_FOLDER'], unique_filename)
                         media_file.save(file_path)
-                                        
-                        # Determine media type
+                        
                         mime_type = mimetypes.guess_type(file_path)[0]
                         media_type = 'image' if mime_type and mime_type.startswith('image') else 'video'
                         
-                        # Create media record
                         media = ComplaintMedia(
                             complaint_id=complaint.id,
                             file_path=unique_filename,
@@ -208,7 +350,7 @@ def new_complaint():
                             created_at=datetime.utcnow()
                         )
                         db.session.add(media)
-                
+            
             # Create audit log
             log = AuditLog(
                 user_id=current_user.id,
@@ -222,25 +364,22 @@ def new_complaint():
             
             # Commit all changes
             db.session.commit()
-                
-            # Send notification to officials
+            
+            # Send notifications
             category = Category.query.get(category_id)
             if category:
-                # Send email notification
                 email_success = False
                 try:
                     email_success = send_complaint_notification(complaint, category)
                 except Exception as e:
                     current_app.logger.error(f"Error sending email notification: {e}")
                 
-                # Send in-app notification
                 app_notification_count = 0
                 try:
                     app_notification_count = send_complaint_notification_in_app(complaint)
                 except Exception as e:
                     current_app.logger.error(f"Error sending in-app notification: {e}")
                 
-                # Determine notification message based on results
                 if email_success and app_notification_count > 0:
                     flash('Your complaint has been submitted and officials have been notified.', 'success')
                 elif app_notification_count > 0:
@@ -250,11 +389,11 @@ def new_complaint():
             else:
                 flash('Your complaint has been submitted.', 'success')
             
-            return redirect(url_for('citizen.complaint_detail', complaint_id=complaint.id))
+            return redirect(url_for('citizen.complaints'))
         except Exception as e:
             db.session.rollback()
             current_app.logger.error(f"Error creating complaint: {e}")
-            flash(f'An error occurred while submitting your complaint: {str(e)}', 'danger')
+            flash('An error occurred while submitting your complaint. Please try again.', 'error')
     
     return render_template('citizen/new_complaint.html', form=form)
 

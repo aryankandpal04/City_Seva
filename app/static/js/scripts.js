@@ -9,6 +9,91 @@ document.addEventListener('DOMContentLoaded', function() {
     initializeInfiniteScroll();
 });
 
+// Initialize Navbar
+function initializeNavbar() {
+    // Add active class to current nav item
+    const currentPath = window.location.pathname;
+    document.querySelectorAll('.nav-link').forEach(link => {
+        if (link.getAttribute('href') === currentPath) {
+            link.classList.add('active');
+        }
+    });
+
+    // Initialize Bootstrap dropdowns
+    const dropdownElementList = document.querySelectorAll('.dropdown-toggle');
+    const dropdownList = [...dropdownElementList].map(dropdownToggleEl => {
+        return new bootstrap.Dropdown(dropdownToggleEl, {
+            offset: [0, 8],
+            boundary: 'viewport'
+        });
+    });
+
+    // Handle all navbar buttons and links
+    document.querySelectorAll('.navbar .btn, .navbar .nav-link').forEach(element => {
+        element.addEventListener('click', function(e) {
+            // If it's a dropdown toggle, let Bootstrap handle it
+            if (this.classList.contains('dropdown-toggle')) {
+                return;
+            }
+            
+            // For regular links and buttons, ensure they work
+            if (this.getAttribute('href') && this.getAttribute('href') !== '#') {
+                window.location.href = this.getAttribute('href');
+            }
+        });
+    });
+
+    // Close dropdowns when clicking outside
+    document.addEventListener('click', function(e) {
+        if (!e.target.matches('.dropdown-toggle') && !e.target.closest('.dropdown-menu')) {
+            dropdownList.forEach(dropdown => {
+                dropdown.hide();
+            });
+        }
+    });
+}
+
+// Initialize Toast
+function initializeToast() {
+    // Create toast container if it doesn't exist
+    if (!document.getElementById('toast-container')) {
+        const toastContainer = document.createElement('div');
+        toastContainer.id = 'toast-container';
+        toastContainer.className = 'toast-container position-fixed bottom-0 end-0 p-3';
+        document.body.appendChild(toastContainer);
+    }
+}
+
+// Show Toast Message
+function showToast(message, type = 'info') {
+    const toastContainer = document.getElementById('toast-container');
+    if (!toastContainer) return;
+
+    const toast = document.createElement('div');
+    toast.className = `toast align-items-center text-white bg-${type} border-0`;
+    toast.setAttribute('role', 'alert');
+    toast.setAttribute('aria-live', 'assertive');
+    toast.setAttribute('aria-atomic', 'true');
+
+    toast.innerHTML = `
+        <div class="d-flex">
+            <div class="toast-body">
+                ${message}
+            </div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+    `;
+
+    toastContainer.appendChild(toast);
+    const bsToast = new bootstrap.Toast(toast);
+    bsToast.show();
+
+    // Remove toast after it's hidden
+    toast.addEventListener('hidden.bs.toast', () => {
+        toast.remove();
+    });
+}
+
 // Lazy Loading Images
 function initializeLazyLoading() {
     const lazyImages = document.querySelectorAll('img[loading="lazy"]');
@@ -103,36 +188,80 @@ function handleFormSubmit(event) {
     event.preventDefault();
     
     const form = event.target;
-    if (!validateForm(form)) {
-        showToast('Please fill in all required fields', 'error');
-        return;
-    }
-
-    const formData = new FormData(form);
     const submitButton = form.querySelector('button[type="submit"]');
     
+    // Validate form
+    if (!validateForm(form)) {
+        return;
+    }
+    
+    // Disable submit button and show loading state
     if (submitButton) {
         submitButton.disabled = true;
-        submitButton.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Loading...';
+        submitButton.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Submitting...';
     }
-
+    
+    // Create FormData object
+    const formData = new FormData(form);
+    
     // Submit form data
     fetch(form.action, {
         method: form.method,
-        body: formData
+        body: formData,
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+        },
+        credentials: 'same-origin'
     })
-    .then(response => response.json())
+    .then(async response => {
+        const contentType = response.headers.get('content-type');
+        if (!response.ok) {
+            if (contentType && contentType.includes('application/json')) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || 'Error submitting form');
+            } else {
+                throw new Error('Server error occurred');
+            }
+        }
+        
+        if (contentType && contentType.includes('application/json')) {
+            return response.json();
+        } else {
+            // If not JSON, redirect to the response URL
+            window.location.href = response.url;
+            return null;
+        }
+    })
     .then(data => {
+        if (!data) return; // Skip if we redirected
+        
         if (data.success) {
             showToast(data.message || 'Form submitted successfully', 'success');
-            form.reset();
+            if (data.redirect) {
+                window.location.href = data.redirect;
+            } else {
+                form.reset();
+            }
         } else {
             showToast(data.message || 'Error submitting form', 'error');
+            // Display validation errors if present
+            if (data.errors) {
+                Object.keys(data.errors).forEach(field => {
+                    const input = form.querySelector(`[name="${field}"]`);
+                    if (input) {
+                        input.classList.add('is-invalid');
+                        const feedback = input.nextElementSibling;
+                        if (feedback && feedback.classList.contains('invalid-feedback')) {
+                            feedback.textContent = data.errors[field].join(', ');
+                        }
+                    }
+                });
+            }
         }
     })
     .catch(error => {
         console.error('Error:', error);
-        showToast('An error occurred while submitting the form', 'error');
+        showToast(error.message || 'An error occurred while submitting the form', 'error');
     })
     .finally(() => {
         if (submitButton) {
@@ -733,7 +862,10 @@ document.addEventListener('DOMContentLoaded', function() {
     // Add smooth scrolling to all links
     document.querySelectorAll('a[href^="#"]').forEach(anchor => {
         anchor.addEventListener('click', function(e) {
-            const target = document.querySelector(this.getAttribute('href'));
+            const href = this.getAttribute('href');
+            if (href === '#') return; // Skip empty href
+            
+            const target = document.querySelector(href);
             if (!target) return;
             
             e.preventDefault();
